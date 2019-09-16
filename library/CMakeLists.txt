@@ -10,10 +10,11 @@ INCLUDE_DIRECTORIES(${ROOT}/include)
 
 
 add_subdirectory(${ROOT}/include/jni)
-add_subdirectory(${ROOT}/libpng)
+add_subdirectory(${ROOT}/filter)
 
 ADD_LIBRARY(gpuimage
         SHARED
+        ${ROOT}/include/queue.c
         ${ROOT}/native_gpu_filter.cpp
         ${ROOT}/native_texture_image.cpp
         ${ROOT}/main.cpp)
@@ -27,8 +28,8 @@ TARGET_LINK_LIBRARIES(gpuimage
         GLESv2
         EGL
         android
-        libpng
         libjni
+        libfilter
         ${log-lib})
 
 

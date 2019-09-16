@@ -36,6 +36,9 @@
 #include "NativeObject.h"
 #include "ShortArray.h"
 #include "JavaStringArray.h"
+#include <EGL/egl.h>
+#include <GLES2/gl2.h>
+
 
 EXPORT JNIEnv *jniHelpersInitialize(JavaVM *jvm);
 EXPORT JNIEnv *JniCurrentEnv(JavaVM *jvm);

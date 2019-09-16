@@ -83,14 +83,14 @@ void JavaExceptionUtils::throwExceptionOfType(JNIEnv *env, const char *exception
   if (clazz == NULL) {
 #if ENABLE_EXCEPTIONS
     std::stringstream fatalErrorMessage;
-    fatalErrorMessage << "Could not throw exception of type '" << exception_class_name << "'";
+    fatalErrorMessage << "Could not throw native_exception of type '" << exception_class_name << "'";
     env->FatalError(fatalErrorMessage.str().c_str());
 #endif
     return;
   }
   char exceptionMessage[kExceptionMaxLength];
   vsnprintf(exceptionMessage, kExceptionMaxLength, message, arguments);
-  LOG_ERROR("Throwing exception %s: %s", exception_class_name, exceptionMessage);
+  LOG_ERROR("Throwing native_exception %s: %s", exception_class_name, exceptionMessage);
 #if ENABLE_EXCEPTIONS
   env->ThrowNew(clazz, exceptionMessage);
 #endif

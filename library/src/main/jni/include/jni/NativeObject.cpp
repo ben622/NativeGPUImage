@@ -34,7 +34,7 @@ bool NativeObject::isInitialized() const {
   bool result = JavaClass::isInitialized();
   if (result) {
     // We expect the persisted field to be cached, otherwise searching for persisted
-    // fields in non-persisted classes will throw java.lang.NoSuchField exception. :(
+    // fields in non-persisted classes will throw java.lang.NoSuchField native_exception. :(
     const std::string key(PERSIST_FIELD_NAME);
     FieldMap::const_iterator mapFindIter = _fields->find(key);
     return mapFindIter != _fields->end();

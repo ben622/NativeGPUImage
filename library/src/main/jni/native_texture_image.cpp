@@ -6,10 +6,65 @@
 
 #include "include/jni/JniHelpers.h"
 #include <malloc.h>
-#include <EGL/egl.h>
-#include <GLES2/gl2.h>
 
-//顶点着色器glsl
+
+//高斯模糊滤镜
+static const char *vertexShaderSource="attribute vec4 position;\n"
+                                      "attribute vec4 inputTextureCoordinate;\n"
+                                      "\n"
+                                      "const int GAUSSIAN_SAMPLES = 9;\n"
+                                      "\n"
+                                      "uniform float texelWidthOffset;\n"
+                                      "uniform float texelHeightOffset;\n"
+                                      "\n"
+                                      "varying vec2 textureCoordinate;\n"
+                                      "varying vec2 blurCoordinates[GAUSSIAN_SAMPLES];\n"
+                                      "\n"
+                                      "void main()\n"
+                                      "{\n"
+                                      "	gl_Position = position;\n"
+                                      "	textureCoordinate = inputTextureCoordinate.xy;\n"
+                                      "	\n"
+                                      "	// Calculate the positions for the blur\n"
+                                      "	int multiplier = 0;\n"
+                                      "	vec2 blurStep;\n"
+                                      "   vec2 singleStepOffset = vec2(texelHeightOffset, texelWidthOffset);\n"
+                                      "    \n"
+                                      "	for (int i = 0; i < GAUSSIAN_SAMPLES; i++)\n"
+                                      "   {\n"
+                                      "		multiplier = (i - ((GAUSSIAN_SAMPLES - 1) / 2));\n"
+                                      "       // Blur in x (horizontal)\n"
+                                      "       blurStep = float(multiplier) * singleStepOffset;\n"
+                                      "		blurCoordinates[i] = inputTextureCoordinate.xy + blurStep;\n"
+                                      "	}\n"
+                                      "}\n";
+
+static const char *fragmentShaderSource= "uniform sampler2D inputImageTexture;\n"
+                                         "\n"
+                                         "const lowp int GAUSSIAN_SAMPLES = 9;\n"
+                                         "\n"
+                                         "varying highp vec2 textureCoordinate;\n"
+                                         "varying highp vec2 blurCoordinates[GAUSSIAN_SAMPLES];\n"
+                                         "\n"
+                                         "void main()\n"
+                                         "{\n"
+                                         "	lowp vec3 sum = vec3(0.0);\n"
+                                         "   lowp vec4 fragColor=texture2D(inputImageTexture,textureCoordinate);\n"
+                                         "	\n"
+                                         "    sum += texture2D(inputImageTexture, blurCoordinates[0]).rgb * 0.05;\n"
+                                         "    sum += texture2D(inputImageTexture, blurCoordinates[1]).rgb * 0.09;\n"
+                                         "    sum += texture2D(inputImageTexture, blurCoordinates[2]).rgb * 0.12;\n"
+                                         "    sum += texture2D(inputImageTexture, blurCoordinates[3]).rgb * 0.15;\n"
+                                         "    sum += texture2D(inputImageTexture, blurCoordinates[4]).rgb * 0.18;\n"
+                                         "    sum += texture2D(inputImageTexture, blurCoordinates[5]).rgb * 0.15;\n"
+                                         "    sum += texture2D(inputImageTexture, blurCoordinates[6]).rgb * 0.12;\n"
+                                         "    sum += texture2D(inputImageTexture, blurCoordinates[7]).rgb * 0.09;\n"
+                                         "    sum += texture2D(inputImageTexture, blurCoordinates[8]).rgb * 0.05;\n"
+                                         "\n"
+                                         "	gl_FragColor = vec4(sum,fragColor.a);\n"
+                                         "}";
+
+/*//顶点着色器glsl
 #define GET_STR(x) #x
 
 static const char *vertexShader = GET_STR(
@@ -51,7 +106,7 @@ static const char *fragYUV420P = GET_STR(
         }
 
 
-);
+);*/
 
 
 using namespace ben::jni;
@@ -65,12 +120,12 @@ public:
         initialize(env);
     }
 
-    ~ImageTextureFilter() override {
+    ~ImageTextureFilter() {
 
     }
 
     void initialize(JNIEnv *env) override {
-        addNativeMethod("start", (void *) start, kTypeVoid, NULL);
+        addNativeMethod("start", (void *) start, kTypeObject,kTypeArray(kTypeByte), NULL);
     }
 
     void mapFields() override {
@@ -81,7 +136,13 @@ public:
         return "com/ben/android/library/Test";
     }
 
-    static void start(JNIEnv *env, jobject javaThis) {
+    static void start(JNIEnv *env, jobject javaThis,jbyteArray jdata) {
+        jbyte *image = env->GetByteArrayElements(jdata, NULL);
+
+        //test width and height
+        int width = 1024;
+        int height = 768;
+
 
         const char *url = "/sdcard/Download/test.jpg";
 
@@ -156,10 +217,9 @@ public:
 
         //顶点和片元shader初始化
         //顶点
-        GLint vsh = InitShader(vertexShader, GL_VERTEX_SHADER);
+        GLint vsh = InitShader(vertexShaderSource, GL_VERTEX_SHADER);
         //片元yuv420
-        GLint fsh = InitShader(fragYUV420P, GL_FRAGMENT_SHADER);
-
+        GLint fsh = InitShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
 
         //////////////////////////////////////////////////////////
         //创建渲染程序
@@ -173,6 +233,7 @@ public:
         glAttachShader(program, fsh);
         //链接程序
         glLinkProgram(program);
+
         GLint status;
         glGetProgramiv(program, GL_LINK_STATUS, &status);
         if (status != GL_TRUE) {
@@ -182,6 +243,27 @@ public:
         //激活渲染程序
         glUseProgram(program);
         LOGE("%s", "glLinkProgram success!");
+
+        /////////////////////////java code
+
+        //on init
+        int glAttribPosition = glGetAttribLocation(program, "position");
+        int glUniformTexture = glGetUniformLocation(program, "inputImageTexture");
+        int glAttribTextureCoordinate = glGetAttribLocation(program, "inputTextureCoordinate");
+
+        //on onInitialized
+        float ratio = 1.0f;
+        int texelWidthOffsetLocation = glGetUniformLocation(program, "texelWidthOffset");
+        int texelHeightOffsetLocation = glGetUniformLocation(program, "texelHeightOffset");
+        glUniform1f(texelWidthOffsetLocation, ratio / width);
+        glUniform1f(texelHeightOffsetLocation, 0);
+        ratio = 1.0f;
+        texelWidthOffsetLocation = glGetUniformLocation(program, "texelWidthOffset");
+        texelHeightOffsetLocation =glGetUniformLocation(program, "texelHeightOffset");
+        glUniform1f(texelWidthOffsetLocation, 0);
+        glUniform1f(texelHeightOffsetLocation, ratio / height);
+
+
         //////////////////////////////////////////////////////////
 
         //加入三维顶点数据 两个三角形组成正方形
@@ -217,142 +299,16 @@ public:
         glEnableVertexAttribArray(atex);
         glVertexAttribPointer(atex, 2, GL_FLOAT, GL_FLOAT, 8, txts);
 
-        //材质纹理初始化
-
-        int width = 1024;//实际应用中从ffmpeg 获取
-        int height = 768;
-
-
-        //设置纹理层
-        glUniform1i(glGetUniformLocation(program, "yTexture"), 0);//对于纹理第1层
-        glUniform1i(glGetUniformLocation(program, "uTexture"), 1);//对于纹理第2层
-        glUniform1i(glGetUniformLocation(program, "vTexture"), 2);//对于纹理第3层
-
-        //创建opengl纹理
-        /*
-         * 创建多少个纹理
-         * 存放数组
-         *
-         * */
-        GLuint texts[3] = {0};
-        glGenTextures(3, texts); //创建3个纹理
-        //设置纹理属性
-        glBindTexture(GL_TEXTURE_2D, texts[0]);//绑定纹理，下面的属性针对这个纹理设置
-        /*
-         * GL_TEXTURE_2D 2D材质
-         * GL_TEXTURE_MIN_FILTER 缩小的过滤
-         * GL_LINEAR 线性差值 当前渲染像素最近的4个纹理做加权平均值
-         *
-         * */
-        //缩小放大过滤器
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        //设置纹理的格式和大小
-
-        /*
-         * Y
-         * GL_TEXTURE_2D
-         * 显示细节的级别
-         * 内部gpu 格式 亮度 灰度图
-         * 宽
-         * 高
-         * 边框
-         * 数据的像素格式
-         * 像素的数据类型
-         * 纹理数据
-         * */
         glTexImage2D(GL_TEXTURE_2D,
                      0,//默认
                      GL_LUMINANCE,
-                     width, height, //尺寸要是2的次方  拉升到全屏
+                     1, 1, //尺寸要是2的次方  拉升到全屏
                      0,
                      GL_LUMINANCE,//数据的像素格式，要与上面一致
                      GL_UNSIGNED_BYTE,// 像素的数据类型
-                     NULL
+                     image
         );
 
-
-        //U
-        glBindTexture(GL_TEXTURE_2D, texts[1]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,//默认
-                     GL_LUMINANCE,
-                     width / 2, height / 2, //尺寸要是2的次方  拉升到全屏
-                     0,
-                     GL_LUMINANCE,//数据的像素格式，要与上面一致
-                     GL_UNSIGNED_BYTE,// 像素的数据类型
-                     NULL
-        );
-
-        //V
-        glBindTexture(GL_TEXTURE_2D, texts[2]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,//默认
-                     GL_LUMINANCE,
-                     width / 2, height / 2, //尺寸要是2的次方  拉升到全屏
-                     0,
-                     GL_LUMINANCE,//数据的像素格式，要与上面一致
-                     GL_UNSIGNED_BYTE,// 像素的数据类型
-                     NULL
-        );
-
-
-        //////////////////////////////////////////////////////////
-        //纹理的修改和显示 把显示的纹理放入内存buf中
-
-
-
-
-        unsigned char *buf[3] = {0};
-        buf[0] = new unsigned char[width * height];
-        buf[1] = new unsigned char[width * height / 4];
-        buf[2] = new unsigned char[width * height / 4];
-
-        // 420p yyyyyy uu vv
-        if (feof(fp) == 0) {//判断是否读到结尾
-            fread(buf[0], 1, width * height, fp);
-            fread(buf[1], 1, width * height / 4, fp);
-            fread(buf[2], 1, width * height / 4, fp);
-        }
-
-        //激活第1层纹理 绑定到创建的opengl纹理
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texts[0]);//绑定纹理
-
-        //替换纹理内容
-        /*
-         * GL_TEXTURE_2D
-         * 细节级别
-         * 偏移位置yoffset
-         * 偏移位置xoffset
-         * 宽
-         * 高
-         * 数据格式
-         * 存储搁置
-         * 纹理数据写入buf中
-         *
-         * */
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE,
-                        buf[0]);
-
-
-        //激活第2层纹理 绑定到创建的opengl纹理
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texts[1]);//绑定纹理
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width / 2, height / 2, GL_LUMINANCE,
-                        GL_UNSIGNED_BYTE, buf[1]);
-
-
-
-        //激活第1层纹理 绑定到创建的opengl纹理
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, texts[2]);//绑定纹理
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width / 2, height / 2, GL_LUMINANCE,
-                        GL_UNSIGNED_BYTE, buf[2]);
 
         //三维绘制
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);//从0顶点开始 一共4个顶点
@@ -363,14 +319,14 @@ public:
 
         GLint size;
         size = 1024 * 768 * 4;
-        GLubyte *data = (GLubyte*)malloc(size);
+        GLubyte *data = (GLubyte *) malloc(size);
         glPixelStorei(GL_PACK_ALIGNMENT, 4);
-        glReadPixels(0,0,1024,768,GL_RGB,GL_UNSIGNED_BYTE,data);
+        glReadPixels(0, 0, 1024, 768, GL_RGB, GL_UNSIGNED_BYTE, data);
         bmp_write(data, 1024, 768, "gpu");
 
+        env->ReleaseByteArrayElements(jdata, image, 0);
+
     }
-
-
 
 
     //初始化着色器
@@ -403,8 +359,7 @@ public:
     }
 
 
-   static int bmp_write(unsigned char *image, int xsize, int ysize, char *filename)
-    {
+    static int bmp_write(unsigned char *image, int xsize, int ysize, char *filename) {
         unsigned char header[54] =
                 {
                         0x42, 0x4d, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -412,27 +367,27 @@ public:
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         0, 0, 0, 0
                 };
-        long file_size = (long)xsize * (long)ysize * 3 + 54;
+        long file_size = (long) xsize * (long) ysize * 3 + 54;
         long width, height;
         char fname_bmp[128];
         FILE *fp;
 
-        header[2] = (unsigned char)(file_size &0x000000ff);
+        header[2] = (unsigned char) (file_size & 0x000000ff);
         header[3] = (file_size >> 8) & 0x000000ff;
         header[4] = (file_size >> 16) & 0x000000ff;
         header[5] = (file_size >> 24) & 0x000000ff;
 
         width = xsize;
         header[18] = width & 0x000000ff;
-        header[19] = (width >> 8) &0x000000ff;
-        header[20] = (width >> 16) &0x000000ff;
-        header[21] = (width >> 24) &0x000000ff;
+        header[19] = (width >> 8) & 0x000000ff;
+        header[20] = (width >> 16) & 0x000000ff;
+        header[21] = (width >> 24) & 0x000000ff;
 
         height = ysize;
-        header[22] = height &0x000000ff;
-        header[23] = (height >> 8) &0x000000ff;
-        header[24] = (height >> 16) &0x000000ff;
-        header[25] = (height >> 24) &0x000000ff;
+        header[22] = height & 0x000000ff;
+        header[23] = (height >> 8) & 0x000000ff;
+        header[24] = (height >> 16) & 0x000000ff;
+        header[25] = (height >> 24) & 0x000000ff;
 
         sprintf(fname_bmp, "/sdcard/Download/%s.bmp", filename);
 
@@ -440,15 +395,14 @@ public:
             return -1;
 
         // switch the image data from RGB to BGR
-        for(unsigned long imageIdx = 0; imageIdx < file_size; imageIdx+=3)
-        {
+        for (unsigned long imageIdx = 0; imageIdx < file_size; imageIdx += 3) {
             unsigned char tempRGB = image[imageIdx];
             image[imageIdx] = image[imageIdx + 2];
             image[imageIdx + 2] = tempRGB;
         }
 
         fwrite(header, sizeof(unsigned char), 54, fp);
-        fwrite(image, sizeof(unsigned char), (size_t)(long)xsize * ysize * 3, fp);
+        fwrite(image, sizeof(unsigned char), (size_t) (long) xsize * ysize * 3, fp);
 
         fclose(fp);
         return 0;

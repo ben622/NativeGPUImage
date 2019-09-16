@@ -12,6 +12,12 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_ARM_NEON=TRUE"
+                cppFlags "-fexceptions -std=c++11"
+            }
+        }
     }
 
     buildTypes {

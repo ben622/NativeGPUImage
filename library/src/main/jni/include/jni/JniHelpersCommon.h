@@ -52,7 +52,7 @@
 #define HAS_RAW_STRING_LITERALS 1
 #endif
 
-// Whether the JVM should be forcibly terminated if an exception is thrown. This does
+// Whether the JVM should be forcibly terminated if an native_exception is thrown. This does
 // not apply to exceptions thrown from within JniHelpers or within Java code attached
 // to JNI code. This is mostly relevant when looking up classes/methods/fields which
 // do not exist, and thus represent a misconfiguration on the programmer's end. In such
