@@ -1,5 +1,6 @@
 package com.ben.android.nativegpuimage;
 
+import android.opengl.GLUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 

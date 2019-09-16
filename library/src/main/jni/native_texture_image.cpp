@@ -9,9 +9,9 @@
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 
-
 //顶点着色器glsl
 #define GET_STR(x) #x
+
 static const char *vertexShader = GET_STR(
         attribute
         vec4 aPosition;//顶点坐标
@@ -24,6 +24,7 @@ static const char *vertexShader = GET_STR(
             gl_Position = aPosition;//显示顶点
         }
 );
+
 //片元着色器 软解码和部分x86硬解码 YUV420P
 static const char *fragYUV420P = GET_STR(
         precision
@@ -52,18 +53,19 @@ static const char *fragYUV420P = GET_STR(
 
 );
 
+
 using namespace ben::jni;
 
-class GPUFilter : public JavaClass {
+class ImageTextureFilter : public JavaClass {
 public:
-    GPUFilter() : JavaClass() {
+    ImageTextureFilter() : JavaClass() {
     }
 
-    GPUFilter(JNIEnv *env) : JavaClass(env) {
+    ImageTextureFilter(JNIEnv *env) : JavaClass(env) {
         initialize(env);
     }
 
-    ~GPUFilter() override {
+    ~ImageTextureFilter() override {
 
     }
 
@@ -358,8 +360,9 @@ public:
         //窗口显示
         eglSwapBuffers(display, winSurface);//交换buf
 
+
         GLint size;
-        size = 1024 * 768 * 8;
+        size = 1024 * 768 * 4;
         GLubyte *data = (GLubyte*)malloc(size);
         glPixelStorei(GL_PACK_ALIGNMENT, 4);
         glReadPixels(0,0,1024,768,GL_RGB,GL_UNSIGNED_BYTE,data);

@@ -5,6 +5,7 @@
 #define GPUIMAGE_MAIN_CPP
 
 #include "include/jni/JniHelpers.h"
+#include "native_texture_image.cpp"
 
 using namespace ben::jni;
 
@@ -16,7 +17,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *jvm, void *) {
         return -1;
     }
     //register
-
+    registry.add(env, new ImageTextureFilter(env));
     return JNI_VERSION_1_6;
 }
 #endif //GPUIMAGE_MAIN_CPP

@@ -9,20 +9,13 @@ set(PRELIB_ROOT ${CMAKE_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI})
 INCLUDE_DIRECTORIES(${ROOT}/include)
 
 
+add_subdirectory(${ROOT}/include/jni)
+add_subdirectory(${ROOT}/libpng)
+
 ADD_LIBRARY(gpuimage
         SHARED
-        ${ROOT}/include/jni/JniHelpers.cpp
-        ${ROOT}/include/jni/ByteArray.cpp
-        ${ROOT}/include/jni/ClassRegistry.cpp
-        ${ROOT}/include/jni/JavaClass.cpp
-        ${ROOT}/include/jni/JavaClassUtils.cpp
-        ${ROOT}/include/jni/JavaExceptionUtils.cpp
-        ${ROOT}/include/jni/JavaString.cpp
-        ${ROOT}/include/jni/JavaStringArray.cpp
-        ${ROOT}/include/jni/JavaThreadUtils.cpp
-        ${ROOT}/include/jni/NativeObject.cpp
-        ${ROOT}/include/jni/ShortArray.cpp
         ${ROOT}/native_gpu_filter.cpp
+        ${ROOT}/native_texture_image.cpp
         ${ROOT}/main.cpp)
 
 #log
@@ -34,6 +27,8 @@ TARGET_LINK_LIBRARIES(gpuimage
         GLESv2
         EGL
         android
+        libpng
+        libjni
         ${log-lib})
 
 
