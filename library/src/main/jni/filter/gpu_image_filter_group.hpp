@@ -17,9 +17,9 @@ static float CUBE[] = {
 using namespace ben::jni;
 namespace ben {
     namespace ngp {
-        class GPUImageFilterGroup : ben::ngp::GPUImageFilter {
+        class GPUImageFilterGroup : public ben::ngp::GPUImageFilter {
         private:
-            std::vector<ben::ngp::GPUImageFilter> filters;
+            std::vector<ben::ngp::GPUImageFilter> filters ;
             std::vector<ben::ngp::GPUImageFilter> mergedFilters;
             int *frameBuffers;
             int frameBuffersSize;
@@ -40,14 +40,17 @@ namespace ben {
 
         public:
 
-
             GPUImageFilterGroup();
+
+            GPUImageFilterGroup(char *vertexShader, char *fragmentShader);
 
             GPUImageFilterGroup(const std::vector<GPUImageFilter> &filters);
 
             void updateMergedFilters();
 
             void destroyFramebuffers();
+
+            void addFilter(GPUImageFilter aFilter);
 
             const std::vector<GPUImageFilter> &getFilters() const;
 

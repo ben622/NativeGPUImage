@@ -4,7 +4,5 @@ add_library(libjni
            ${JNI_SOURCE}
 )
 
-target_link_libraries(libjni
-                    z
-)
+target_link_libraries(libjni)
 

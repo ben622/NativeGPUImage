@@ -5,6 +5,7 @@
 #define NATIVEGPUIMAGE_OPEN_GL_UTIL_HPP
 
 #include "../include/jni/JniHelpers.h"
+#include <android/bitmap.h>
 
 namespace ben {
     namespace util {
@@ -43,6 +44,42 @@ namespace ben {
             glDeleteShader(iFShader);
             return iProgId;
         }
+
+        /**
+         * 根据Bitmap对象生成纹理
+         * @param env
+         * @param jbitmap
+         * @param width
+         * @param height
+         * @param usedTexId
+         * @return
+         */
+        static GLuint loadTextureByBitmap(JNIEnv *env,jobject jbitmap,int width,int height,int usedTexId) {
+            void* pixel_source = NULL;
+            AndroidBitmap_lockPixels(env, jbitmap, &pixel_source);
+            GLuint renderbuffers;
+            if (usedTexId == NO_TEXTURE) {
+                glGenTextures(1, &renderbuffers);
+                glBindTexture(GL_TEXTURE_2D, renderbuffers);
+                glTexParameterf(GL_TEXTURE_2D,
+                                GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameterf(GL_TEXTURE_2D,
+                                GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameterf(GL_TEXTURE_2D,
+                                GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameterf(GL_TEXTURE_2D,
+                                GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                             pixel_source);
+            } else {
+                glBindTexture(GL_TEXTURE_2D, renderbuffers);
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE,
+                                pixel_source);
+            }
+            return renderbuffers;
+        }
+
 
     }
 }

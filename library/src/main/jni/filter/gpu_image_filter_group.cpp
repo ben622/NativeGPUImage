@@ -67,6 +67,7 @@ void ben::ngp::GPUImageFilterGroup::onDestory() {
 
 void ben::ngp::GPUImageFilterGroup::onDraw(int textureId, const void *cubeBufferPtr,
                                            const void *textureBufferPtr) {
+    runPendingOnDrawTasks();
     if (!isIsInitialized() || frameBuffers == 0 || frameBufferTextures == 0) {
         return;
     }
@@ -177,12 +178,9 @@ void ben::ngp::GPUImageFilterGroup::setFrameBufferTexturesSize(int frameBufferTe
 ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(
         const std::vector<ben::ngp::GPUImageFilter> &filters) : filters(filters) {
     this->filters = filters;
-    if (this->filters.empty()) {
-        this->filters = vector<ben::ngp::GPUImageFilter>();
-    } else {
+    if (!this->filters.empty()) {
         updateMergedFilters();
     }
-
     glCubeBufferPtr = CUBE;
     glTextureBufferPtr = TEXTURE_NO_ROTATION;
     glTextureFlipBufferPtr = getRotation(Rotation::NORMAL, false, true);
@@ -198,12 +196,7 @@ void ben::ngp::GPUImageFilterGroup::updateMergedFilters() {
     if (this->filters.empty()) {
         return;
     }
-
-    if (mergedFilters.empty()) {
-        //mergedFilters = new vector();
-    } else {
-        mergedFilters.clear();
-    }
+    this->mergedFilters.clear();
 
     std::vector<GPUImageFilter> filters;
     for (GPUImageFilter filter : this->filters) {
@@ -233,5 +226,15 @@ void ben::ngp::GPUImageFilterGroup::destroyFramebuffers() {
         //remove pointer
         delete frameBuffers;
     }
+}
+
+void ben::ngp::GPUImageFilterGroup::addFilter(ben::ngp::GPUImageFilter aFilter) {
+    filters.push_back(aFilter);
+    updateMergedFilters();
+}
+
+ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(char *vertexShader, char *fragmentShader)
+        : GPUImageFilter(vertexShader, fragmentShader) {
+
 }
 

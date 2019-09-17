@@ -17,6 +17,7 @@ ADD_LIBRARY(gpuimage
         ${ROOT}/include/queue.c
         ${ROOT}/native_gpu_filter.cpp
         ${ROOT}/native_texture_image.cpp
+        ${ROOT}/gpu_image_render.cpp
         ${ROOT}/main.cpp)
 
 #log

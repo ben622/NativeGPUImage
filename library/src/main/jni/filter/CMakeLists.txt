@@ -6,7 +6,6 @@ add_library(libfilter
 )
 
 target_link_libraries(libfilter
-        z
         GLESv2
         EGL
         android

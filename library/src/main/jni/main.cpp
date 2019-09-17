@@ -6,10 +6,9 @@
 
 #include "include/jni/JniHelpers.h"
 #include "native_texture_image.cpp"
+#include "gpu_image_render.hpp"
 
 using namespace ben::jni;
-
-ClassRegistry registry;
 
 extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *jvm, void *) {
     JNIEnv *env = jniHelpersInitialize(jvm);
@@ -18,6 +17,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *jvm, void *) {
     }
     //register
     registry.add(env, new ImageTextureFilter(env));
+    registry.add(env, new ben::ngp::GPUImageRender(env));
     return JNI_VERSION_1_6;
 }
 #endif //GPUIMAGE_MAIN_CPP

@@ -7,7 +7,38 @@
 
 #include "../include/jni/JniHelpers.h"
 #include <vector>
+#include <pthread.h>
+
 using namespace ben::jni;
+using namespace std;
+
+enum GL_DRAW_TYPE{
+    DRAW_INTEGER,
+    DRAW_FLOAT,
+    DRAW_FLOAT_VEC2,
+    DRAW_FLOAT_VEC3,
+    DRAW_FLOAT_VEC4,
+    DRAW_FLOAT_ARRAY,
+    DRAW_POINT,
+    DRAW_UNIFORM_MATRIX3F,
+    DRAW_UNIFORM_MATRIX4F
+
+
+};
+typedef struct runOnDrawArgs {
+    int location;
+    int intValue;
+    float floatValue;
+    float *arrayValuePtr;
+    int arrayValueLength;
+    float x;
+    float y;
+    GL_DRAW_TYPE glDrawType;
+    void *filter; //ben::ngp::GPUImageFilter
+    pthread_t *pthread; //不需要主动创建线程，由GPUImageFilter创建
+} GL_VARS;
+
+
 static const char *NO_FILTER_VERTEX_SHADER = "attribute vec4 position;\n"
                                              "attribute vec4 inputTextureCoordinate;\n"
                                              " \n"
@@ -41,9 +72,15 @@ namespace ben {
             int outputHeight;
             bool isInitialized;
 
-            //std::vector
+            vector<GL_VARS *> runOnDrawGLVars;
+            //互斥锁
+            pthread_mutex_t runOnDrawMutex;
+            //互斥锁条件变量
+            pthread_cond_t runOndrawMutexCondition;
+
         public:
 
+            //register jni api
             GPUImageFilter(JNIEnv *env) {
 
             };
@@ -60,6 +97,7 @@ namespace ben {
                 return "";
             };
 
+            //filter api
             GPUImageFilter();
 
             GPUImageFilter(char *vertexShader, char *fragmentShader);
@@ -83,6 +121,30 @@ namespace ben {
 
             virtual void ifNeedInit();
 
+            //////////////////run on draw////////////////
+            void addDrawThread(GL_VARS *glVars);
+
+            void setInteger(int location, int intValue);
+
+            void setFloat(int location, float floatValue);
+
+            void setFloatVec2(int location, float *arrayValuePtr);
+
+            void setFloatVec3(int location, float *arrayValuePtr);
+
+            void setFloatVec4(int location, float *arrayValuePtr);
+
+            void setFloatArray(int location, float *arrayValuePtr,int arrayValueLength);
+
+            void setPoint(int location, float x, float y);
+
+            void setUniformMatrix3f(int location, float *arrayValuePtr);
+
+            void setUniformMatrix4f(int location, float *arrayValuePtr);
+
+            void runPendingOnDrawTasks();
+
+            ////////////////////getter and setter/////////////////////////
             char *getVertexShader() const {
                 return vertexShader;
             }
@@ -157,4 +219,6 @@ namespace ben {
         };
     }
 }
+
+
 #endif //NATIVEGPUIMAGE_GPU_IMAGE_FILTER_HPP

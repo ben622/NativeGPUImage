@@ -10,7 +10,7 @@ using namespace std;
 
 namespace ben{
     namespace common{
-        class NException{
+        class NException : public exception{
         public:
             NException() {}
             NException(char *msg) {}

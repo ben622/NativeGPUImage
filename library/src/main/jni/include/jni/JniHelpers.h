@@ -38,8 +38,7 @@
 #include "JavaStringArray.h"
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
-
-
+static ben::jni::ClassRegistry registry;
 EXPORT JNIEnv *jniHelpersInitialize(JavaVM *jvm);
 EXPORT JNIEnv *JniCurrentEnv(JavaVM *jvm);
 
