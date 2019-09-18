@@ -15,9 +15,9 @@ namespace ben {
                                                  char *secondVertexShader,
                                                  char *secondFragmentShader);
 
-            virtual void onOutputSizeChanged(int width, int height);
+            void onOutputSizeChanged(int width, int height) override ;
 
-            virtual void onInit();
+            void onInit() override ;
 
             virtual float getVerticalTexelOffsetRatio();
 

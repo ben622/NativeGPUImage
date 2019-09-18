@@ -10,26 +10,32 @@
 
 namespace ben {
     namespace util {
-        static float TEXTURE_NO_ROTATION[] = {
+        static float CUBE[8] = {
+                -1.0f, -1.0f,
+                1.0f, -1.0f,
+                -1.0f, 1.0f,
+                1.0f, 1.0f,
+        };
+        static float TEXTURE_NO_ROTATION[8] = {
                 0.0f, 1.0f,
                 1.0f, 1.0f,
                 0.0f, 0.0f,
                 1.0f, 0.0f,
         };
 
-        static float TEXTURE_ROTATED_90[] = {
+        static float TEXTURE_ROTATED_90[8] = {
                 1.0f, 1.0f,
                 1.0f, 0.0f,
                 0.0f, 1.0f,
                 0.0f, 0.0f,
         };
-        static float TEXTURE_ROTATED_180[] = {
+        static float TEXTURE_ROTATED_180[8] = {
                 1.0f, 0.0f,
                 0.0f, 0.0f,
                 1.0f, 1.0f,
                 0.0f, 1.0f,
         };
-        static float TEXTURE_ROTATED_270[] = {
+        static float TEXTURE_ROTATED_270[8] = {
                 0.0f, 0.0f,
                 0.0f, 1.0f,
                 1.0f, 0.0f,
@@ -43,7 +49,7 @@ namespace ben {
             return 0.0f;
         }
 
-        float *getRotation(Rotation rotation, bool flipHorizontal,
+        static float *getRotation(Rotation rotation, bool flipHorizontal,
                            bool flipVertical) {
             float *rotatedTex = TEXTURE_NO_ROTATION;
             switch (rotation) {

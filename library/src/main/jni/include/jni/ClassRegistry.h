@@ -61,7 +61,7 @@ typedef std::map<std::string, ScopedPtr<const JavaClass> > ClassRegistryMap;
  * will be merged into this object, thus making it relatively cheap to copy to/from
  * Java objects.
  */
-class EXPORT ClassRegistry {
+class ClassRegistry {
 public:
   ClassRegistry();
   virtual ~ClassRegistry();

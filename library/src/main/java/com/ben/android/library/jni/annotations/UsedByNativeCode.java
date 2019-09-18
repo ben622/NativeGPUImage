@@ -19,10 +19,11 @@
  * under the License.
  */
 
-#include "JniHelpers.h"
-extern  ben::jni::ClassRegistry registry;
-using namespace ben::jni;
+package com.ben.android.library.jni.annotations;
 
-JNIEnv* jniHelpersInitialize(JavaVM *jvm) {
-  return JavaThreadUtils::initialize(jvm);
-}
+/**
+ * Annotation which indicates that a piece of seemingly-unused Java code
+ * is actually being referenced by native code via JNI. Since annotations
+ * cannot subclass each other, this should be used in combination with
+ */
+public @interface UsedByNativeCode {}

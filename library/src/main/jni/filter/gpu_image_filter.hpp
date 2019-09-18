@@ -70,7 +70,7 @@ namespace ben {
             int glAttribTextureCoordinate;
             int outputWidth;
             int outputHeight;
-            bool isInitialized;
+            bool isInitialized = false;
 
             vector<GL_VARS *> runOnDrawGLVars;
             //互斥锁
@@ -78,6 +78,29 @@ namespace ben {
             //互斥锁条件变量
             pthread_cond_t runOndrawMutexCondition;
 
+        public:
+            //filter api
+            GPUImageFilter();
+
+            GPUImageFilter(char *vertexShader, char *fragmentShader);
+
+            ~GPUImageFilter() {}
+
+            virtual void onOutputSizeChanged(int width, int height);
+
+            virtual void onInit();
+
+            virtual void onInitialized();
+
+            virtual void onDestory();
+
+            virtual void onDraw(int textureId, const void *cubeBufferPtr, const void *textureBufferPtr);
+
+            void destory();
+
+            void onDrawArraysPre();
+
+            void ifNeedInit();
         public:
 
             //register jni api
@@ -97,29 +120,7 @@ namespace ben {
                 return "";
             };
 
-            //filter api
-            GPUImageFilter();
 
-            GPUImageFilter(char *vertexShader, char *fragmentShader);
-
-            ~GPUImageFilter() {}
-
-            virtual void onOutputSizeChanged(int width, int height);
-
-            virtual void destory();
-
-            virtual void onInit();
-
-            virtual void onInitialized();
-
-            virtual void onDestory();
-
-            virtual void
-            onDraw(int textureId, const void *cubeBufferPtr, const void *textureBufferPtr);
-
-            virtual void onDrawArraysPre();
-
-            virtual void ifNeedInit();
 
             //////////////////run on draw////////////////
             void addDrawThread(GL_VARS *glVars);

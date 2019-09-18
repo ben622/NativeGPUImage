@@ -8,18 +8,13 @@
 #include "../include/jni/JniHelpers.h"
 #include "gpu_image_filter.hpp"
 #include <vector>
-static float CUBE[] = {
-        -1.0f, -1.0f,
-        1.0f, -1.0f,
-        -1.0f, 1.0f,
-        1.0f, 1.0f,
-};
+
 using namespace ben::jni;
 namespace ben {
     namespace ngp {
         class GPUImageFilterGroup : public ben::ngp::GPUImageFilter {
         private:
-            std::vector<ben::ngp::GPUImageFilter> filters ;
+            std::vector<ben::ngp::GPUImageFilter> filters;
             std::vector<ben::ngp::GPUImageFilter> mergedFilters;
             int *frameBuffers;
             int frameBuffersSize;
@@ -29,14 +24,16 @@ namespace ben {
             const void *glTextureBufferPtr;
             const void *glTextureFlipBufferPtr;
 
-            void onOutputSizeChanged(int width, int height) override;
 
-            void onInit() override;
+        public:
+            void onOutputSizeChanged(int width, int height);
 
-            void onDestory() override;
+            void onInit();
+
+            void onDestory();
 
             void
-            onDraw(int textureId, const void *cubeBufferPtr, const void *textureBufferPtr) override;
+            onDraw(int textureId, const void *cubeBufferPtr, const void *textureBufferPtr);
 
         public:
 

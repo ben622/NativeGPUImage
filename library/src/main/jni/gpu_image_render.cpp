@@ -7,14 +7,16 @@
 #include <android/native_window_jni.h>
 #include "util/jni_util.hpp"
 #include "util/open_gl_util.hpp"
-#include "util/textur_rotation_util.hpp"
+
+#include "filter/gpu_image_gaussian_blur_filter.hpp"
+#include <math.h>
 
 using namespace ben::util;
 
 static void onDrawFrame(ben::ngp::GPUImageRender* render){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //runAll(runOnDraw);
-    render->getFilter().onDraw(render->getGlTextureId(), render->getGlCubeBuffer(), render->getGlTextureBuffer());
+    render->getFilter()->onDraw(render->getGlTextureId(), render->getGlCubeBuffer(), render->getGlTextureBuffer());
     //runAll(runOnDrawEnd);
     /*if (surfaceTexture != null) {
         surfaceTexture.updateTexImage();
@@ -22,6 +24,7 @@ static void onDrawFrame(ben::ngp::GPUImageRender* render){
 }
 
 static void nativeSurfaceCreated(JNIEnv *env, jobject javaThis, jobject surface,jobject jbitmap,int width,int height) {
+    LOGE("width:%d,height:%d", width, height);
     //1.准备opengl环境
     ANativeWindow *nativeWindow = ANativeWindow_fromSurface(env, surface);
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -82,23 +85,38 @@ static void nativeSurfaceCreated(JNIEnv *env, jobject javaThis, jobject surface,
     glClearColor(backgroundRed, backgroundGreen, backgroundBlue, 1);
     glDisable(GL_DEPTH_TEST);
     //初始化默认filter
-    ben::ngp::GPUImageRender* render = getNativeRenderInstance(env, javaThis);
+    ben::ngp::GPUImageRender* render = getNativeClassPtr<ben::ngp::GPUImageRender>(GPU_IMAGE_RENDER_CLASS);
+    if (!render) {
+        LOGE("%s", "render is null");
+        return;
+    }
+
     render->setIsPreparGLEnvironment(JNI_TRUE);
-    render->setFilter(*new ben::ngp::GPUImageFilter());
-    render->getFilter().ifNeedInit();
+    render->setFilter(new ben::ngp::GPUImageGaussianBlurFilter());
+    render->getFilter()->ifNeedInit();
+
+    render->setOutputWidth(1080);
+    render->setOutputHeight(1920);
+    glViewport(0, 0, render->getOutputWidth(), render->getOutputHeight());
+    glUseProgram(render->getFilter()->getGlProgId());
+    render->getFilter()->onOutputSizeChanged(width, height);
 
     //create texu
     render->setGlTextureId(
             loadTextureByBitmap(env, jbitmap, width, height, render->getGlTextureId()));
     render->setImageWidth(width);
     render->setImageHeight(height);
-
+    render->adjustImageScaling();
     //run
     onDrawFrame(render);
+    //绘制
+    //glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    //窗口显示
+    eglSwapBuffers(display, winSurface);
 }
 
 static void nativeSurfaceChanged(JNIEnv *env, jobject javaThis, jint width, jint height) {
-    ben::ngp::GPUImageRender* render = getNativeRenderInstance(env, javaThis);
+    ben::ngp::GPUImageRender* render = getNativeClassPtr<ben::ngp::GPUImageRender>(GPU_IMAGE_RENDER_CLASS);
     if (!render->isIsPreparGLEnvironment()) {
         LOGE("%s", "opengl environment is not ready!");
         return;
@@ -107,27 +125,25 @@ static void nativeSurfaceChanged(JNIEnv *env, jobject javaThis, jint width, jint
     render->setOutputHeight(height);
 
     glViewport(0, 0, width, height);
-    glUseProgram(render->getFilter().getGlProgId());
+    glUseProgram(render->getFilter()->getGlProgId());
     //call filter onOutputSizeChanged
-    render->getFilter().onOutputSizeChanged(width, height);
+    render->getFilter()->onOutputSizeChanged(width, height);
 
-    /*adjustImageScaling();
-    synchronized (surfaceChangedWaiter) {
-        surfaceChangedWaiter.notifyAll();
-    }*/
-}
-
-
-
-ben::ngp::GPUImageRender::GPUImageRender() : NativeObject() {
+    render->adjustImageScaling();
 
 }
 
-ben::ngp::GPUImageRender::GPUImageRender(ben::ngp::GPUImageFilter filter) {
+
+
+ben::ngp::GPUImageRender::GPUImageRender() : JavaClass() {
+
+}
+
+ben::ngp::GPUImageRender::GPUImageRender(ben::ngp::GPUImageFilter *filter) {
     this->filter = filter;
 }
 
-ben::ngp::GPUImageRender::GPUImageRender(JNIEnv *env) : NativeObject(env) {
+ben::ngp::GPUImageRender::GPUImageRender(JNIEnv *env) : JavaClass(env) {
     initialize(env);
 }
 
@@ -136,7 +152,7 @@ ben::ngp::GPUImageRender::~GPUImageRender() {
 }
 
 void ben::ngp::GPUImageRender::initialize(JNIEnv *env) {
-
+    setClass(env);
     glCubeBuffer = CUBE;
     glTextureBuffer = TEXTURE_NO_ROTATION;
 
@@ -147,21 +163,15 @@ void ben::ngp::GPUImageRender::initialize(JNIEnv *env) {
     registerNativeMethods(env);
 }
 
+
 void ben::ngp::GPUImageRender::mapFields() {
 
 }
 
 const char *ben::ngp::GPUImageRender::getCanonicalName() const {
-    return "com/ben/android/library/GPUImageRender";
+    return GPU_IMAGE_RENDER_CLASS;
 }
 
-ben::ngp::GPUImageFilter &ben::ngp::GPUImageRender::getFilter() {
-    return filter;
-}
-
-void ben::ngp::GPUImageRender::setFilter(ben::ngp::GPUImageFilter &filter) {
-    GPUImageRender::filter = filter;
-}
 
 int ben::ngp::GPUImageRender::getOutputWidth() const {
     return outputWidth;
@@ -233,6 +243,109 @@ int *ben::ngp::GPUImageRender::getGlRgbBuffer() const {
 
 void ben::ngp::GPUImageRender::setGlRgbBuffer(int *glRgbBuffer) {
     GPUImageRender::glRgbBuffer = glRgbBuffer;
+}
+
+float ben::ngp::GPUImageRender::getBackgroundRed() const {
+    return backgroundRed;
+}
+
+void ben::ngp::GPUImageRender::setBackgroundRed(float backgroundRed) {
+    GPUImageRender::backgroundRed = backgroundRed;
+}
+
+float ben::ngp::GPUImageRender::getBackgroundGreen() const {
+    return backgroundGreen;
+}
+
+void ben::ngp::GPUImageRender::setBackgroundGreen(float backgroundGreen) {
+    GPUImageRender::backgroundGreen = backgroundGreen;
+}
+
+float ben::ngp::GPUImageRender::getBackgroundBlue() const {
+    return backgroundBlue;
+}
+
+void ben::ngp::GPUImageRender::setBackgroundBlue(float backgroundBlue) {
+    GPUImageRender::backgroundBlue = backgroundBlue;
+}
+
+bool ben::ngp::GPUImageRender::isFlipHorizontal() const {
+    return flipHorizontal;
+}
+
+void ben::ngp::GPUImageRender::setFlipHorizontal(bool flipHorizontal) {
+    GPUImageRender::flipHorizontal = flipHorizontal;
+}
+
+bool ben::ngp::GPUImageRender::isFlipVertical() const {
+    return flipVertical;
+}
+
+void ben::ngp::GPUImageRender::setFlipVertical(bool flipVertical) {
+    GPUImageRender::flipVertical = flipVertical;
+}
+
+ScaleType ben::ngp::GPUImageRender::getScaleType() const {
+    return scaleType;
+}
+
+void ben::ngp::GPUImageRender::setScaleType(ScaleType scaleType) {
+    GPUImageRender::scaleType = scaleType;
+}
+
+void ben::ngp::GPUImageRender::adjustImageScaling() {
+    float outputWidth = this->getOutputWidth();
+    float outputHeight = this->getOutputHeight();
+    if (rotation == Rotation::ROTATION_270 || rotation == Rotation::ROTATION_90) {
+        outputWidth = this->getOutputHeight();
+        outputHeight = this->getOutputWidth();
+    }
+
+    float ratio1 = outputWidth / imageWidth;
+    float ratio2 = outputHeight / imageHeight;
+
+    float ratioMax = max(ratio1, ratio2);
+    int imageWidthNew = round(imageWidth * ratioMax);
+    int imageHeightNew = round(imageHeight * ratioMax);
+
+    float ratioWidth = imageWidthNew / outputWidth;
+    float ratioHeight = imageHeightNew / outputHeight;
+
+    float*cube = CUBE;
+    float *textureCords = ben::util::getRotation(rotation, flipHorizontal, flipVertical);
+    if (scaleType == ScaleType::CENTER_CROP) {
+        float distHorizontal = (1 - 1 / ratioWidth) / 2;
+        float distVertical = (1 - 1 / ratioHeight) / 2;
+        textureCords = new float[8]{
+                addDistance(textureCords[0], distHorizontal), addDistance(textureCords[1], distVertical),
+                addDistance(textureCords[2], distHorizontal), addDistance(textureCords[3], distVertical),
+                addDistance(textureCords[4], distHorizontal), addDistance(textureCords[5], distVertical),
+                addDistance(textureCords[6], distHorizontal), addDistance(textureCords[7], distVertical),
+        };
+    } else {
+        cube = new float[8]{
+                CUBE[0] / ratioHeight, CUBE[1] / ratioWidth,
+                CUBE[2] / ratioHeight, CUBE[3] / ratioWidth,
+                CUBE[4] / ratioHeight, CUBE[5] / ratioWidth,
+                CUBE[6] / ratioHeight, CUBE[7] / ratioWidth,
+        };
+    }
+
+    this->glCubeBuffer = cube;
+    this->glTextureBuffer = textureCords;
+}
+
+float ben::ngp::GPUImageRender::addDistance(float coordinate, float distance) {
+    return coordinate == 0.0f ? distance : 1 - distance;
+
+}
+
+ben::ngp::GPUImageFilter *ben::ngp::GPUImageRender::getFilter() const {
+    return filter;
+}
+
+void ben::ngp::GPUImageRender::setFilter(ben::ngp::GPUImageFilter *filter) {
+    GPUImageRender::filter = filter;
 }
 
 

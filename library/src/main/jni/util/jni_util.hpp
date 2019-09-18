@@ -5,12 +5,20 @@
 #ifndef NATIVEGPUIMAGE_JNI_UTIL_HPP
 #define NATIVEGPUIMAGE_JNI_UTIL_HPP
 
-#include "../include/jni/JniHelpers.h"
+#include "../global_native_class_ptr.hpp"
 #include "../gpu_image_render.hpp"
+
+extern ben::jni::ClassRegistry *classRegistryPtr;
 namespace ben{
     namespace jni{
-        static ben::ngp::GPUImageRender* getNativeRenderInstance(JNIEnv *env, jobject javaThis){
-            return registry.getNativeInstance<ben::ngp::GPUImageRender>(env, javaThis);
+        static const char *GPU_IMAGE_RENDER_CLASS = "com/ben/android/library/GPUImageRender";
+        template<typename TypeName>
+        static TypeName* getNativeClassPtr(const char* className){
+            JavaClass *nativeClassPtr  = const_cast<JavaClass *>(classRegistryPtr->get(className));
+            if (!nativeClassPtr) {
+                LOGE("%s", "class not found!");
+            }
+            return dynamic_cast<TypeName *>(nativeClassPtr);
         }
 
     }

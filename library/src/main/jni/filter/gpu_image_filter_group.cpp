@@ -51,9 +51,13 @@ void ben::ngp::GPUImageFilterGroup::onOutputSizeChanged(int width, int height) {
 }
 
 void ben::ngp::GPUImageFilterGroup::onInit() {
+    LOGE("%s", "GPUImageFilterGroup onInit 1");
     GPUImageFilter::onInit();
+    LOGE("%s", "GPUImageFilterGroup onInit 2");
     for (GPUImageFilter filter : filters) {
+        LOGE("%s", "GPUImageFilterGroup onInit 2.1");
         filter.ifNeedInit();
+        LOGE("%s", "GPUImageFilterGroup onInit 2.1");
     }
 }
 
@@ -67,6 +71,7 @@ void ben::ngp::GPUImageFilterGroup::onDestory() {
 
 void ben::ngp::GPUImageFilterGroup::onDraw(int textureId, const void *cubeBufferPtr,
                                            const void *textureBufferPtr) {
+    LOGE("%s", "GPUImageFilterGroup-->onDraw");
     runPendingOnDrawTasks();
     if (!isIsInitialized() || frameBuffers == 0 || frameBufferTextures == 0) {
         return;

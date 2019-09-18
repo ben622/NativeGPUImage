@@ -15,6 +15,7 @@ add_subdirectory(${ROOT}/filter)
 ADD_LIBRARY(gpuimage
         SHARED
         ${ROOT}/include/queue.c
+        ${ROOT}/global_native_class_ptr.cpp
         ${ROOT}/native_gpu_filter.cpp
         ${ROOT}/native_texture_image.cpp
         ${ROOT}/gpu_image_render.cpp
@@ -28,6 +29,7 @@ FIND_LIBRARY(log-lib
 TARGET_LINK_LIBRARIES(gpuimage
         GLESv2
         EGL
+        jnigraphics
         android
         libjni
         libfilter

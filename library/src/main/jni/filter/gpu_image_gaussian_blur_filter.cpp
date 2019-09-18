@@ -40,3 +40,5 @@ void ben::ngp::GPUImageGaussianBlurFilter::setBlurSize(float blurSize) {
     GPUImageGaussianBlurFilter::blurSize = blurSize;
     initTexelOffsets();
 }
+
+

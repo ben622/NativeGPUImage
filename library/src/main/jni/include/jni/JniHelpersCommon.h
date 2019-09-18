@@ -25,7 +25,7 @@
 #include "JniTypes.h"
 #include <jni.h>
 #include <android/log.h>
-#define LOGGING_TAG "benlive"
+#define LOGGING_TAG "ngp"
 
 
 // Disable some annoying compiler warnings

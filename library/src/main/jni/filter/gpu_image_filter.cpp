@@ -24,6 +24,7 @@ GPUImageFilter::GPUImageFilter(char *vertexShader, char *fragmentShader) {
 
 
 void GPUImageFilter::onInit() {
+    LOGE("%s", "GPUImageFilter::onInit()");
     glProgId = loadProgram(vertexShader, fragmentShader);
     glAttribPosition = glGetAttribLocation(glProgId, "position");
     glUniformTexture = glGetUniformLocation(glProgId, "inputImageTexture");
@@ -32,24 +33,28 @@ void GPUImageFilter::onInit() {
 }
 
 void GPUImageFilter::onInitialized() {
-    LOGI("%s", "onInitialized");
+    LOGI("%s", "GPUImageFilter onInitialized");
 }
 
 void GPUImageFilter::onDestory() {
-    LOGI("%s", "onDestory");
+    LOGI("%s", "GPUImageFilter onDestory");
 }
 
 void
 GPUImageFilter::onDraw(int textureId, const void *cubeBufferPtr, const void *textureBufferPtr) {
+    LOGI("%s", "GPUImageFilter-->onDraw");
     glUseProgram(glProgId);
     runPendingOnDrawTasks();
     if (!isInitialized) {
+        LOGE("%s", "isInitialized is false!");
         return;
     }
     //cubeBuffer.position(0);
+    setGlAttribPosition(0);
     glVertexAttribPointer(glAttribPosition, 2, GL_FLOAT, false, 0, cubeBufferPtr);
     glEnableVertexAttribArray(glAttribPosition);
     //textureBuffer.position(0);
+    setGlAttribPosition(0);
     glVertexAttribPointer(glAttribTextureCoordinate, 2, GL_FLOAT, false, 0,
                           textureBufferPtr);
     glEnableVertexAttribArray(glAttribTextureCoordinate);
@@ -63,6 +68,7 @@ GPUImageFilter::onDraw(int textureId, const void *cubeBufferPtr, const void *tex
     glDisableVertexAttribArray(glAttribPosition);
     glDisableVertexAttribArray(glAttribTextureCoordinate);
     glBindTexture(GL_TEXTURE_2D, 0);
+    LOGI("%s", "GPUImageFilter-->onDraw complete！");
 }
 
 void GPUImageFilter::onOutputSizeChanged(int width, int height) {
@@ -81,7 +87,9 @@ void GPUImageFilter::onDrawArraysPre() {
 }
 
 void GPUImageFilter::ifNeedInit() {
+    LOGE("%s", "GPUImageFilter ifNeedInit");
     if (!isInitialized) {
+        LOGE("%s", "GPUImageFilter call on init and initialized");
         onInit();
         onInitialized();
     }

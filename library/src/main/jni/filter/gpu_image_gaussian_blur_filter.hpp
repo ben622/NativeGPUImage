@@ -77,13 +77,11 @@ namespace ben {
 
             GPUImageGaussianBlurFilter(float blurSize);
 
-            virtual void onInit();
+            float getVerticalTexelOffsetRatio() override;
 
-            virtual float getVerticalTexelOffsetRatio();
+            float getHorizontalTexelOffsetRatio() override;
 
-            virtual float getHorizontalTexelOffsetRatio();
-
-            virtual void onInitialized();
+            void onInitialized() override;
 
         };
     }
