@@ -14,8 +14,8 @@ namespace ben {
     namespace ngp {
         class GPUImageFilterGroup : public ben::ngp::GPUImageFilter {
         private:
-            std::vector<ben::ngp::GPUImageFilter> filters;
-            std::vector<ben::ngp::GPUImageFilter> mergedFilters;
+            std::vector<ben::ngp::GPUImageFilter*> filters;
+            std::vector<ben::ngp::GPUImageFilter*> mergedFilters;
             int *frameBuffers;
             int frameBuffersSize;
             int *frameBufferTextures;
@@ -41,21 +41,21 @@ namespace ben {
 
             GPUImageFilterGroup(char *vertexShader, char *fragmentShader);
 
-            GPUImageFilterGroup(const std::vector<GPUImageFilter> &filters);
+            GPUImageFilterGroup(const std::vector<GPUImageFilter*> &filters);
 
             void updateMergedFilters();
 
             void destroyFramebuffers();
 
-            void addFilter(GPUImageFilter aFilter);
+            void addFilter(GPUImageFilter* aFilter);
 
-            const std::vector<GPUImageFilter> &getFilters() const;
+            const vector<GPUImageFilter *> &getFilters() const;
 
-            void setFilters(const std::vector<GPUImageFilter> &filters);
+            void setFilters(const vector<GPUImageFilter *> &filters);
 
-            const std::vector<GPUImageFilter> &getMergedFilters() const;
+            const vector<GPUImageFilter *> &getMergedFilters() const;
 
-            void setMergedFilters(const std::vector<GPUImageFilter> &mergedFilters);
+            void setMergedFilters(const vector<GPUImageFilter *> &mergedFilters);
 
             int *getFrameBuffers() const;
 

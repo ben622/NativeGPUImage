@@ -8,60 +8,125 @@
 
 #include "gpu_image_two_pass_texture_sampling_filter.hpp"
 
-static char *VERTEX_SHADER = "attribute vec4 position;\n"
-                             "attribute vec4 inputTextureCoordinate;\n"
-                             "\n"
-                             "const int GAUSSIAN_SAMPLES = 9;\n"
-                             "\n"
-                             "uniform float texelWidthOffset;\n"
-                             "uniform float texelHeightOffset;\n"
-                             "\n"
-                             "varying vec2 textureCoordinate;\n"
-                             "varying vec2 blurCoordinates[GAUSSIAN_SAMPLES];\n"
-                             "\n"
-                             "void main()\n"
-                             "{\n"
-                             "	gl_Position = position;\n"
-                             "	textureCoordinate = inputTextureCoordinate.xy;\n"
-                             "	\n"
-                             "	// Calculate the positions for the blur\n"
-                             "	int multiplier = 0;\n"
-                             "	vec2 blurStep;\n"
-                             "   vec2 singleStepOffset = vec2(texelHeightOffset, texelWidthOffset);\n"
-                             "    \n"
-                             "	for (int i = 0; i < GAUSSIAN_SAMPLES; i++)\n"
-                             "   {\n"
-                             "		multiplier = (i - ((GAUSSIAN_SAMPLES - 1) / 2));\n"
-                             "       // Blur in x (horizontal)\n"
-                             "       blurStep = float(multiplier) * singleStepOffset;\n"
-                             "		blurCoordinates[i] = inputTextureCoordinate.xy + blurStep;\n"
-                             "	}\n"
-                             "}\n";
+static char *VERTEX_SHADER = "attribute vec4 position;"\
+                             "attribute vec4 inputTextureCoordinate;"\
+                             ""\
+                             "const int GAUSSIAN_SAMPLES = 9;"\
+                             ""\
+                             "uniform float texelWidthOffset;"\
+                             "uniform float texelHeightOffset;"\
+                             ""\
+                             "varying vec2 textureCoordinate;"\
+                             "varying vec2 blurCoordinates[GAUSSIAN_SAMPLES];"\
+                             ""\
+                             "void main()"\
+                             "{"\
+                             "	gl_Position = position;"\
+                             "	textureCoordinate = inputTextureCoordinate.xy;"\
+                             "	"\
+                             "	// Calculate the positions for the blur"\
+                             "	int multiplier = 0;"\
+                             "	vec2 blurStep;"\
+                             "   vec2 singleStepOffset = vec2(texelHeightOffset, texelWidthOffset);"\
+                             "    "\
+                             "	for (int i = 0; i < GAUSSIAN_SAMPLES; i++)"\
+                             "   {"\
+                             "		multiplier = (i - ((GAUSSIAN_SAMPLES - 1) / 2));"\
+                             "       // Blur in x (horizontal)"\
+                             "       blurStep = float(multiplier) * singleStepOffset;"\
+                             "		blurCoordinates[i] = inputTextureCoordinate.xy + blurStep;"\
+                             "	}"\
+                             "}";
 
-static char *FRAGMENT_SHADER = "uniform sampler2D inputImageTexture;\n"
-                               "\n"
-                               "const lowp int GAUSSIAN_SAMPLES = 9;\n"
-                               "\n"
-                               "varying highp vec2 textureCoordinate;\n"
-                               "varying highp vec2 blurCoordinates[GAUSSIAN_SAMPLES];\n"
-                               "\n"
-                               "void main()\n"
-                               "{\n"
-                               "	lowp vec3 sum = vec3(0.0);\n"
-                               "   lowp vec4 fragColor=texture2D(inputImageTexture,textureCoordinate);\n"
-                               "	\n"
-                               "    sum += texture2D(inputImageTexture, blurCoordinates[0]).rgb * 0.05;\n"
-                               "    sum += texture2D(inputImageTexture, blurCoordinates[1]).rgb * 0.09;\n"
-                               "    sum += texture2D(inputImageTexture, blurCoordinates[2]).rgb * 0.12;\n"
-                               "    sum += texture2D(inputImageTexture, blurCoordinates[3]).rgb * 0.15;\n"
-                               "    sum += texture2D(inputImageTexture, blurCoordinates[4]).rgb * 0.18;\n"
-                               "    sum += texture2D(inputImageTexture, blurCoordinates[5]).rgb * 0.15;\n"
-                               "    sum += texture2D(inputImageTexture, blurCoordinates[6]).rgb * 0.12;\n"
-                               "    sum += texture2D(inputImageTexture, blurCoordinates[7]).rgb * 0.09;\n"
-                               "    sum += texture2D(inputImageTexture, blurCoordinates[8]).rgb * 0.05;\n"
-                               "\n"
-                               "	gl_FragColor = vec4(sum,fragColor.a);\n"
+static char *FRAGMENT_SHADER = "uniform sampler2D inputImageTexture;"\
+                               ""\
+                               "const lowp int GAUSSIAN_SAMPLES = 9;"\
+                               ""\
+                               "varying highp vec2 textureCoordinate;"\
+                               "varying highp vec2 blurCoordinates[GAUSSIAN_SAMPLES];"\
+                               ""\
+                               "void main()"\
+                               "{"\
+                               "	lowp vec3 sum = vec3(0.0);"\
+                               "   lowp vec4 fragColor=texture2D(inputImageTexture,textureCoordinate);"\
+                               "	"\
+                               "    sum += texture2D(inputImageTexture, blurCoordinates[0]).rgb * 0.05;"\
+                               "    sum += texture2D(inputImageTexture, blurCoordinates[1]).rgb * 0.09;"\
+                               "    sum += texture2D(inputImageTexture, blurCoordinates[2]).rgb * 0.12;"\
+                               "    sum += texture2D(inputImageTexture, blurCoordinates[3]).rgb * 0.15;"\
+                               "    sum += texture2D(inputImageTexture, blurCoordinates[4]).rgb * 0.18;"\
+                               "    sum += texture2D(inputImageTexture, blurCoordinates[5]).rgb * 0.15;"\
+                               "    sum += texture2D(inputImageTexture, blurCoordinates[6]).rgb * 0.12;"\
+                               "    sum += texture2D(inputImageTexture, blurCoordinates[7]).rgb * 0.09;"\
+                               "    sum += texture2D(inputImageTexture, blurCoordinates[8]).rgb * 0.05;"\
+                               ""\
+                               "	gl_FragColor = vec4(sum,fragColor.a);"\
                                "}";
+
+/*
+#define GET_STR(x) #x
+
+static  char *VERTEX_SHADER = GET_STR(
+        attribute
+        vec4 position;
+        attribute
+        vec4 inputTextureCoordinate;
+
+        const int GAUSSIAN_SAMPLES = 9;
+
+        uniform float texelWidthOffset;
+        uniform float texelHeightOffset;
+
+        varying
+        vec2 textureCoordinate;
+        varying
+        vec2 blurCoordinates[GAUSSIAN_SAMPLES];
+
+        void main() {
+            gl_Position = position;
+            textureCoordinate = inputTextureCoordinate.xy;
+
+            // Calculate the positions for the blur
+            int multiplier = 0;
+            vec2 blurStep;
+            vec2 singleStepOffset = vec2(texelHeightOffset, texelWidthOffset);
+
+            for (int i = 0; i < GAUSSIAN_SAMPLES; i++) {
+                multiplier = (i - ((GAUSSIAN_SAMPLES - 1) / 2));
+                // Blur in x (horizontal)
+                blurStep = float(multiplier) * singleStepOffset;
+                blurCoordinates[i] = inputTextureCoordinate.xy + blurStep;
+            }
+        }
+);
+
+static  char *FRAGMENT_SHADER = GET_STR(
+        uniform sampler2D inputImageTexture;
+
+        const lowp int GAUSSIAN_SAMPLES = 9;
+
+        varying highp vec2 textureCoordinate;
+        varying highp vec2 blurCoordinates[GAUSSIAN_SAMPLES];
+
+        void main()
+        {
+            lowp vec3 sum = vec3(0.0);
+            lowp vec4 fragColor=texture2D(inputImageTexture,textureCoordinate);
+
+            sum += texture2D(inputImageTexture, blurCoordinates[0]).rgb * 0.05;
+            sum += texture2D(inputImageTexture, blurCoordinates[1]).rgb * 0.09;
+            sum += texture2D(inputImageTexture, blurCoordinates[2]).rgb * 0.12;
+            sum += texture2D(inputImageTexture, blurCoordinates[3]).rgb * 0.15;
+            sum += texture2D(inputImageTexture, blurCoordinates[4]).rgb * 0.18;
+            sum += texture2D(inputImageTexture, blurCoordinates[5]).rgb * 0.15;
+            sum += texture2D(inputImageTexture, blurCoordinates[6]).rgb * 0.12;
+            sum += texture2D(inputImageTexture, blurCoordinates[7]).rgb * 0.09;
+            sum += texture2D(inputImageTexture, blurCoordinates[8]).rgb * 0.05;
+
+            gl_FragColor = vec4(sum,fragColor.a);
+        }
+);*/
+
 namespace ben {
     namespace ngp {
         class GPUImageGaussianBlurFilter : public GPUImageTwoPassTextureSamplingFilter {

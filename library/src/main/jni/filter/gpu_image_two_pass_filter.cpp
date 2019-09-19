@@ -8,6 +8,6 @@ ben::ngp::GPUImageTwoPassFilter::GPUImageTwoPassFilter(char *firstVertexShader,
                                                        char *firstFragmentShader,
                                                        char *secondVertexShader,
                                                        char *secondFragmentShader) {
-    addFilter(*new GPUImageFilter(firstVertexShader, firstFragmentShader));
-    addFilter(*new GPUImageFilter(secondVertexShader, secondFragmentShader));
+    addFilter(new GPUImageFilter(firstVertexShader, firstFragmentShader));
+    addFilter(new GPUImageFilter(secondVertexShader, secondFragmentShader));
 }

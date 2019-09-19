@@ -13,26 +13,21 @@
 
 using namespace ben::util;
 
-static void onDrawFrame(ben::ngp::GPUImageRender* render){
+static void onDrawFrame(ben::ngp::GPUImageRender *render) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //runAll(runOnDraw);
-    render->getFilter()->onDraw(render->getGlTextureId(), render->getGlCubeBuffer(), render->getGlTextureBuffer());
-    //runAll(runOnDrawEnd);
-    /*if (surfaceTexture != null) {
-        surfaceTexture.updateTexImage();
-    }*/
+    render->getFilter()->onDraw(render->getGlTextureId(), render->getGlCubeBuffer(),
+                                render->getGlTextureBuffer());
 }
 
-static void nativeSurfaceCreated(JNIEnv *env, jobject javaThis, jobject surface,jobject jbitmap,int width,int height) {
-    LOGE("width:%d,height:%d", width, height);
+static void nativeSurfaceCreated(JNIEnv *env, jobject javaThis, jobject surface) {
     //1.准备opengl环境
     ANativeWindow *nativeWindow = ANativeWindow_fromSurface(env, surface);
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (display == EGL_NO_DISPLAY) {
-        LOGE("%s", "get display failed!");
+        LOGE("%s", "get eglDisplay failed!");
         return;
     }
-    if (EGL_TRUE != eglInitialize(display, 0, 0)) {
+    if (EGL_TRUE != eglInitialize(display, NULL, NULL)) {
         LOGE("%s", "eglInitialize failed!");
         return;
     }
@@ -79,44 +74,32 @@ static void nativeSurfaceCreated(JNIEnv *env, jobject javaThis, jobject surface,
 
 
     //2.初始化GPUImageRender
-    float backgroundRed = 0;
-    float backgroundGreen = 0;
-    float backgroundBlue = 0;
-    glClearColor(backgroundRed, backgroundGreen, backgroundBlue, 1);
-    glDisable(GL_DEPTH_TEST);
-    //初始化默认filter
-    ben::ngp::GPUImageRender* render = getNativeClassPtr<ben::ngp::GPUImageRender>(GPU_IMAGE_RENDER_CLASS);
+    ben::ngp::GPUImageRender *render = getNativeClassPtr<ben::ngp::GPUImageRender>(
+            GPU_IMAGE_RENDER_CLASS);
     if (!render) {
         LOGE("%s", "render is null");
         return;
     }
 
+    glClearColor(render->getBackgroundRed(), render->getBackgroundGreen(), render->getBackgroundBlue(), 1);
+    glDisable(GL_DEPTH_TEST);
+
+    //构造默认filter
     render->setIsPreparGLEnvironment(JNI_TRUE);
     render->setFilter(new ben::ngp::GPUImageGaussianBlurFilter());
+    render->getFilter()->setNativeWindow(nativeWindow);
+    render->getFilter()->setEglDisplay(&display);
+    render->getFilter()->setEglSurface(&winSurface);
+    //filter init
     render->getFilter()->ifNeedInit();
 
-    render->setOutputWidth(1080);
-    render->setOutputHeight(1920);
-    glViewport(0, 0, render->getOutputWidth(), render->getOutputHeight());
-    glUseProgram(render->getFilter()->getGlProgId());
-    render->getFilter()->onOutputSizeChanged(width, height);
 
-    //create texu
-    render->setGlTextureId(
-            loadTextureByBitmap(env, jbitmap, width, height, render->getGlTextureId()));
-    render->setImageWidth(width);
-    render->setImageHeight(height);
-    render->adjustImageScaling();
-    //run
-    onDrawFrame(render);
-    //绘制
-    //glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    //窗口显示
-    eglSwapBuffers(display, winSurface);
 }
 
-static void nativeSurfaceChanged(JNIEnv *env, jobject javaThis, jint width, jint height) {
-    ben::ngp::GPUImageRender* render = getNativeClassPtr<ben::ngp::GPUImageRender>(GPU_IMAGE_RENDER_CLASS);
+static void nativeSurfaceChanged(JNIEnv *env, jobject javaThis, jobject jbitmap,jint imageWidth, jint imageHeight, jint width, jint height) {
+
+    ben::ngp::GPUImageRender *render = getNativeClassPtr<ben::ngp::GPUImageRender>(
+            GPU_IMAGE_RENDER_CLASS);
     if (!render->isIsPreparGLEnvironment()) {
         LOGE("%s", "opengl environment is not ready!");
         return;
@@ -126,13 +109,32 @@ static void nativeSurfaceChanged(JNIEnv *env, jobject javaThis, jint width, jint
 
     glViewport(0, 0, width, height);
     glUseProgram(render->getFilter()->getGlProgId());
-    //call filter onOutputSizeChanged
     render->getFilter()->onOutputSizeChanged(width, height);
-
     render->adjustImageScaling();
 
-}
+    AndroidBitmapInfo bitmapInfo;
+    if (AndroidBitmap_getInfo(env, jbitmap, &bitmapInfo) < 0) {
+        return;
+    }
+    LOGI("showBitmap width %d, height %d, format %d", imageWidth, imageHeight,
+         bitmapInfo.format);
 
+    if (bitmapInfo.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("%s", "invalid rgb format error!");
+        return;
+    }
+    //create texureid
+    render->setGlTextureId(
+            loadTextureByBitmap(env, jbitmap, imageWidth, imageHeight, render->getGlTextureId()));
+    render->setImageWidth(imageWidth);
+    render->setImageHeight(imageHeight);
+    render->adjustImageScaling();
+
+    //run
+    onDrawFrame(render);
+
+
+}
 
 
 ben::ngp::GPUImageRender::GPUImageRender() : JavaClass() {
@@ -157,8 +159,10 @@ void ben::ngp::GPUImageRender::initialize(JNIEnv *env) {
     glTextureBuffer = TEXTURE_NO_ROTATION;
 
     addNativeMethod("nativeSurfaceCreated", (void *) nativeSurfaceCreated, kTypeVoid,
-                    "Landroid/view/Surface;","Landroid/graphics/Bitmap;",kTypeInt,kTypeInt, NULL);
+                    "Landroid/view/Surface;", NULL);
     addNativeMethod("nativeSurfaceChanged", (void *) nativeSurfaceChanged, kTypeVoid,
+                    "Landroid/graphics/Bitmap;",
+                    kTypeInt, kTypeInt,
                     kTypeInt, kTypeInt, NULL);
     registerNativeMethods(env);
 }
@@ -311,16 +315,20 @@ void ben::ngp::GPUImageRender::adjustImageScaling() {
     float ratioWidth = imageWidthNew / outputWidth;
     float ratioHeight = imageHeightNew / outputHeight;
 
-    float*cube = CUBE;
+    float *cube = CUBE;
     float *textureCords = ben::util::getRotation(rotation, flipHorizontal, flipVertical);
     if (scaleType == ScaleType::CENTER_CROP) {
         float distHorizontal = (1 - 1 / ratioWidth) / 2;
         float distVertical = (1 - 1 / ratioHeight) / 2;
         textureCords = new float[8]{
-                addDistance(textureCords[0], distHorizontal), addDistance(textureCords[1], distVertical),
-                addDistance(textureCords[2], distHorizontal), addDistance(textureCords[3], distVertical),
-                addDistance(textureCords[4], distHorizontal), addDistance(textureCords[5], distVertical),
-                addDistance(textureCords[6], distHorizontal), addDistance(textureCords[7], distVertical),
+                addDistance(textureCords[0], distHorizontal),
+                addDistance(textureCords[1], distVertical),
+                addDistance(textureCords[2], distHorizontal),
+                addDistance(textureCords[3], distVertical),
+                addDistance(textureCords[4], distHorizontal),
+                addDistance(textureCords[5], distVertical),
+                addDistance(textureCords[6], distHorizontal),
+                addDistance(textureCords[7], distVertical),
         };
     } else {
         cube = new float[8]{

@@ -17,8 +17,14 @@ namespace ben {
                 LOGE(" glCreateShader  %d failed ! ", iType);
                 return 0;
             }
-            glShaderSource(sh, 1, &strSource, 0);
+            glShaderSource(sh, 1, &strSource, NULL);
             glCompileShader(sh);
+            GLint status;
+            glGetShaderiv(sh,GL_COMPILE_STATUS,&status);
+            if (status == 0){
+                LOGE("%s", " GL_COMPILE_STATUS  failed ! ");
+                return 0;
+            }
             return sh;
         }
 
@@ -71,11 +77,11 @@ namespace ben {
                 glTexParameterf(GL_TEXTURE_2D,
                                 GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                              pixel_source);
             } else {
                 glBindTexture(GL_TEXTURE_2D, renderbuffers);
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE,
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
                                 pixel_source);
             }
             AndroidBitmap_unlockPixels(env, jbitmap);

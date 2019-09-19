@@ -12,7 +12,7 @@
 using namespace ben::jni;
 using namespace std;
 
-enum GL_DRAW_TYPE{
+enum GL_DRAW_TYPE {
     DRAW_INTEGER,
     DRAW_FLOAT,
     DRAW_FLOAT_VEC2,
@@ -34,30 +34,54 @@ typedef struct runOnDrawArgs {
     float x;
     float y;
     GL_DRAW_TYPE glDrawType;
-    void *filter; //ben::ngp::GPUImageFilter
-    pthread_t *pthread; //不需要主动创建线程，由GPUImageFilter创建
+    void *filter; //link ben::ngp::GPUImageFilter
+    pthread_t *pthread;
 } GL_VARS;
 
-
-static const char *NO_FILTER_VERTEX_SHADER = "attribute vec4 position;\n"
-                                             "attribute vec4 inputTextureCoordinate;\n"
-                                             " \n"
-                                             "varying vec2 textureCoordinate;\n"
-                                             " \n"
-                                             "void main()\n"
-                                             "{\n"
-                                             "    gl_Position = position;\n"
-                                             "    textureCoordinate = inputTextureCoordinate.xy;\n"
+static char *NO_FILTER_VERTEX_SHADER = "attribute vec4 position;"\
+                                             "attribute vec4 inputTextureCoordinate;"\
+                                             ""\
+                                             "varying vec2 textureCoordinate;"\
+                                             ""\
+                                             "void main()"\
+                                             "{"\
+                                             "    gl_Position = position;"\
+                                             "    textureCoordinate = inputTextureCoordinate.xy;"\
                                              "}";
 
-static const char *NO_FILTER_FRAGMENT_SHADER = "varying highp vec2 textureCoordinate;\n"
-                                               " \n"
-                                               "uniform sampler2D inputImageTexture;\n"
-                                               " \n"
-                                               "void main()\n"
-                                               "{\n"
-                                               "     gl_FragColor = texture2D(inputImageTexture, textureCoordinate);\n"
+static char *NO_FILTER_FRAGMENT_SHADER = "varying highp vec2 textureCoordinate;"\
+                                               " "\
+                                               "uniform sampler2D inputImageTexture;"\
+                                               " "\
+                                               "void main()"\
+                                               "{"\
+                                               "     gl_FragColor = texture2D(inputImageTexture, textureCoordinate);"\
                                                "}";
+/*
+#define GET_STR(x) #x
+
+static const char *NO_FILTER_VERTEX_SHADER = GET_STR(
+        attribute vec4 position;
+        attribute vec4 inputTextureCoordinate;
+
+        varying vec2 textureCoordinate;
+
+        void main()
+        {
+            gl_Position = position;
+            textureCoordinate = inputTextureCoordinate.xy;
+        }
+);
+static const char *NO_FILTER_FRAGMENT_SHADER = GET_STR(
+        varying highp vec2 textureCoordinate;
+
+        uniform sampler2D inputImageTexture;
+
+        void main()
+        {
+            gl_FragColor = texture2D(inputImageTexture, textureCoordinate);
+        }
+);*/
 namespace ben {
     namespace ngp {
         class GPUImageFilter : public JavaClass {
@@ -72,7 +96,15 @@ namespace ben {
             int outputHeight;
             bool isInitialized = false;
 
+
+        private:
+            ANativeWindow *nativeWindow;
+            EGLDisplay *eglDisplay;
+            EGLSurface *eglSurface;
+
+        private:
             vector<GL_VARS *> runOnDrawGLVars;
+            vector<pthread_t *> runOnDrawThreads;
             //互斥锁
             pthread_mutex_t runOnDrawMutex;
             //互斥锁条件变量
@@ -94,13 +126,15 @@ namespace ben {
 
             virtual void onDestory();
 
-            virtual void onDraw(int textureId, const void *cubeBufferPtr, const void *textureBufferPtr);
+            virtual void
+            onDraw(int textureId, const void *cubeBufferPtr, const void *textureBufferPtr);
 
             void destory();
 
             void onDrawArraysPre();
 
             void ifNeedInit();
+
         public:
 
             //register jni api
@@ -121,7 +155,6 @@ namespace ben {
             };
 
 
-
             //////////////////run on draw////////////////
             void addDrawThread(GL_VARS *glVars);
 
@@ -135,7 +168,7 @@ namespace ben {
 
             void setFloatVec4(int location, float *arrayValuePtr);
 
-            void setFloatArray(int location, float *arrayValuePtr,int arrayValueLength);
+            void setFloatArray(int location, float *arrayValuePtr, int arrayValueLength);
 
             void setPoint(int location, float x, float y);
 
@@ -217,6 +250,19 @@ namespace ben {
             void setIsInitialized(bool isInitialized) {
                 GPUImageFilter::isInitialized = isInitialized;
             }
+
+            ANativeWindow *getNativeWindow() const;
+
+            void setNativeWindow(ANativeWindow *nativeWindow);
+
+            EGLDisplay *getEglDisplay() const;
+
+            void setEglDisplay(EGLDisplay *eglDisplay);
+
+            EGLSurface *getEglSurface() const;
+
+            void setEglSurface(EGLSurface *eglSurface);
+
         };
     }
 }

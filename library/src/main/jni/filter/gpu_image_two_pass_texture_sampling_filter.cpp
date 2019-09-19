@@ -11,12 +11,12 @@ ben::ngp::GPUImageTwoPassTextureSamplingFilter::GPUImageTwoPassTextureSamplingFi
                                                             secondFragmentShader) {}
 
 void ben::ngp::GPUImageTwoPassTextureSamplingFilter::onOutputSizeChanged(int width, int height) {
-    GPUImageFilter::onOutputSizeChanged(width, height);
+    GPUImageFilterGroup::onOutputSizeChanged(width, height);
     initTexelOffsets();
 }
 
 void ben::ngp::GPUImageTwoPassTextureSamplingFilter::onInit() {
-    GPUImageFilter::onInit();
+    GPUImageFilterGroup::onInit();
     initTexelOffsets();
 }
 
@@ -30,16 +30,16 @@ float ben::ngp::GPUImageTwoPassTextureSamplingFilter::getHorizontalTexelOffsetRa
 
 void ben::ngp::GPUImageTwoPassTextureSamplingFilter::initTexelOffsets() {
     float ratio = getHorizontalTexelOffsetRatio();
-    GPUImageFilter filter = getFilters()[0];
-    int texelWidthOffsetLocation = glGetUniformLocation(filter.getGlProgId(), "texelWidthOffset");
-    int texelHeightOffsetLocation = glGetUniformLocation(filter.getGlProgId(), "texelHeightOffset");
-    filter.setFloat(texelWidthOffsetLocation, ratio / getOutputWidth());
-    filter.setFloat(texelHeightOffsetLocation, 0);
+    GPUImageFilter* filter = getFilters()[0];
+    int texelWidthOffsetLocation = glGetUniformLocation(filter->getGlProgId(), "texelWidthOffset");
+    int texelHeightOffsetLocation = glGetUniformLocation(filter->getGlProgId(), "texelHeightOffset");
+    filter->setFloat(texelWidthOffsetLocation, ratio / getOutputWidth());
+    filter->setFloat(texelHeightOffsetLocation, 0);
 
     ratio = getVerticalTexelOffsetRatio();
     filter = getFilters()[1];
-    texelWidthOffsetLocation = glGetUniformLocation(filter.getGlProgId(), "texelWidthOffset");
-    texelHeightOffsetLocation = glGetUniformLocation(filter.getGlProgId(), "texelHeightOffset");
-    filter.setFloat(texelWidthOffsetLocation, 0);
-    filter.setFloat(texelHeightOffsetLocation, ratio / getOutputHeight());
+    texelWidthOffsetLocation = glGetUniformLocation(filter->getGlProgId(), "texelWidthOffset");
+    texelHeightOffsetLocation = glGetUniformLocation(filter->getGlProgId(), "texelHeightOffset");
+    filter->setFloat(texelWidthOffsetLocation, 0);
+    filter->setFloat(texelHeightOffsetLocation, ratio / getOutputHeight());
 }

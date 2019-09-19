@@ -157,10 +157,10 @@ public:
 
         //------------------------
         //EGL
-        //1  display 显示
+        //1  eglDisplay 显示
         EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
         if (display == EGL_NO_DISPLAY) {
-            LOGE("%s", "get display failed!");
+            LOGE("%s", "get eglDisplay failed!");
             return;
         }
         //初始化 后面两个参数是版本号
@@ -189,7 +189,7 @@ public:
             return;
         }
         //创建surface （关联原始窗口）
-        //EGLSurface winSurface = eglCreateWindowSurface(display, config, nwin, 0);
+        //EGLSurface winSurface = eglCreateWindowSurface(eglDisplay, config, nwin, 0);
         EGLSurface winSurface = eglCreatePbufferSurface(display, config, 0);
 
         if (winSurface == EGL_NO_SURFACE) {

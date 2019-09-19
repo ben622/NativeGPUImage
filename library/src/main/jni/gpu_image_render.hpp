@@ -28,8 +28,8 @@ namespace ben {
             float *glTextureBuffer;
             int *glRgbBuffer;
 
-            float backgroundRed = 0;
-            float backgroundGreen = 0;
+            float backgroundRed = 1.0;
+            float backgroundGreen = 1.0;
             float backgroundBlue = 0;
 
             Rotation rotation;
