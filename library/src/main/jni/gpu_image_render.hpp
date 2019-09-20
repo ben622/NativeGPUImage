@@ -9,6 +9,9 @@
 #include "util/rotation.hpp"
 #include "util/scale_type.hpp"
 #include "util/textur_rotation_util.hpp"
+#include "filter/gpu_image_gaussian_blur_filter.hpp"
+#include "filter/gpu_image_pixelation_filter.hpp"
+#include "filter/gpu_image_dilation_filter.hpp"
 
 #define NO_IMAGE  -1
 using namespace ben::jni;
@@ -86,14 +89,6 @@ namespace ben {
 
             void setGlTextureId(int glTextureId);
 
-            float *getGlCubeBuffer() const;
-
-            void setGlCubeBuffer(float *glCubeBuffer);
-
-            float *getGlTextureBuffer() const;
-
-            void setGlTextureBuffer(float *glTextureBuffer);
-
             int *getGlRgbBuffer() const;
 
             void setGlRgbBuffer(int *glRgbBuffer);
@@ -121,6 +116,10 @@ namespace ben {
             ScaleType getScaleType() const;
 
             void setScaleType(ScaleType scaleType);
+
+            float *getGlCubeBuffer() const;
+
+            float *getGlTextureBuffer() const;
         };
     }
 }

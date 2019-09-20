@@ -7,7 +7,7 @@
 ben::ngp::GPUImageGaussianBlurFilter::GPUImageGaussianBlurFilter()
         : GPUImageTwoPassTextureSamplingFilter(VERTEX_SHADER, FRAGMENT_SHADER, VERTEX_SHADER,
                                                FRAGMENT_SHADER) {
-    this->blurSize = 1.0;
+    this->blurSize = 0.0;
 }
 
 ben::ngp::GPUImageGaussianBlurFilter::GPUImageGaussianBlurFilter(float blurSize)

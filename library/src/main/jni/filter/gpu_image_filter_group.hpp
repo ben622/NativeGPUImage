@@ -20,9 +20,10 @@ namespace ben {
             int frameBuffersSize;
             int *frameBufferTextures;
             int frameBufferTexturesSize;
-            const void *glCubeBufferPtr;
-            const void *glTextureBufferPtr;
-            const void *glTextureFlipBufferPtr;
+
+            float *glCubeBufferPtr;
+            float *glTextureBufferPtr;
+            float *glTextureFlipBufferPtr;
 
 
         public:
@@ -33,7 +34,7 @@ namespace ben {
             void onDestory();
 
             void
-            onDraw(int textureId, const void *cubeBufferPtr, const void *textureBufferPtr);
+            onDraw(int textureId,  float* cubeBufferPtr,  float *textureBufferPtr);
 
         public:
 
@@ -65,18 +66,6 @@ namespace ben {
 
             void setFrameBufferTextures(int *frameBufferTextures);
 
-            const void *getGlCubeBufferPtr() const;
-
-            void setGlCubeBufferPtr(const void *glCubeBufferPtr);
-
-            const void *getGlTextureBufferPtr() const;
-
-            void setGlTextureBufferPtr(const void *glTextureBufferPtr);
-
-            const void *getGlTextureFlipBufferPtr() const;
-
-            void setGlTextureFlipBufferPtr(const void *glTextureFlipBufferPtr);
-
             int getFrameBuffersSize() const;
 
             void setFrameBuffersSize(int frameBuffersSize);
@@ -84,6 +73,12 @@ namespace ben {
             int getFrameBufferTexturesSize() const;
 
             void setFrameBufferTexturesSize(int frameBufferTexturesSize);
+
+            float *getGlCubeBufferPtr() const;
+
+            float *getGlTextureBufferPtr() const;
+
+            float *getGlTextureFlipBufferPtr() const;
         };
     }
 }

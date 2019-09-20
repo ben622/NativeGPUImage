@@ -4,6 +4,7 @@
 #include "gpu_image_filter.hpp"
 #include "../util/open_gl_util.hpp"
 #include "../include/queue.h"
+#include "../util/yuv-decoder.hpp"
 #include <cstring>
 
 using namespace ben::util;
@@ -22,7 +23,6 @@ GPUImageFilter::GPUImageFilter(char *vertexShaderArg, char *fragmentShaderArg) {
 
 
 void GPUImageFilter::onInit() {
-    LOGE("%s", "GPUImageFilter onInit");
     glProgId = loadProgram(vertexShader, fragmentShader);
 
     glAttribPosition = glGetAttribLocation(glProgId, "position");
@@ -40,20 +40,18 @@ void GPUImageFilter::onDestory() {
 }
 
 void
-GPUImageFilter::onDraw(int textureId, const void *cubeBufferPtr, const void *textureBufferPtr) {
-    LOGE("%s", "GPUImageFilter onDraw.");
+GPUImageFilter::onDraw(int textureId, float *cubeBufferPtr, float *textureBufferPtr) {
+    LOGE("GPUImageFilter onDraw textureId:%d", textureId);
     LOGE("GPUImageFilter glProgId:%d", glProgId);
     glUseProgram(glProgId);
     runPendingOnDrawTasks();
-    /*if (!isInitialized) {
+    if (!isInitialized) {
         LOGE("%s", "isInitialized is false!");
         return;
-    }*/
-    //cubeBuffer.position(0);
+    }
     setGlAttribPosition(0);
     glVertexAttribPointer(glAttribPosition, 2, GL_FLOAT, false, 0, cubeBufferPtr);
     glEnableVertexAttribArray(glAttribPosition);
-    //textureBuffer.position(0);
     setGlAttribPosition(0);
     glVertexAttribPointer(glAttribTextureCoordinate, 2, GL_FLOAT, false, 0,
                           textureBufferPtr);
@@ -69,9 +67,7 @@ GPUImageFilter::onDraw(int textureId, const void *cubeBufferPtr, const void *tex
     glDisableVertexAttribArray(glAttribTextureCoordinate);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    eglSwapBuffers(getEglDisplay(), getEglSurface());
-
+    eglSwapBuffers(*getEglDisplay(), *getEglSurface());
     LOGE("%s", "GPUImageFilter-->onDraw complete！");
 }
 
@@ -91,9 +87,7 @@ void GPUImageFilter::onDrawArraysPre() {
 }
 
 void GPUImageFilter::ifNeedInit() {
-    LOGE("%s", "GPUImageFilter ifNeedInit");
     if (!isInitialized) {
-        LOGE("%s", "GPUImageFilter call on init and initialized");
         this->onInit();
         this->onInitialized();
     }
@@ -104,29 +98,35 @@ void GPUImageFilter::ifNeedInit() {
  * @param arg
  * @return
  */
-void *onRunDrawGlCallback(void *arg) {
-    LOGE("%s", "onRunDrawGlCallback");
+static void *onRunDrawGlCallback(void *arg) {
     GL_VARS *glVars = static_cast<GL_VARS *>(arg);
     static_cast<GPUImageFilter *>(glVars->filter)->ifNeedInit();
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_INTEGER) {
+        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_INTEGER");
         glUniform1i(glVars->location, glVars->intValue);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT) {
+        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT");
         glUniform1f(glVars->location, glVars->floatValue);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_VEC2) {
+        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_VEC2");
         glUniform2fv(glVars->location, 1, glVars->arrayValuePtr);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_VEC3) {
+        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_VEC3");
         glUniform3fv(glVars->location, 1, glVars->arrayValuePtr);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_VEC4) {
+        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_VEC4");
         glUniform4fv(glVars->location, 1, glVars->arrayValuePtr);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_ARRAY) {
+        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_ARRAY");
         glUniform1fv(glVars->location, glVars->arrayValueLength, glVars->arrayValuePtr);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_POINT) {
+        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_POINT");
         float *vec2 = new float[2]{
                 glVars->x,
                 glVars->y
@@ -135,54 +135,19 @@ void *onRunDrawGlCallback(void *arg) {
     }
 
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX3F) {
+        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX3F");
         glUniformMatrix3fv(glVars->location, 1, false, glVars->arrayValuePtr);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX4F) {
+        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX4F");
         glUniformMatrix4fv(glVars->location, 1, false, glVars->arrayValuePtr);
     }
+    return 0;
 
 }
 
 void GPUImageFilter::addDrawThread(GL_VARS *glVars) {
-   /* pthread_t *pthread;
-    //runOnDrawThreads.push_back(pthread);
-    glVars->pthread = pthread;
     runOnDrawGLVars.push_back(glVars);
-*/
-    static_cast<GPUImageFilter *>(glVars->filter)->ifNeedInit();
-    if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_INTEGER) {
-        glUniform1i(glVars->location, glVars->intValue);
-    }
-    if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT) {
-        glUniform1f(glVars->location, glVars->floatValue);
-    }
-    if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_VEC2) {
-        glUniform2fv(glVars->location, 1, glVars->arrayValuePtr);
-    }
-    if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_VEC3) {
-        glUniform3fv(glVars->location, 1, glVars->arrayValuePtr);
-    }
-    if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_VEC4) {
-        glUniform4fv(glVars->location, 1, glVars->arrayValuePtr);
-    }
-    if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_ARRAY) {
-        glUniform1fv(glVars->location, glVars->arrayValueLength, glVars->arrayValuePtr);
-    }
-    if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_POINT) {
-        float *vec2 = new float[2]{
-                glVars->x,
-                glVars->y
-        };
-        glUniform2fv(glVars->location, 1, vec2);
-    }
-
-    if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX3F) {
-        glUniformMatrix3fv(glVars->location, 1, false, glVars->arrayValuePtr);
-    }
-    if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX4F) {
-        glUniformMatrix4fv(glVars->location, 1, false, glVars->arrayValuePtr);
-    }
-
 }
 
 
@@ -272,14 +237,24 @@ void GPUImageFilter::setUniformMatrix4f(int location, float *arrayValuePtr) {
 
 
 void GPUImageFilter::runPendingOnDrawTasks() {
-    /*if (this->runOnDrawGLVars.empty()) {
+    if (this->runOnDrawGLVars.empty()) {
         return;
     }
-    for (int i = 0; i < runOnDrawGLVars.size(); i++) {
+    pthread_t *pt = (pthread_t *) malloc(runOnDrawGLVars.size() * sizeof(pthread_t));
+    vector<GL_VARS *> temp = vector<GL_VARS *>(runOnDrawGLVars.size());
+    for (int i = runOnDrawGLVars.size() - 1; i >= 0; i--) {
+        temp[i] = runOnDrawGLVars[i];
+    }
+    for (int i = runOnDrawGLVars.size() - 1; i >= 0; i--) {
         //create thread
-        LOGE("run thread %d", i);
-        pthread_create(runOnDrawGLVars[i]->pthread, NULL, onRunDrawGlCallback, runOnDrawGLVars[i]);
-    }*/
+        pthread_create(&pt[i], NULL, onRunDrawGlCallback, temp[i]);
+    }
+    for (int i = runOnDrawGLVars.size() - 1; i >= 0; i--) {
+        pthread_join(pt[i], NULL);
+    }
+    runOnDrawGLVars.clear();
+    temp.clear();
+    free(pt);
 
 }
 

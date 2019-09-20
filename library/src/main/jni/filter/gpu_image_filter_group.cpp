@@ -22,7 +22,9 @@ void ben::ngp::GPUImageFilterGroup::onOutputSizeChanged(int width, int height) {
 
     if (!mergedFilters.empty()) {
         size = mergedFilters.size();
+        frameBuffersSize = size - 1;
         frameBuffers = new int[size - 1];
+        frameBufferTexturesSize = size - 1;
         frameBufferTextures = new int[size - 1];
 
         for (int i = 0; i < size - 1; i++) {
@@ -30,46 +32,40 @@ void ben::ngp::GPUImageFilterGroup::onOutputSizeChanged(int width, int height) {
             glGenTextures(1, reinterpret_cast<GLuint *>(frameBufferTextures));
             glBindTexture(GL_TEXTURE_2D, frameBufferTextures[i]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                    GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+                         GL_RGBA, GL_UNSIGNED_BYTE, NULL);
             glTexParameterf(GL_TEXTURE_2D,
-                    GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                            GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameterf(GL_TEXTURE_2D,
-                    GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                            GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameterf(GL_TEXTURE_2D,
-                    GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                            GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameterf(GL_TEXTURE_2D,
-                    GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                            GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
             glBindFramebuffer(GL_FRAMEBUFFER, frameBuffers[i]);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                    GL_TEXTURE_2D, frameBufferTextures[i], 0);
+                                   GL_TEXTURE_2D, frameBufferTextures[i], 0);
         }
     }
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    eglSwapBuffers(getEglDisplay(), getEglSurface());
 }
 
 void ben::ngp::GPUImageFilterGroup::onInit() {
-    LOGE("%s", "GPUImageFilterGroup onInit");
     GPUImageFilter::onInit();
-    for (GPUImageFilter* filter : filters) {
-        LOGE("%s","GPUImageFilterGroup init");
+    for (GPUImageFilter *filter : filters) {
         filter->ifNeedInit();
     }
 }
 
 void ben::ngp::GPUImageFilterGroup::onDestory() {
     destroyFramebuffers();
-    for (GPUImageFilter* filter : filters) {
+    for (GPUImageFilter *filter : filters) {
         filter->destory();
     }
     GPUImageFilter::onDestory();
 }
 
-void ben::ngp::GPUImageFilterGroup::onDraw(int textureId, const void *cubeBufferPtr,
-                                           const void *textureBufferPtr) {
-    LOGE("%s", "GPUImageFilterGroup-->onDraw");
+void ben::ngp::GPUImageFilterGroup::onDraw(int textureId, float *cubeBufferPtr,
+                                           float *textureBufferPtr) {
     runPendingOnDrawTasks();
     if (!isIsInitialized() || frameBuffers == NULL || frameBufferTextures == NULL) {
         LOGE("isIsInitialized:%d,frameBuffers:%d,frameBufferTextures:%d", !isIsInitialized(),
@@ -80,7 +76,7 @@ void ben::ngp::GPUImageFilterGroup::onDraw(int textureId, const void *cubeBuffer
         int size = mergedFilters.size();
         int previousTexture = textureId;
         for (int i = 0; i < size; i++) {
-            GPUImageFilter* filter = mergedFilters[i];
+            GPUImageFilter *filter = mergedFilters[i];
             bool isNotLast = i < size - 1;
             if (isNotLast) {
                 glBindFramebuffer(GL_FRAMEBUFFER, frameBuffers[i]);
@@ -90,7 +86,17 @@ void ben::ngp::GPUImageFilterGroup::onDraw(int textureId, const void *cubeBuffer
             if (i == 0) {
                 filter->onDraw(previousTexture, cubeBufferPtr, textureBufferPtr);
             } else if (i == size - 1) {
-                filter->onDraw(previousTexture, glCubeBufferPtr, (size % 2 == 0) ? glTextureFlipBufferPtr : glTextureBufferPtr);
+                filter->onDraw(previousTexture, new float[8]{
+                        -1.0f, -1.0f,
+                        1.0f, -1.0f,
+                        -1.0f, 1.0f,
+                        1.0f, 1.0f,
+                }, (size % 2 == 0) ? new float[8]{
+                        0.0f, 1.0f,
+                        1.0f, 1.0f,
+                        0.0f, 0.0f,
+                        1.0f, 0.0f,
+                } : glTextureBufferPtr);
             } else {
                 filter->onDraw(previousTexture, glCubeBufferPtr, glTextureBufferPtr);
             }
@@ -119,30 +125,6 @@ void ben::ngp::GPUImageFilterGroup::setFrameBufferTextures(int *frameBufferTextu
     GPUImageFilterGroup::frameBufferTextures = frameBufferTextures;
 }
 
-const void *ben::ngp::GPUImageFilterGroup::getGlCubeBufferPtr() const {
-    return glCubeBufferPtr;
-}
-
-void ben::ngp::GPUImageFilterGroup::setGlCubeBufferPtr(const void *glCubeBufferPtr) {
-    GPUImageFilterGroup::glCubeBufferPtr = glCubeBufferPtr;
-}
-
-const void *ben::ngp::GPUImageFilterGroup::getGlTextureBufferPtr() const {
-    return glTextureBufferPtr;
-}
-
-void ben::ngp::GPUImageFilterGroup::setGlTextureBufferPtr(const void *glTextureBufferPtr) {
-    GPUImageFilterGroup::glTextureBufferPtr = glTextureBufferPtr;
-}
-
-const void *ben::ngp::GPUImageFilterGroup::getGlTextureFlipBufferPtr() const {
-    return glTextureFlipBufferPtr;
-}
-
-void ben::ngp::GPUImageFilterGroup::setGlTextureFlipBufferPtr(const void *glTextureFlipBufferPtr) {
-    GPUImageFilterGroup::glTextureFlipBufferPtr = glTextureFlipBufferPtr;
-}
-
 int ben::ngp::GPUImageFilterGroup::getFrameBuffersSize() const {
     return frameBuffersSize;
 }
@@ -162,7 +144,7 @@ void ben::ngp::GPUImageFilterGroup::setFrameBufferTexturesSize(int frameBufferTe
 
 //group 构造函数
 ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(
-        const std::vector<ben::ngp::GPUImageFilter*> &filters) : filters(filters) {
+        const std::vector<ben::ngp::GPUImageFilter *> &filters) : filters(filters) {
     this->filters = filters;
     if (!this->filters.empty()) {
         updateMergedFilters();
@@ -184,8 +166,8 @@ void ben::ngp::GPUImageFilterGroup::updateMergedFilters() {
     }
     this->mergedFilters.clear();
 
-    std::vector<GPUImageFilter*> filters;
-    for (GPUImageFilter* filter : this->filters) {
+    std::vector<GPUImageFilter *> filters;
+    for (GPUImageFilter *filter : this->filters) {
         if (strcmp(typeid(GPUImageFilterGroup).name(), typeid(filter).name()) == 0) {
             GPUImageFilterGroup *filterGroup = dynamic_cast<GPUImageFilterGroup *>(filter);
             filterGroup->updateMergedFilters();
@@ -202,19 +184,22 @@ void ben::ngp::GPUImageFilterGroup::updateMergedFilters() {
 }
 
 void ben::ngp::GPUImageFilterGroup::destroyFramebuffers() {
-    if (frameBufferTextures != NULL) {
-        glDeleteTextures(frameBuffersSize, reinterpret_cast<const GLuint *>(frameBufferTextures));
+   /* if (frameBufferTextures != NULL) {
+        glDeleteTextures(frameBufferTexturesSize,
+                         reinterpret_cast<const GLuint *>(frameBufferTextures));
         //remove pointer
+        frameBufferTexturesSize = 0;
         delete frameBufferTextures;
     }
     if (frameBuffers != NULL) {
         glDeleteFramebuffers(frameBuffersSize, reinterpret_cast<const GLuint *>(frameBuffers));
         //remove pointer
+        frameBuffersSize = 0;
         delete frameBuffers;
-    }
+    }*/
 }
 
-void ben::ngp::GPUImageFilterGroup::addFilter(ben::ngp::GPUImageFilter* aFilter) {
+void ben::ngp::GPUImageFilterGroup::addFilter(ben::ngp::GPUImageFilter *aFilter) {
     filters.push_back(aFilter);
     updateMergedFilters();
 }
@@ -228,16 +213,30 @@ const std::vector<ben::ngp::GPUImageFilter *> &ben::ngp::GPUImageFilterGroup::ge
     return filters;
 }
 
-void ben::ngp::GPUImageFilterGroup::setFilters(const std::vector<ben::ngp::GPUImageFilter *> &filters) {
+void
+ben::ngp::GPUImageFilterGroup::setFilters(const std::vector<ben::ngp::GPUImageFilter *> &filters) {
     GPUImageFilterGroup::filters = filters;
 }
 
-const std::vector<ben::ngp::GPUImageFilter *> &ben::ngp::GPUImageFilterGroup::getMergedFilters() const {
+const std::vector<ben::ngp::GPUImageFilter *> &
+ben::ngp::GPUImageFilterGroup::getMergedFilters() const {
     return mergedFilters;
 }
 
 void ben::ngp::GPUImageFilterGroup::setMergedFilters(
         const std::vector<ben::ngp::GPUImageFilter *> &mergedFilters) {
     GPUImageFilterGroup::mergedFilters = mergedFilters;
+}
+
+float *ben::ngp::GPUImageFilterGroup::getGlCubeBufferPtr() const {
+    return glCubeBufferPtr;
+}
+
+float *ben::ngp::GPUImageFilterGroup::getGlTextureBufferPtr() const {
+    return glTextureBufferPtr;
+}
+
+float *ben::ngp::GPUImageFilterGroup::getGlTextureFlipBufferPtr() const {
+    return glTextureFlipBufferPtr;
 }
 

@@ -8,7 +8,6 @@
 #include "util/jni_util.hpp"
 #include "util/open_gl_util.hpp"
 
-#include "filter/gpu_image_gaussian_blur_filter.hpp"
 #include <math.h>
 
 using namespace ben::util;
@@ -19,7 +18,7 @@ static void onDrawFrame(ben::ngp::GPUImageRender *render) {
                                 render->getGlTextureBuffer());
 }
 
-static void nativeSurfaceCreated(JNIEnv *env, jobject javaThis, jobject surface) {
+static void nativeSurfaceCreated(JNIEnv *env, jobject javaThis, jobject surface,jobject jbitmap,jint imageWidth, jint imageHeight) {
     //1.准备opengl环境
     ANativeWindow *nativeWindow = ANativeWindow_fromSurface(env, surface);
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -40,6 +39,10 @@ static void nativeSurfaceCreated(JNIEnv *env, jobject javaThis, jobject surface)
             EGL_RED_SIZE, 8,
             EGL_GREEN_SIZE, 8,
             EGL_BLUE_SIZE, 8,
+            EGL_ALPHA_SIZE, 8,
+            EGL_DEPTH_SIZE, 16,
+            EGL_STENCIL_SIZE, 0,
+            EGL_RENDERABLE_TYPE,EGL_OPENGL_ES2_BIT,
             EGL_SURFACE_TYPE,
             EGL_WINDOW_BIT,
             EGL_NONE
@@ -86,12 +89,61 @@ static void nativeSurfaceCreated(JNIEnv *env, jobject javaThis, jobject surface)
 
     //构造默认filter
     render->setIsPreparGLEnvironment(JNI_TRUE);
-    render->setFilter(new ben::ngp::GPUImageGaussianBlurFilter());
-    render->getFilter()->setNativeWindow(nativeWindow);
-    render->getFilter()->setEglDisplay(&display);
-    render->getFilter()->setEglSurface(&winSurface);
+    //ben::ngp::GPUImageGaussianBlurFilter* pFilter = new ben::ngp::GPUImageGaussianBlurFilter();
+    ben::ngp::GPUImageDilationFilter* pFilter = new ben::ngp::GPUImageDilationFilter();
+
+    pFilter->setNativeWindow(nativeWindow);
+    pFilter->setEglDisplay(&display);
+    pFilter->setEglSurface(&winSurface);
+    for (ben::ngp::GPUImageFilter * filter : pFilter->getFilters()) {
+        filter->setNativeWindow(nativeWindow);
+        filter->setEglDisplay(&display);
+        filter->setEglSurface(&winSurface);
+    }
+    for (ben::ngp::GPUImageFilter * filter : pFilter->getMergedFilters()) {
+        filter->setNativeWindow(nativeWindow);
+        filter->setEglDisplay(&display);
+        filter->setEglSurface(&winSurface);
+    }
+    render->setFilter(pFilter);
+    /*
+    ben::ngp::GPUImagePixelationFilter *pixelationFilter = new ben::ngp::GPUImagePixelationFilter();
+    pixelationFilter->setNativeWindow(nativeWindow);
+    pixelationFilter->setEglDisplay(&display);
+    pixelationFilter->setEglSurface(&winSurface);
+    render->setFilter(pixelationFilter);
+*/
     //filter init
     render->getFilter()->ifNeedInit();
+
+    AndroidBitmapInfo bitmapInfo;
+    if (AndroidBitmap_getInfo(env, jbitmap, &bitmapInfo) < 0) {
+        return;
+    }
+    LOGI("showBitmap width %d, height %d, format %d", imageWidth, imageHeight,
+         bitmapInfo.format);
+
+    if (bitmapInfo.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("%s", "invalid rgb format error!");
+        return;
+    }
+    //create texureid
+    render->setGlTextureId(
+            loadTextureByBitmap(env, jbitmap, imageWidth, imageHeight, render->getGlTextureId()));
+
+    render->setImageWidth(imageWidth);
+    render->setImageHeight(imageHeight);
+
+    render->setOutputWidth(1920);
+    render->setOutputHeight(1080);
+
+    glViewport(0, 0, 1920, 1080);
+    glUseProgram(render->getFilter()->getGlProgId());
+    render->getFilter()->onOutputSizeChanged(1920, 1080);
+    render->adjustImageScaling();
+
+    //run
+    onDrawFrame(render);
 
 
 }
@@ -126,13 +178,13 @@ static void nativeSurfaceChanged(JNIEnv *env, jobject javaThis, jobject jbitmap,
     //create texureid
     render->setGlTextureId(
             loadTextureByBitmap(env, jbitmap, imageWidth, imageHeight, render->getGlTextureId()));
+    LOGE("gl textureid %d", render->getGlTextureId());
     render->setImageWidth(imageWidth);
     render->setImageHeight(imageHeight);
     render->adjustImageScaling();
 
     //run
     onDrawFrame(render);
-
 
 }
 
@@ -159,7 +211,9 @@ void ben::ngp::GPUImageRender::initialize(JNIEnv *env) {
     glTextureBuffer = TEXTURE_NO_ROTATION;
 
     addNativeMethod("nativeSurfaceCreated", (void *) nativeSurfaceCreated, kTypeVoid,
-                    "Landroid/view/Surface;", NULL);
+                    "Landroid/view/Surface;",
+                    "Landroid/graphics/Bitmap;",
+                    kTypeInt, kTypeInt,NULL);
     addNativeMethod("nativeSurfaceChanged", (void *) nativeSurfaceChanged, kTypeVoid,
                     "Landroid/graphics/Bitmap;",
                     kTypeInt, kTypeInt,
@@ -225,21 +279,6 @@ void ben::ngp::GPUImageRender::setGlTextureId(int glTextureId) {
     GPUImageRender::glTextureId = glTextureId;
 }
 
-float *ben::ngp::GPUImageRender::getGlCubeBuffer() const {
-    return glCubeBuffer;
-}
-
-void ben::ngp::GPUImageRender::setGlCubeBuffer(float *glCubeBuffer) {
-    GPUImageRender::glCubeBuffer = glCubeBuffer;
-}
-
-float *ben::ngp::GPUImageRender::getGlTextureBuffer() const {
-    return glTextureBuffer;
-}
-
-void ben::ngp::GPUImageRender::setGlTextureBuffer(float *glTextureBuffer) {
-    GPUImageRender::glTextureBuffer = glTextureBuffer;
-}
 
 int *ben::ngp::GPUImageRender::getGlRgbBuffer() const {
     return glRgbBuffer;
@@ -354,6 +393,14 @@ ben::ngp::GPUImageFilter *ben::ngp::GPUImageRender::getFilter() const {
 
 void ben::ngp::GPUImageRender::setFilter(ben::ngp::GPUImageFilter *filter) {
     GPUImageRender::filter = filter;
+}
+
+float *ben::ngp::GPUImageRender::getGlCubeBuffer() const {
+    return glCubeBuffer;
+}
+
+float *ben::ngp::GPUImageRender::getGlTextureBuffer() const {
+    return glTextureBuffer;
 }
 
 

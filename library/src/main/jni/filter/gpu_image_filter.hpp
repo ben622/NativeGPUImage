@@ -21,7 +21,8 @@ enum GL_DRAW_TYPE {
     DRAW_FLOAT_ARRAY,
     DRAW_POINT,
     DRAW_UNIFORM_MATRIX3F,
-    DRAW_UNIFORM_MATRIX4F
+    DRAW_UNIFORM_MATRIX4F,
+    TEST
 
 
 };
@@ -35,35 +36,13 @@ typedef struct runOnDrawArgs {
     float y;
     GL_DRAW_TYPE glDrawType;
     void *filter; //link ben::ngp::GPUImageFilter
-    pthread_t *pthread;
 } GL_VARS;
 
-static char *NO_FILTER_VERTEX_SHADER = "attribute vec4 position;"\
-                                             "attribute vec4 inputTextureCoordinate;"\
-                                             ""\
-                                             "varying vec2 textureCoordinate;"\
-                                             ""\
-                                             "void main()"\
-                                             "{"\
-                                             "    gl_Position = position;"\
-                                             "    textureCoordinate = inputTextureCoordinate.xy;"\
-                                             "}";
-
-static char *NO_FILTER_FRAGMENT_SHADER = "varying highp vec2 textureCoordinate;"\
-                                               " "\
-                                               "uniform sampler2D inputImageTexture;"\
-                                               " "\
-                                               "void main()"\
-                                               "{"\
-                                               "     gl_FragColor = texture2D(inputImageTexture, textureCoordinate);"\
-                                               "}";
-/*
 #define GET_STR(x) #x
 
-static const char *NO_FILTER_VERTEX_SHADER = GET_STR(
+static  char *NO_FILTER_VERTEX_SHADER = GET_STR(
         attribute vec4 position;
         attribute vec4 inputTextureCoordinate;
-
         varying vec2 textureCoordinate;
 
         void main()
@@ -72,16 +51,15 @@ static const char *NO_FILTER_VERTEX_SHADER = GET_STR(
             textureCoordinate = inputTextureCoordinate.xy;
         }
 );
-static const char *NO_FILTER_FRAGMENT_SHADER = GET_STR(
+static  char *NO_FILTER_FRAGMENT_SHADER = GET_STR(
         varying highp vec2 textureCoordinate;
-
         uniform sampler2D inputImageTexture;
 
         void main()
         {
             gl_FragColor = texture2D(inputImageTexture, textureCoordinate);
         }
-);*/
+);
 namespace ben {
     namespace ngp {
         class GPUImageFilter : public JavaClass {
@@ -104,7 +82,6 @@ namespace ben {
 
         private:
             vector<GL_VARS *> runOnDrawGLVars;
-            vector<pthread_t *> runOnDrawThreads;
             //互斥锁
             pthread_mutex_t runOnDrawMutex;
             //互斥锁条件变量
@@ -127,7 +104,7 @@ namespace ben {
             virtual void onDestory();
 
             virtual void
-            onDraw(int textureId, const void *cubeBufferPtr, const void *textureBufferPtr);
+            onDraw(int textureId,  float* cubeBufferPtr,  float *textureBufferPtr);
 
             void destory();
 

@@ -83,6 +83,7 @@ namespace ben {
                         rotatedTex[6], flip(rotatedTex[7]),
                 };
             }
+
             return rotatedTex;
         }
 

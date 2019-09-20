@@ -19,11 +19,22 @@ namespace ben {
             }
             glShaderSource(sh, 1, &strSource, NULL);
             glCompileShader(sh);
-            GLint status;
-            glGetShaderiv(sh,GL_COMPILE_STATUS,&status);
-            if (status == 0){
-                LOGE("%s", " GL_COMPILE_STATUS  failed ! ");
-                return 0;
+            GLint compiled = 0;
+            glGetShaderiv(sh, GL_COMPILE_STATUS, &compiled);
+            if (!compiled) {
+                GLint infoLen = 0;
+                glGetShaderiv(sh, GL_INFO_LOG_LENGTH, &infoLen);
+                if (infoLen) {
+                    char* buf = (char*) malloc(infoLen);
+                    if (buf) {
+                        glGetShaderInfoLog(sh, infoLen, NULL, buf);
+                        LOGE("Could not compile shader %d:\n%s\n",
+                             iType, buf);
+                        free(buf);
+                    }
+                    glDeleteShader(sh);
+                    sh = 0;
+                }
             }
             return sh;
         }
