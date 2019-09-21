@@ -12,6 +12,7 @@
 #include "filter/gpu_image_gaussian_blur_filter.hpp"
 #include "filter/gpu_image_pixelation_filter.hpp"
 #include "filter/gpu_image_dilation_filter.hpp"
+#include "filter/gpu_image_zoom_blur_filter.hpp"
 
 #define NO_IMAGE  -1
 using namespace ben::jni;
@@ -31,14 +32,14 @@ namespace ben {
             float *glTextureBuffer;
             int *glRgbBuffer;
 
-            float backgroundRed = 1.0;
-            float backgroundGreen = 1.0;
+            float backgroundRed = 0;
+            float backgroundGreen = 0;
             float backgroundBlue = 0;
 
             Rotation rotation;
             bool flipHorizontal;
             bool flipVertical;
-            ScaleType scaleType = ScaleType::CENTER_CROP;
+            ScaleType scaleType = ScaleType::CENTER_INSIDE;
 
 
             bool isPreparGLEnvironment; //opengl 环境是否准备就绪
@@ -116,6 +117,13 @@ namespace ben {
             ScaleType getScaleType() const;
 
             void setScaleType(ScaleType scaleType);
+
+            Rotation getRotation() const;
+
+            void setRotation(Rotation rotation,
+                             bool flipHorizontal, bool flipVertical);
+
+            void setRotation(Rotation rotation);
 
             float *getGlCubeBuffer() const;
 

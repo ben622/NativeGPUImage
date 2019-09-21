@@ -74,7 +74,6 @@ namespace ben {
         static GLuint loadTextureByBitmap(JNIEnv *env,jobject jbitmap,int width,int height,int usedTexId) {
             void* pixel_source = NULL;
             AndroidBitmap_lockPixels(env, jbitmap, &pixel_source);
-            LOGE("pixel_source pointer：%p",pixel_source);
             GLuint renderbuffers;
             if (usedTexId == NO_TEXTURE) {
                 glGenTextures(1, &renderbuffers);

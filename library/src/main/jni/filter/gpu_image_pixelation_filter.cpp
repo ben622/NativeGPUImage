@@ -5,7 +5,7 @@
 #include "gpu_image_pixelation_filter.hpp"
 
 ben::ngp::GPUImagePixelationFilter::GPUImagePixelationFilter():GPUImageFilter(NO_FILTER_VERTEX_SHADER, PIXELATION_FRAGMENT_SHADER) {
-    this->pixel = 1.0;
+    this->pixel = 50.0;
 }
 
 void ben::ngp::GPUImagePixelationFilter::onOutputSizeChanged(int width, int height) {

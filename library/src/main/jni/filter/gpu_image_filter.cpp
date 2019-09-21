@@ -41,8 +41,6 @@ void GPUImageFilter::onDestory() {
 
 void
 GPUImageFilter::onDraw(int textureId, float *cubeBufferPtr, float *textureBufferPtr) {
-    LOGE("GPUImageFilter onDraw textureId:%d", textureId);
-    LOGE("GPUImageFilter glProgId:%d", glProgId);
     glUseProgram(glProgId);
     runPendingOnDrawTasks();
     if (!isInitialized) {
@@ -68,7 +66,6 @@ GPUImageFilter::onDraw(int textureId, float *cubeBufferPtr, float *textureBuffer
     glBindTexture(GL_TEXTURE_2D, 0);
 
     eglSwapBuffers(*getEglDisplay(), *getEglSurface());
-    LOGE("%s", "GPUImageFilter-->onDraw complete！");
 }
 
 void GPUImageFilter::onOutputSizeChanged(int width, int height) {
@@ -102,32 +99,32 @@ static void *onRunDrawGlCallback(void *arg) {
     GL_VARS *glVars = static_cast<GL_VARS *>(arg);
     static_cast<GPUImageFilter *>(glVars->filter)->ifNeedInit();
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_INTEGER) {
-        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_INTEGER");
+        LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_INTEGER");
         glUniform1i(glVars->location, glVars->intValue);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT) {
-        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT");
+        LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT");
         glUniform1f(glVars->location, glVars->floatValue);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_VEC2) {
-        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_VEC2");
+        LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_VEC2");
         glUniform2fv(glVars->location, 1, glVars->arrayValuePtr);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_VEC3) {
-        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_VEC3");
+        LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_VEC3");
         glUniform3fv(glVars->location, 1, glVars->arrayValuePtr);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_VEC4) {
-        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_VEC4");
+        LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_VEC4");
         glUniform4fv(glVars->location, 1, glVars->arrayValuePtr);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_ARRAY) {
-        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_ARRAY");
+        LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT_ARRAY");
         glUniform1fv(glVars->location, glVars->arrayValueLength, glVars->arrayValuePtr);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_POINT) {
-        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_POINT");
-        float *vec2 = new float[2]{
+        LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_POINT");
+        static float vec2[] = {
                 glVars->x,
                 glVars->y
         };
@@ -246,7 +243,6 @@ void GPUImageFilter::runPendingOnDrawTasks() {
         temp[i] = runOnDrawGLVars[i];
     }
     for (int i = runOnDrawGLVars.size() - 1; i >= 0; i--) {
-        //create thread
         pthread_create(&pt[i], NULL, onRunDrawGlCallback, temp[i]);
     }
     for (int i = runOnDrawGLVars.size() - 1; i >= 0; i--) {
