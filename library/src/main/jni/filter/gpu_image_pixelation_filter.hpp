@@ -6,6 +6,9 @@
 #define NATIVEGPUIMAGE_GPU_IMAGE_PIXELATION_FILTER_HPP
 
 #include "gpu_image_filter.hpp"
+
+#define JAVA_PIXELATION_FILTER "com/ben/android/library/filter/PixelationFilter"
+
 #define GET_STR(x) #x
 static char *PIXELATION_FRAGMENT_SHADER = GET_STR(
         precision highp float;
@@ -30,7 +33,7 @@ static char *PIXELATION_FRAGMENT_SHADER = GET_STR(
 
 namespace ben {
     namespace ngp {
-        class GPUImagePixelationFilter : public ben::ngp::GPUImageFilter {
+        class GPUImagePixelationFilter :virtual public ben::ngp::GPUImageFilter {
         private:
             int imageWidthFactorLocation;
             int imageHeightFactorLocation;
@@ -38,6 +41,15 @@ namespace ben {
             int pixelLocation;
         public:
             GPUImagePixelationFilter();
+
+            GPUImagePixelationFilter(JNIEnv *env);
+
+        public:
+            void initialize(JNIEnv *env) override;
+
+            void mapFields() override;
+
+            virtual const char *getCanonicalName() const override ;
 
         public:
 

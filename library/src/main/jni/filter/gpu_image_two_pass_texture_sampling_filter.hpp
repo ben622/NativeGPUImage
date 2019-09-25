@@ -13,6 +13,10 @@ namespace ben {
         public:
             GPUImageTwoPassTextureSamplingFilter(char *firstVertexShader, char *firstFragmentShader,
                                                  char *secondVertexShader,
+                                                 char *secondFragmentShader,
+                                                 JNIEnv *env);
+            GPUImageTwoPassTextureSamplingFilter(char *firstVertexShader, char *firstFragmentShader,
+                                                 char *secondVertexShader,
                                                  char *secondFragmentShader);
 
             void onOutputSizeChanged(int width, int height) override ;
@@ -24,6 +28,9 @@ namespace ben {
             virtual float getHorizontalTexelOffsetRatio();
 
             void initTexelOffsets();
+
+        public:
+            virtual const char *getCanonicalName() const override;
         };
     }
 }

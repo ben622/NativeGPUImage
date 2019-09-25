@@ -6,6 +6,15 @@
 
 ben::ngp::GPUImageTwoPassTextureSamplingFilter::GPUImageTwoPassTextureSamplingFilter(
         char *firstVertexShader, char *firstFragmentShader, char *secondVertexShader,
+        char *secondFragmentShader, JNIEnv *env) : GPUImageTwoPassFilter(firstVertexShader,
+                                                                         firstFragmentShader,
+                                                                         secondVertexShader,
+                                                                         secondFragmentShader,
+                                                                         env) {
+}
+
+ben::ngp::GPUImageTwoPassTextureSamplingFilter::GPUImageTwoPassTextureSamplingFilter(
+        char *firstVertexShader, char *firstFragmentShader, char *secondVertexShader,
         char *secondFragmentShader) : GPUImageTwoPassFilter(firstVertexShader, firstFragmentShader,
                                                             secondVertexShader,
                                                             secondFragmentShader) {}
@@ -42,4 +51,8 @@ void ben::ngp::GPUImageTwoPassTextureSamplingFilter::initTexelOffsets() {
     texelHeightOffsetLocation = glGetUniformLocation(filter->getGlProgId(), "texelHeightOffset");
     filter->setFloat(texelWidthOffsetLocation, 0);
     filter->setFloat(texelHeightOffsetLocation, ratio / getOutputHeight());
+}
+
+const char *ben::ngp::GPUImageTwoPassTextureSamplingFilter::getCanonicalName() const {
+    return GPUImageTwoPassFilter::getCanonicalName();
 }

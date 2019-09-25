@@ -4,6 +4,16 @@
 
 #include "gpu_image_gaussian_blur_filter.hpp"
 
+
+ben::ngp::GPUImageGaussianBlurFilter::GPUImageGaussianBlurFilter(JNIEnv *env)
+        : GPUImageTwoPassTextureSamplingFilter(VERTEX_SHADER, FRAGMENT_SHADER, VERTEX_SHADER,
+                                               FRAGMENT_SHADER,env) {
+    //必须在构造函数执行完以后才可以进行JNI操作
+    initialize(env);
+    this->blurSize = 0.0;
+}
+
+
 ben::ngp::GPUImageGaussianBlurFilter::GPUImageGaussianBlurFilter()
         : GPUImageTwoPassTextureSamplingFilter(VERTEX_SHADER, FRAGMENT_SHADER, VERTEX_SHADER,
                                                FRAGMENT_SHADER) {
@@ -41,4 +51,21 @@ void ben::ngp::GPUImageGaussianBlurFilter::setBlurSize(float blurSize) {
     initTexelOffsets();
 }
 
+const char *ben::ngp::GPUImageGaussianBlurFilter::getCanonicalName() const {
+    return JAVA_GAUSSIAN_BLUR_FILTER;
+}
+
+void ben::ngp::GPUImageGaussianBlurFilter::initialize(JNIEnv *env) {
+    GPUImageFilter::initialize(env);
+    cacheField(env, "blurSize", kTypeFloat);
+    cacheConstructor(env);
+    cacheMethod(env, "getBlurSize", kTypeFloat, NULL);
+    cacheMethod(env, "setBlurSize", kTypeVoid, kTypeFloat, NULL);
+    merge(this);
+}
+
+void ben::ngp::GPUImageGaussianBlurFilter::mapFields() {
+    GPUImageFilter::mapFields();
+    mapField("blurSize", kTypeFloat, &blurSize);
+}
 

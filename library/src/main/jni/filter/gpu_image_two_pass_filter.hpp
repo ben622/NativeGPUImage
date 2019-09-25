@@ -11,8 +11,13 @@ namespace ben {
         class GPUImageTwoPassFilter : public GPUImageFilterGroup {
         public:
             GPUImageTwoPassFilter(char *firstVertexShader, char *firstFragmentShader,
+                                  char *secondVertexShader, char *secondFragmentShader,JNIEnv *env);
+
+            GPUImageTwoPassFilter(char *firstVertexShader, char *firstFragmentShader,
                                   char *secondVertexShader, char *secondFragmentShader);
 
+        public:
+            virtual const char *getCanonicalName() const override;
         };
     }
 }

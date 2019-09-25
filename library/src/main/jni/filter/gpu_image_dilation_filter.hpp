@@ -6,6 +6,8 @@
 #define NATIVEGPUIMAGE_GPU_IMAGE_DILATION_FILTER_HPP
 
 #include "gpu_image_two_pass_texture_sampling_filter.hpp"
+#define JAVA_DILATION_FILTER "com/ben/android/library/filter/DilationFilter"
+
 #define GET_STR(x) #x
 static char *VERTEX_SHADER_1 = GET_STR(
         attribute vec4 position;
@@ -242,9 +244,26 @@ static char *FRAGMENT_SHADER_4 = GET_STR(
 namespace ben{
     namespace ngp{
         class GPUImageDilationFilter:public ben::ngp::GPUImageTwoPassTextureSamplingFilter {
+        private:
+            int radius;
         public:
             GPUImageDilationFilter();
+
             GPUImageDilationFilter(int radius);
+
+            GPUImageDilationFilter(JNIEnv *env);
+
+        public:
+            void initialize(JNIEnv *env) override;
+
+            void mapFields() override;
+
+            const char *getCanonicalName() const override;
+
+        public:
+            int getRadius() const;
+
+            void setRadius(int radius);
         };
     }
 }

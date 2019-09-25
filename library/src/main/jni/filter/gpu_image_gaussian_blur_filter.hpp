@@ -8,8 +8,10 @@
 
 #include "gpu_image_two_pass_texture_sampling_filter.hpp"
 
+#define JAVA_GAUSSIAN_BLUR_FILTER "com/ben/android/library/filter/GaussianBlurFilter"
+
 #define GET_STR(x) #x
-static  char *VERTEX_SHADER = GET_STR(
+static char *VERTEX_SHADER = GET_STR(
         attribute
         vec4 position;
         attribute
@@ -42,18 +44,24 @@ static  char *VERTEX_SHADER = GET_STR(
             }
         }
 );
-static  char *FRAGMENT_SHADER = GET_STR(
-        uniform sampler2D inputImageTexture;
+static char *FRAGMENT_SHADER = GET_STR(
+        uniform
+        sampler2D inputImageTexture;
 
         const lowp int GAUSSIAN_SAMPLES = 9;
 
-        varying highp vec2 textureCoordinate;
-        varying highp vec2 blurCoordinates[GAUSSIAN_SAMPLES];
+        varying
+                highp
+        vec2 textureCoordinate;
+        varying
+                highp
+        vec2 blurCoordinates[GAUSSIAN_SAMPLES];
 
-        void main()
-        {
-            lowp vec3 sum = vec3(0.0);
-            lowp vec4 fragColor=texture2D(inputImageTexture,textureCoordinate);
+        void main() {
+            lowp
+            vec3 sum = vec3(0.0);
+            lowp
+            vec4 fragColor = texture2D(inputImageTexture, textureCoordinate);
 
             sum += texture2D(inputImageTexture, blurCoordinates[0]).rgb * 0.05;
             sum += texture2D(inputImageTexture, blurCoordinates[1]).rgb * 0.09;
@@ -65,7 +73,7 @@ static  char *FRAGMENT_SHADER = GET_STR(
             sum += texture2D(inputImageTexture, blurCoordinates[7]).rgb * 0.09;
             sum += texture2D(inputImageTexture, blurCoordinates[8]).rgb * 0.05;
 
-            gl_FragColor = vec4(sum,fragColor.a);
+            gl_FragColor = vec4(sum, fragColor.a);
         }
 );
 
@@ -84,12 +92,20 @@ namespace ben {
 
             GPUImageGaussianBlurFilter(float blurSize);
 
+            GPUImageGaussianBlurFilter(JNIEnv *env);
+
             float getVerticalTexelOffsetRatio() override;
 
             float getHorizontalTexelOffsetRatio() override;
 
             void onInitialized() override;
 
+        public:
+            void initialize(JNIEnv *env) override;
+
+            void mapFields() override;
+
+            const char *getCanonicalName() const override;
         };
     }
 }

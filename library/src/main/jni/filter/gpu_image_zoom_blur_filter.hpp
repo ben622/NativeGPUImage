@@ -4,8 +4,8 @@
 
 #ifndef NATIVEGPUIMAGE_GPU_IMAGE_ZOOM_BLUR_FILTER_HPP
 #define NATIVEGPUIMAGE_GPU_IMAGE_ZOOM_BLUR_FILTER_HPP
-
 #include "gpu_image_filter.hpp"
+#define JAVA_ZOOM_BLUR_FILTER "com/ben/android/library/filter/ZoomBlurFilter"
 #define GET_STR(x) #x
 static char *ZOOM_BLUR_FRAGMENT_SHADER = GET_STR(
         varying highp vec2 textureCoordinate;
@@ -44,6 +44,15 @@ namespace ben {
             int blurSizeLocation;
         public:
             GPUImageZoomBlurFilter();
+
+            GPUImageZoomBlurFilter(JNIEnv *env);
+
+        public:
+            void initialize(JNIEnv *env) override;
+
+            void mapFields() override;
+
+            virtual const char *getCanonicalName() const;
 
         public:
             virtual void onInit();

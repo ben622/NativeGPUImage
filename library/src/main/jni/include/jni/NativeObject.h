@@ -167,7 +167,7 @@ public:
    * @param env JNIEnv
    * @param javaThis Java object to free the field on (may not be NULL)
    */
-  virtual void destroy(JNIEnv *env, jobject javaThis);
+  virtual void destroyNativeObject(JNIEnv *env, jobject javaThis);
 
 // Internal helper calls ////////////////////////////////////////////////////////////
 protected:

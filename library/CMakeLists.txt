@@ -10,7 +10,9 @@ INCLUDE_DIRECTORIES(${ROOT}/include)
 
 
 add_subdirectory(${ROOT}/include/jni)
+add_subdirectory(${ROOT}/include/lib_json)
 add_subdirectory(${ROOT}/filter)
+add_subdirectory(${ROOT}/api)
 
 ADD_LIBRARY(gpuimage
         SHARED
@@ -35,6 +37,7 @@ TARGET_LINK_LIBRARIES(gpuimage
         android
         libjni
         libfilter
+        libapi
         ${log-lib})
 
 

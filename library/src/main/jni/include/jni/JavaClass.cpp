@@ -65,7 +65,7 @@ namespace ben {
         }
 
         void JavaClass::merge(const JavaClass *globalInstance) {
-            LOG_DEBUG("Merging instance of '%s' with global class info", getSimpleName());
+            LOGI("Merging instance of '%s' with global class info", getSimpleName());
             _clazz = globalInstance->_clazz_global.get();
             _methods = &globalInstance->_methods_global;
             _fields = &globalInstance->_fields_global;
@@ -73,7 +73,7 @@ namespace ben {
         }
 
         void JavaClass::setJavaObject(JNIEnv *env, jobject javaThis) {
-            LOG_DEBUG("Setting fields from Java object of type '%s' to native instance",
+            LOGI("Setting fields from Java object of type '%s' to native instance",
                       getSimpleName());
 
             // Set up field mappings, if this has not already been done

@@ -82,7 +82,7 @@ JavaClass* NativeObject::getPersistedInstance(JNIEnv *env, jobject javaThis) con
   }
 }
 
-void NativeObject::destroy(JNIEnv *env, jobject javaThis) {
+void NativeObject::destroyNativeObject(JNIEnv *env, jobject javaThis) {
   if (isInitialized()) {
     LOG_DEBUG("Destroying persisted instance of '%s'", getSimpleName());
     if (javaThis == NULL) {
@@ -109,7 +109,7 @@ void NativeObject::destroy(JNIEnv *env, jobject javaThis) {
 
 void NativeObject::setClass(JNIEnv *env) {
   JavaClass::setClass(env);
-  // We can't call cacheField() here because it checks isInitialized(), which we
+  // We can't call cacheField() here because it checks isFilterInitialized(), which we
   // have overridden to check to see that the persist field is present...
   std::string fieldTypeSignature;
   JavaClassUtils::makeNameForSignature(fieldTypeSignature, kTypeLong);

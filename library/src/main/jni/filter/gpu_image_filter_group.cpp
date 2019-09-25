@@ -67,8 +67,8 @@ void ben::ngp::GPUImageFilterGroup::onDestory() {
 void ben::ngp::GPUImageFilterGroup::onDraw(int textureId, float *cubeBufferPtr,
                                            float *textureBufferPtr) {
     runPendingOnDrawTasks();
-    if (!isIsInitialized() || frameBuffers == NULL || frameBufferTextures == NULL) {
-        LOGE("isIsInitialized:%d,frameBuffers:%d,frameBufferTextures:%d", !isIsInitialized(),
+    if (!isIsFilterInitialized() || frameBuffers == NULL || frameBufferTextures == NULL) {
+        LOGE("isFilterInitialized:%d,frameBuffers:%d,frameBufferTextures:%d", !isIsFilterInitialized(),
              frameBuffers, frameBufferTextures);
         return;
     }
@@ -141,6 +141,11 @@ void ben::ngp::GPUImageFilterGroup::setFrameBufferTexturesSize(int frameBufferTe
     GPUImageFilterGroup::frameBufferTexturesSize = frameBufferTexturesSize;
 }
 
+ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(JNIEnv *env):GPUImageFilter(env){
+    glCubeBufferPtr = CUBE;
+    glTextureBufferPtr = TEXTURE_NO_ROTATION;
+    glTextureFlipBufferPtr = getRotation(Rotation::NORMAL, false, true);
+}
 
 //group 构造函数
 ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(
@@ -208,6 +213,12 @@ ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(char *vertexShader, char *fra
         : GPUImageFilter(vertexShader, fragmentShader) {
 
 }
+ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(char *vertexShader, char *fragmentShader,JNIEnv *env)
+        : GPUImageFilter(vertexShader, fragmentShader,env) {
+
+}
+
+
 
 const std::vector<ben::ngp::GPUImageFilter *> &ben::ngp::GPUImageFilterGroup::getFilters() const {
     return filters;
@@ -239,4 +250,16 @@ float *ben::ngp::GPUImageFilterGroup::getGlTextureBufferPtr() const {
 float *ben::ngp::GPUImageFilterGroup::getGlTextureFlipBufferPtr() const {
     return glTextureFlipBufferPtr;
 }
+
+const char *ben::ngp::GPUImageFilterGroup::getCanonicalName() const {
+    return GPUImageFilter::getCanonicalName();
+}
+
+void ben::ngp::GPUImageFilterGroup::clearFilter() {
+    filters.clear();
+    mergedFilters.clear();
+
+}
+
+
 

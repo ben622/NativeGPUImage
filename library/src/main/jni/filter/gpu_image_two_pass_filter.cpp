@@ -11,3 +11,16 @@ ben::ngp::GPUImageTwoPassFilter::GPUImageTwoPassFilter(char *firstVertexShader,
     addFilter(new GPUImageFilter(firstVertexShader, firstFragmentShader));
     addFilter(new GPUImageFilter(secondVertexShader, secondFragmentShader));
 }
+
+const char *ben::ngp::GPUImageTwoPassFilter::getCanonicalName() const {
+    return GPUImageFilterGroup::getCanonicalName();
+}
+
+ben::ngp::GPUImageTwoPassFilter::GPUImageTwoPassFilter(char *firstVertexShader,
+                                                       char *firstFragmentShader,
+                                                       char *secondVertexShader,
+                                                       char *secondFragmentShader, JNIEnv *env):GPUImageFilterGroup(env){
+    addFilter(new GPUImageFilter(firstVertexShader, firstFragmentShader));
+    addFilter(new GPUImageFilter(secondVertexShader, secondFragmentShader));
+
+}

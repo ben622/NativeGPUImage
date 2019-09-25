@@ -35,26 +35,13 @@ public class GPUImageRender extends SurfaceView implements SurfaceHolder.Callbac
 
     @Override
     public void surfaceCreated(final SurfaceHolder holder) {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.dog);
-        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas can = new Canvas(resizedBitmap);
-        can.drawARGB(0x00, 0x00, 0x00, 0x00);
-        can.drawBitmap(bitmap, 0, 0, null);
-        nativeSurfaceCreated(holder.getSurface(), resizedBitmap, resizedBitmap.getWidth(), resizedBitmap.getHeight());
+        nativeSurfaceCreated(holder.getSurface());
 
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, final int w, final int h) {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.dog);
-        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas can = new Canvas(resizedBitmap);
-        can.drawARGB(0x00, 0x00, 0x00, 0x00);
-        can.drawBitmap(bitmap, 0, 0, null);
-
-        nativeSurfaceChanged(resizedBitmap, resizedBitmap.getWidth(), resizedBitmap.getHeight(), w, h);
+        nativeSurfaceChanged(w, h);
     }
 
     @Override
@@ -63,9 +50,9 @@ public class GPUImageRender extends SurfaceView implements SurfaceHolder.Callbac
     }
 
 
-    public native void nativeSurfaceCreated(Surface surface, Bitmap bitmap, int imageWidth, int imageHeight);
+    public native void nativeSurfaceCreated(Surface surface);
 
-    public native void nativeSurfaceChanged(Bitmap bitmap, int imageWidth, int imageHeight, int width, int height);
+    public native void nativeSurfaceChanged(int width, int height);
 
     public native void nativeSurfaceDestroyed();
 }

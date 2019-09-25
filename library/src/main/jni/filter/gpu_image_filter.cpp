@@ -2,10 +2,6 @@
 // Created by ben622 on 2019/9/16.
 //
 #include "gpu_image_filter.hpp"
-#include "../util/open_gl_util.hpp"
-#include "../include/queue.h"
-#include "../util/yuv-decoder.hpp"
-#include <cstring>
 
 using namespace ben::util;
 using namespace ben::ngp;
@@ -15,6 +11,11 @@ GPUImageFilter::GPUImageFilter() {
     this->vertexShader = NO_FILTER_VERTEX_SHADER;
     this->fragmentShader = NO_FILTER_FRAGMENT_SHADER;
 }
+GPUImageFilter::GPUImageFilter(char *vertexShaderArg, char *fragmentShaderArg,JNIEnv *env):JavaClass(env) {
+    this->vertexShader = vertexShaderArg;
+    this->fragmentShader = fragmentShaderArg;
+}
+
 
 GPUImageFilter::GPUImageFilter(char *vertexShaderArg, char *fragmentShaderArg) {
     this->vertexShader = vertexShaderArg;
@@ -28,7 +29,7 @@ void GPUImageFilter::onInit() {
     glAttribPosition = glGetAttribLocation(glProgId, "position");
     glUniformTexture = glGetUniformLocation(glProgId, "inputImageTexture");
     glAttribTextureCoordinate = glGetAttribLocation(glProgId, "inputTextureCoordinate");
-    isInitialized = true;
+    isFilterInitialized = true;
 }
 
 void GPUImageFilter::onInitialized() {
@@ -43,8 +44,8 @@ void
 GPUImageFilter::onDraw(int textureId, float *cubeBufferPtr, float *textureBufferPtr) {
     glUseProgram(glProgId);
     runPendingOnDrawTasks();
-    if (!isInitialized) {
-        LOGE("%s", "isInitialized is false!");
+    if (!isFilterInitialized) {
+        LOGE("%s", "isFilterInitialized is false!");
         return;
     }
     setGlAttribPosition(0);
@@ -74,7 +75,7 @@ void GPUImageFilter::onOutputSizeChanged(int width, int height) {
 }
 
 void GPUImageFilter::destory() {
-    isInitialized = false;
+    isFilterInitialized = false;
     glDeleteProgram(glProgId);
     onDestory();
 }
@@ -84,7 +85,7 @@ void GPUImageFilter::onDrawArraysPre() {
 }
 
 void GPUImageFilter::ifNeedInit() {
-    if (!isInitialized) {
+    if (!isFilterInitialized) {
         this->onInit();
         this->onInitialized();
     }
@@ -278,4 +279,11 @@ void GPUImageFilter::setEglSurface(EGLSurface *eglSurface) {
     GPUImageFilter::eglSurface = eglSurface;
 }
 
+bool GPUImageFilter::isIsFilterInitialized() const {
+    return isFilterInitialized;
+}
+
+void GPUImageFilter::setIsFilterInitialized(bool isFilterInitialized) {
+    GPUImageFilter::isFilterInitialized = isFilterInitialized;
+}
 

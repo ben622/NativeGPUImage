@@ -5,7 +5,6 @@
 #ifndef NATIVEGPUIMAGE_GPU_IMAGE_FILTER_GROUP_HPP
 #define NATIVEGPUIMAGE_GPU_IMAGE_FILTER_GROUP_HPP
 
-#include "../include/jni/JniHelpers.h"
 #include "gpu_image_filter.hpp"
 #include <vector>
 
@@ -24,7 +23,8 @@ namespace ben {
             float *glCubeBufferPtr;
             float *glTextureBufferPtr;
             float *glTextureFlipBufferPtr;
-
+        public:
+            virtual const char *getCanonicalName() const override;
 
         public:
             void onOutputSizeChanged(int width, int height);
@@ -42,13 +42,20 @@ namespace ben {
 
             GPUImageFilterGroup(char *vertexShader, char *fragmentShader);
 
+            GPUImageFilterGroup(char *vertexShader, char *fragmentShader,JNIEnv *env);
+
             GPUImageFilterGroup(const std::vector<GPUImageFilter*> &filters);
+
+            GPUImageFilterGroup(JNIEnv *env);
 
             void updateMergedFilters();
 
             void destroyFramebuffers();
 
+
             void addFilter(GPUImageFilter* aFilter);
+
+            void clearFilter();
 
             const vector<GPUImageFilter *> &getFilters() const;
 

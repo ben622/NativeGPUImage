@@ -43,6 +43,12 @@ namespace ben {
 
 
             bool isPreparGLEnvironment; //opengl 环境是否准备就绪
+        public:
+            void resetFilter(GPUImageFilter *filter);
+
+            void renderBitmap(JNIEnv *env,jobject jbitmap);
+
+            void surfaceChange(int width, int height);
 
         public:
             GPUImageRender();

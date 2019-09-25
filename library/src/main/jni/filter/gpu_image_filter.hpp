@@ -6,6 +6,11 @@
 #define NATIVEGPUIMAGE_GPU_IMAGE_FILTER_HPP
 
 #include "../include/jni/JniHelpers.h"
+#include "../include/queue.h"
+#include "../util/filter_tools.hpp"
+#include "../util/open_gl_util.hpp"
+#include "../util/yuv-decoder.hpp"
+#include <cstring>
 #include <vector>
 #include <pthread.h>
 
@@ -40,23 +45,27 @@ typedef struct runOnDrawArgs {
 
 #define GET_STR(x) #x
 
-static  char *NO_FILTER_VERTEX_SHADER = GET_STR(
-        attribute vec4 position;
-        attribute vec4 inputTextureCoordinate;
-        varying vec2 textureCoordinate;
+static char *NO_FILTER_VERTEX_SHADER = GET_STR(
+        attribute
+        vec4 position;
+        attribute
+        vec4 inputTextureCoordinate;
+        varying
+        vec2 textureCoordinate;
 
-        void main()
-        {
+        void main() {
             gl_Position = position;
             textureCoordinate = inputTextureCoordinate.xy;
         }
 );
-static  char *NO_FILTER_FRAGMENT_SHADER = GET_STR(
-        varying highp vec2 textureCoordinate;
-        uniform sampler2D inputImageTexture;
+static char *NO_FILTER_FRAGMENT_SHADER = GET_STR(
+        varying
+        highp
+        vec2 textureCoordinate;
+        uniform
+        sampler2D inputImageTexture;
 
-        void main()
-        {
+        void main() {
             gl_FragColor = texture2D(inputImageTexture, textureCoordinate);
         }
 );
@@ -72,7 +81,7 @@ namespace ben {
             int glAttribTextureCoordinate;
             int outputWidth;
             int outputHeight;
-            bool isInitialized = false;
+            bool isFilterInitialized = false;
 
 
         private:
@@ -86,12 +95,32 @@ namespace ben {
             pthread_mutex_t runOnDrawMutex;
             //互斥锁条件变量
             pthread_cond_t runOndrawMutexCondition;
+        public:
+            //register jni api
+            GPUImageFilter(JNIEnv *env):JavaClass(env) {
+                this->vertexShader = NO_FILTER_VERTEX_SHADER;
+                this->fragmentShader = NO_FILTER_FRAGMENT_SHADER;
+            };
+
+            virtual void initialize(JNIEnv *env) {
+                LOGI("register native filter > %s", this->getCanonicalName());
+                setClass(env);
+            };
+
+            virtual void mapFields() {
+            };
+
+            virtual const char *getCanonicalName() const {
+                return NULL;
+            };
 
         public:
             //filter api
             GPUImageFilter();
 
             GPUImageFilter(char *vertexShader, char *fragmentShader);
+
+            GPUImageFilter(char *vertexShader, char *fragmentShader,JNIEnv *env);
 
             ~GPUImageFilter() {}
 
@@ -103,8 +132,9 @@ namespace ben {
 
             virtual void onDestory();
 
+
             virtual void
-            onDraw(int textureId,  float* cubeBufferPtr,  float *textureBufferPtr);
+            onDraw(int textureId, float *cubeBufferPtr, float *textureBufferPtr);
 
             void destory();
 
@@ -113,24 +143,6 @@ namespace ben {
             void ifNeedInit();
 
         public:
-
-            //register jni api
-            GPUImageFilter(JNIEnv *env) {
-
-            };
-
-            virtual void initialize(JNIEnv *env) {
-
-            };
-
-            virtual void mapFields() {
-
-            };
-
-            virtual const char *getCanonicalName() const {
-                return "";
-            };
-
 
             //////////////////run on draw////////////////
             void addDrawThread(GL_VARS *glVars);
@@ -220,13 +232,9 @@ namespace ben {
                 GPUImageFilter::outputHeight = outputHeight;
             }
 
-            bool isIsInitialized() const {
-                return isInitialized;
-            }
+            bool isIsFilterInitialized() const;
 
-            void setIsInitialized(bool isInitialized) {
-                GPUImageFilter::isInitialized = isInitialized;
-            }
+            void setIsFilterInitialized(bool isFilterInitialized);
 
             ANativeWindow *getNativeWindow() const;
 

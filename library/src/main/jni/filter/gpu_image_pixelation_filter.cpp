@@ -4,6 +4,14 @@
 
 #include "gpu_image_pixelation_filter.hpp"
 
+
+ben::ngp::GPUImagePixelationFilter::GPUImagePixelationFilter(JNIEnv *env) : GPUImageFilter(NO_FILTER_VERTEX_SHADER, PIXELATION_FRAGMENT_SHADER,env) {
+    //必须在构造函数执行完以后才可以进行JNI操作
+    initialize(env);
+    this->pixel = 50.0;
+}
+
+
 ben::ngp::GPUImagePixelationFilter::GPUImagePixelationFilter():GPUImageFilter(NO_FILTER_VERTEX_SHADER, PIXELATION_FRAGMENT_SHADER) {
     this->pixel = 50.0;
 }
@@ -60,3 +68,21 @@ void ben::ngp::GPUImagePixelationFilter::setPixelLocation(int pixelLocation) {
     GPUImagePixelationFilter::pixelLocation = pixelLocation;
 }
 
+const char *ben::ngp::GPUImagePixelationFilter::getCanonicalName() const {
+    return JAVA_PIXELATION_FILTER;
+}
+
+void ben::ngp::GPUImagePixelationFilter::initialize(JNIEnv *env) {
+    GPUImageFilter::initialize(env);
+    cacheField(env, "pixel", kTypeFloat);
+    cacheConstructor(env);
+    cacheMethod(env, "getPixel", kTypeFloat, NULL);
+    cacheMethod(env, "setPixel", kTypeVoid, kTypeFloat, NULL);
+    merge(this);
+}
+
+void ben::ngp::GPUImagePixelationFilter::mapFields() {
+    GPUImageFilter::mapFields();
+    mapField("pixel", kTypeFloat, &pixel);
+
+}
