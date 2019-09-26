@@ -9,10 +9,7 @@
 #include "util/rotation.hpp"
 #include "util/scale_type.hpp"
 #include "util/textur_rotation_util.hpp"
-#include "filter/gpu_image_gaussian_blur_filter.hpp"
-#include "filter/gpu_image_pixelation_filter.hpp"
-#include "filter/gpu_image_dilation_filter.hpp"
-#include "filter/gpu_image_zoom_blur_filter.hpp"
+#include "filter/gpu_image_filter_group.hpp"
 
 #define NO_IMAGE  -1
 using namespace ben::jni;
@@ -50,6 +47,7 @@ namespace ben {
 
             void surfaceChange(int width, int height);
 
+            void reqeustRender();
         public:
             GPUImageRender();
 

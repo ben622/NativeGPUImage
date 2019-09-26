@@ -3,12 +3,10 @@
 //
 
 #include "gpu_image_render.hpp"
-#include "include/jni/JniHelpers.h"
 #include <android/native_window_jni.h>
 #include "util/jni_util.hpp"
 #include "util/open_gl_util.hpp"
 #include <math.h>
-#include <typeinfo>
 
 using namespace ben::util;
 
@@ -343,7 +341,7 @@ void ben::ngp::GPUImageRender::resetFilter(ben::ngp::GPUImageFilter *filter) {
     filter->setNativeWindow(nativeWindow);
     filter->setEglDisplay(&display);
     filter->setEglSurface(&winSurface);
-    if (strcmp(typeid(GPUImageFilterGroup).name(), typeid(filter).name()) == 0) {
+    if (dynamic_cast<GPUImageFilterGroup*>(filter)!=NULL) {
         GPUImageFilterGroup *filterGroup = dynamic_cast<GPUImageFilterGroup *>(filter);
         for (ben::ngp::GPUImageFilter *filter : filterGroup->getFilters()) {
             filter->setNativeWindow(nativeWindow);
@@ -358,6 +356,10 @@ void ben::ngp::GPUImageRender::resetFilter(ben::ngp::GPUImageFilter *filter) {
     }
     this->setFilter(filter);
     this->getFilter()->ifNeedInit();
+
+    glUseProgram(this->getFilter()->getGlProgId());
+    this->surfaceChange(this->getOutputWidth(), this->getOutputHeight());
+
 
 }
 
@@ -380,15 +382,11 @@ void ben::ngp::GPUImageRender::renderBitmap(JNIEnv *env,jobject jbitmap) {
     }
     this->setGlTextureId(
             loadTextureByBitmap(env, jbitmap, bitmapWidth, bitmapHeight, this->getGlTextureId()));
-    LOGE("gl textureid %d", this->getGlTextureId());
+    LOGI("gl textureid %d", this->getGlTextureId());
     this->setImageWidth(bitmapWidth);
     this->setImageHeight(bitmapHeight);
 
     adjustImageScaling();
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    this->getFilter()->onDraw(this->getGlTextureId(), this->getGlCubeBuffer(),
-                              this->getGlTextureBuffer());
 
 }
 
@@ -406,6 +404,13 @@ void ben::ngp::GPUImageRender::surfaceChange(int width, int height) {
     glUseProgram(this->getFilter()->getGlProgId());
     this->getFilter()->onOutputSizeChanged(windowWidth, windowHeight);
     this->adjustImageScaling();
+}
+
+void ben::ngp::GPUImageRender::reqeustRender() {
+    //draw
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    this->getFilter()->onDraw(this->getGlTextureId(), this->getGlCubeBuffer(),
+                              this->getGlTextureBuffer());
 
 }
 

@@ -4,7 +4,6 @@
 
 #include "gpu_image_filter_group.hpp"
 #include "../util/textur_rotation_util.hpp"
-#include <typeinfo>
 
 using namespace ben::util;
 using namespace std;
@@ -68,7 +67,8 @@ void ben::ngp::GPUImageFilterGroup::onDraw(int textureId, float *cubeBufferPtr,
                                            float *textureBufferPtr) {
     runPendingOnDrawTasks();
     if (!isIsFilterInitialized() || frameBuffers == NULL || frameBufferTextures == NULL) {
-        LOGE("isFilterInitialized:%d,frameBuffers:%d,frameBufferTextures:%d", !isIsFilterInitialized(),
+        LOGE("isFilterInitialized:%d,frameBuffers:%d,frameBufferTextures:%d",
+             !isIsFilterInitialized(),
              frameBuffers, frameBufferTextures);
         return;
     }
@@ -141,7 +141,7 @@ void ben::ngp::GPUImageFilterGroup::setFrameBufferTexturesSize(int frameBufferTe
     GPUImageFilterGroup::frameBufferTexturesSize = frameBufferTexturesSize;
 }
 
-ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(JNIEnv *env):GPUImageFilter(env){
+ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(JNIEnv *env) : GPUImageFilter(env) {
     glCubeBufferPtr = CUBE;
     glTextureBufferPtr = TEXTURE_NO_ROTATION;
     glTextureFlipBufferPtr = getRotation(Rotation::NORMAL, false, true);
@@ -173,7 +173,7 @@ void ben::ngp::GPUImageFilterGroup::updateMergedFilters() {
 
     std::vector<GPUImageFilter *> filters;
     for (GPUImageFilter *filter : this->filters) {
-        if (strcmp(typeid(GPUImageFilterGroup).name(), typeid(filter).name()) == 0) {
+        if (dynamic_cast<GPUImageFilterGroup *>(filter) != NULL) {
             GPUImageFilterGroup *filterGroup = dynamic_cast<GPUImageFilterGroup *>(filter);
             filterGroup->updateMergedFilters();
             filters = filterGroup->getMergedFilters();
@@ -189,19 +189,19 @@ void ben::ngp::GPUImageFilterGroup::updateMergedFilters() {
 }
 
 void ben::ngp::GPUImageFilterGroup::destroyFramebuffers() {
-   /* if (frameBufferTextures != NULL) {
-        glDeleteTextures(frameBufferTexturesSize,
-                         reinterpret_cast<const GLuint *>(frameBufferTextures));
-        //remove pointer
-        frameBufferTexturesSize = 0;
-        delete frameBufferTextures;
-    }
-    if (frameBuffers != NULL) {
-        glDeleteFramebuffers(frameBuffersSize, reinterpret_cast<const GLuint *>(frameBuffers));
-        //remove pointer
-        frameBuffersSize = 0;
-        delete frameBuffers;
-    }*/
+    /* if (frameBufferTextures != NULL) {
+         glDeleteTextures(frameBufferTexturesSize,
+                          reinterpret_cast<const GLuint *>(frameBufferTextures));
+         //remove pointer
+         frameBufferTexturesSize = 0;
+         delete frameBufferTextures;
+     }
+     if (frameBuffers != NULL) {
+         glDeleteFramebuffers(frameBuffersSize, reinterpret_cast<const GLuint *>(frameBuffers));
+         //remove pointer
+         frameBuffersSize = 0;
+         delete frameBuffers;
+     }*/
 }
 
 void ben::ngp::GPUImageFilterGroup::addFilter(ben::ngp::GPUImageFilter *aFilter) {
@@ -213,11 +213,12 @@ ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(char *vertexShader, char *fra
         : GPUImageFilter(vertexShader, fragmentShader) {
 
 }
-ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(char *vertexShader, char *fragmentShader,JNIEnv *env)
-        : GPUImageFilter(vertexShader, fragmentShader,env) {
+
+ben::ngp::GPUImageFilterGroup::GPUImageFilterGroup(char *vertexShader, char *fragmentShader,
+                                                   JNIEnv *env)
+        : GPUImageFilter(vertexShader, fragmentShader, env) {
 
 }
-
 
 
 const std::vector<ben::ngp::GPUImageFilter *> &ben::ngp::GPUImageFilterGroup::getFilters() const {

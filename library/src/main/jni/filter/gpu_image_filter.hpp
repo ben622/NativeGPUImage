@@ -27,9 +27,6 @@ enum GL_DRAW_TYPE {
     DRAW_POINT,
     DRAW_UNIFORM_MATRIX3F,
     DRAW_UNIFORM_MATRIX4F,
-    TEST
-
-
 };
 typedef struct runOnDrawArgs {
     int location;
@@ -46,26 +43,20 @@ typedef struct runOnDrawArgs {
 #define GET_STR(x) #x
 
 static char *NO_FILTER_VERTEX_SHADER = GET_STR(
-        attribute
-        vec4 position;
-        attribute
-        vec4 inputTextureCoordinate;
-        varying
-        vec2 textureCoordinate;
-
-        void main() {
+        attribute vec4 position;
+        attribute vec4 inputTextureCoordinate;
+        varying vec2 textureCoordinate;
+        void main()
+        {
             gl_Position = position;
             textureCoordinate = inputTextureCoordinate.xy;
         }
 );
 static char *NO_FILTER_FRAGMENT_SHADER = GET_STR(
-        varying
-        highp
-        vec2 textureCoordinate;
-        uniform
-        sampler2D inputImageTexture;
-
-        void main() {
+        varying highp vec2 textureCoordinate;
+        uniform sampler2D inputImageTexture;
+        void main()
+        {
             gl_FragColor = texture2D(inputImageTexture, textureCoordinate);
         }
 );
@@ -82,19 +73,14 @@ namespace ben {
             int outputWidth;
             int outputHeight;
             bool isFilterInitialized = false;
-
+            bool isFBO = false;
 
         private:
             ANativeWindow *nativeWindow;
             EGLDisplay *eglDisplay;
             EGLSurface *eglSurface;
-
         private:
             vector<GL_VARS *> runOnDrawGLVars;
-            //互斥锁
-            pthread_mutex_t runOnDrawMutex;
-            //互斥锁条件变量
-            pthread_cond_t runOndrawMutexCondition;
         public:
             //register jni api
             GPUImageFilter(JNIEnv *env):JavaClass(env) {
@@ -247,6 +233,10 @@ namespace ben {
             EGLSurface *getEglSurface() const;
 
             void setEglSurface(EGLSurface *eglSurface);
+
+            bool isIsFBO() const;
+
+            void setIsFBO(bool isFBO);
 
         };
     }

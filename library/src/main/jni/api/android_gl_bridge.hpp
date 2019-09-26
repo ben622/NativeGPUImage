@@ -8,6 +8,12 @@
 
 #include "../include/jni/JniHelpers.h"
 #include "android_native_filter.hpp"
+#include "../filter/gpu_image_gaussian_blur_filter.hpp"
+#include "../filter/gpu_image_pixelation_filter.hpp"
+#include "../filter/gpu_image_dilation_filter.hpp"
+#include "../filter/gpu_image_zoom_blur_filter.hpp"
+#include "../filter/gpu_image_white_balance_filter.hpp"
+
 using namespace ben::jni;
 namespace ben{
     namespace ngp{
@@ -22,8 +28,10 @@ namespace ben{
             virtual const char *getCanonicalName() const;
 
         private:
-            static void setFilter(JNIEnv *env, jobject javaThis, jobject object);
-            static void setBitmap(JNIEnv *env, jobject javaThis, jobject object);
+            static void setFilter(JNIEnv *env, jclass javaThis, jobject object);
+            static void setBitmap(JNIEnv *env, jclass javaThis, jobject object);
+            static void requestRender(JNIEnv *env, jclass javaThis);
+            static void capture(JNIEnv *env, jclass javaThis,jobject object);
         };
     }
 }

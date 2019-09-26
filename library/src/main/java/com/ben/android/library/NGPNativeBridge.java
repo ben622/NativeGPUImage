@@ -12,6 +12,9 @@ import com.ben.android.library.filter.NativeFilter;
  * Android与NGP所有的操作将通过该类里的接口进行交互
  */
 public class NGPNativeBridge {
+    public static void init() {
+        System.loadLibrary("gpuimage");
+    }
     /**
      * 设置一个新的filter给ngp，这将会清除之前的filter。
      * @param filter
@@ -24,4 +27,14 @@ public class NGPNativeBridge {
      * @param bitmap
      */
     public native static void setBitmap(Bitmap bitmap);
+
+    /**
+     * 从gl中获取渲染后的bitmap
+     * @param bitmap
+     */
+    public native static void capture(Bitmap bitmap);
+    /**
+     * 使用该方法请求渲染
+     */
+    public native static void requestRender();
 }

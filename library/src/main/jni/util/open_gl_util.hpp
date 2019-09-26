@@ -22,6 +22,7 @@ namespace ben {
             GLint compiled = 0;
             glGetShaderiv(sh, GL_COMPILE_STATUS, &compiled);
             if (!compiled) {
+                LOGE("%s","shader error.");
                 GLint infoLen = 0;
                 glGetShaderiv(sh, GL_INFO_LOG_LENGTH, &infoLen);
                 if (infoLen) {

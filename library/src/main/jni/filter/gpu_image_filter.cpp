@@ -11,7 +11,9 @@ GPUImageFilter::GPUImageFilter() {
     this->vertexShader = NO_FILTER_VERTEX_SHADER;
     this->fragmentShader = NO_FILTER_FRAGMENT_SHADER;
 }
-GPUImageFilter::GPUImageFilter(char *vertexShaderArg, char *fragmentShaderArg,JNIEnv *env):JavaClass(env) {
+
+GPUImageFilter::GPUImageFilter(char *vertexShaderArg, char *fragmentShaderArg, JNIEnv *env)
+        : JavaClass(env) {
     this->vertexShader = vertexShaderArg;
     this->fragmentShader = fragmentShaderArg;
 }
@@ -42,16 +44,16 @@ void GPUImageFilter::onDestory() {
 
 void
 GPUImageFilter::onDraw(int textureId, float *cubeBufferPtr, float *textureBufferPtr) {
+    //activity
     glUseProgram(glProgId);
     runPendingOnDrawTasks();
     if (!isFilterInitialized) {
         LOGE("%s", "isFilterInitialized is false!");
         return;
     }
-    setGlAttribPosition(0);
+
     glVertexAttribPointer(glAttribPosition, 2, GL_FLOAT, false, 0, cubeBufferPtr);
     glEnableVertexAttribArray(glAttribPosition);
-    setGlAttribPosition(0);
     glVertexAttribPointer(glAttribTextureCoordinate, 2, GL_FLOAT, false, 0,
                           textureBufferPtr);
     glEnableVertexAttribArray(glAttribTextureCoordinate);
@@ -66,6 +68,14 @@ GPUImageFilter::onDraw(int textureId, float *cubeBufferPtr, float *textureBuffer
     glDisableVertexAttribArray(glAttribTextureCoordinate);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    if (getEglDisplay() == NULL || getEglSurface() == NULL) {
+        LOGI("%s", "EglDisplay or EglSurface is Null!");
+        return;
+    }
+    if (isFBO) {
+        LOGI("%s", "fbo render!");
+        return;
+    }
     eglSwapBuffers(*getEglDisplay(), *getEglSurface());
 }
 
@@ -285,5 +295,13 @@ bool GPUImageFilter::isIsFilterInitialized() const {
 
 void GPUImageFilter::setIsFilterInitialized(bool isFilterInitialized) {
     GPUImageFilter::isFilterInitialized = isFilterInitialized;
+}
+
+bool GPUImageFilter::isIsFBO() const {
+    return isFBO;
+}
+
+void GPUImageFilter::setIsFBO(bool isFBO) {
+    GPUImageFilter::isFBO = isFBO;
 }
 

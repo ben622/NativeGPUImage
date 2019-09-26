@@ -13,9 +13,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class GPUImageRender extends SurfaceView implements SurfaceHolder.Callback {
-    static {
-        System.loadLibrary("gpuimage");
-    }
 
     public GPUImageRender(Context context) {
         super(context);

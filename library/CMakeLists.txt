@@ -19,6 +19,7 @@ ADD_LIBRARY(gpuimage
         ${ROOT}/include/queue.c
         ${ROOT}/filter/gpu_image_dilation_filter.cpp
         ${ROOT}/filter/gpu_image_zoom_blur_filter.hpp
+        ${ROOT}/filter/gpu_image_white_balance_filter.cpp
         ${ROOT}/global_native_class_ptr.cpp
         ${ROOT}/native_gpu_filter.cpp
         ${ROOT}/native_texture_image.cpp

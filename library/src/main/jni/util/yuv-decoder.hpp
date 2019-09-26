@@ -5,8 +5,7 @@
 
 namespace ben {
     namespace util {
-        static void
-        YUVtoRBGA(JNIEnv *env, jbyteArray yuv420sp, jint width, jint height, jintArray rgbOut) {
+        static void YUVtoRBGA(JNIEnv *env, jbyteArray yuv420sp, jint width, jint height, jintArray rgbOut) {
             int sz;
             int i;
             int j;
