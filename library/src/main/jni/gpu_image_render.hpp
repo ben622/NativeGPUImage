@@ -41,6 +41,7 @@ namespace ben {
 
             bool isPreparGLEnvironment; //opengl 环境是否准备就绪
         public:
+            //Android GL Bridge API
             void resetFilter(GPUImageFilter *filter);
 
             void renderBitmap(JNIEnv *env,jobject jbitmap);
@@ -48,6 +49,15 @@ namespace ben {
             void surfaceChange(int width, int height);
 
             void reqeustRender();
+
+            void nativeSurfaceCreated(JNIEnv *env, jclass javaThis, jobject surface);
+
+            void nativeSurfaceChanged(JNIEnv *env, jclass javaThis, jint width, jint height);
+
+            void nativeDestroyed(JNIEnv *env, jclass javaThis);
+
+            void nativeCreateGL(JNIEnv *env, jclass javaThis);
+
         public:
             GPUImageRender();
 

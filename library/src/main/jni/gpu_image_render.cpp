@@ -14,7 +14,7 @@ static EGLSurface winSurface;
 static EGLDisplay display;
 static ANativeWindow *nativeWindow;
 
-static void nativeSurfaceCreated(JNIEnv *env, jobject javaThis, jobject surface) {
+void ben::ngp::GPUImageRender::nativeSurfaceCreated(JNIEnv *env, jclass javaThis, jobject surface) {
     //1.准备opengl环境
     nativeWindow = ANativeWindow_fromSurface(env, surface);
     display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -95,10 +95,10 @@ static void nativeSurfaceCreated(JNIEnv *env, jobject javaThis, jobject surface)
 
     //filter init
     render->getFilter()->ifNeedInit();
-
 }
 
-static void nativeSurfaceChanged(JNIEnv *env, jobject javaThis, jint width, jint height) {
+void ben::ngp::GPUImageRender::nativeSurfaceChanged(JNIEnv *env, jclass javaThis, jint width,
+                                                    jint height) {
     ben::ngp::GPUImageRender *render = getNativeClassPtr<ben::ngp::GPUImageRender>(
             GPU_IMAGE_RENDER_CLASS);
     if (!render->isIsPreparGLEnvironment()) {
@@ -106,6 +106,15 @@ static void nativeSurfaceChanged(JNIEnv *env, jobject javaThis, jint width, jint
         return;
     }
     render->surfaceChange(width, height);
+}
+
+void ben::ngp::GPUImageRender::nativeDestroyed(JNIEnv *env, jclass javaThis) {
+
+}
+
+void ben::ngp::GPUImageRender::nativeCreateGL(JNIEnv *env, jclass javaThis) {
+
+
 }
 
 
@@ -130,13 +139,6 @@ void ben::ngp::GPUImageRender::initialize(JNIEnv *env) {
     glCubeBuffer = CUBE;
     glTextureBuffer = TEXTURE_NO_ROTATION;
     setRotation(Rotation::NORMAL, false, false);
-
-    addNativeMethod("nativeSurfaceCreated", (void *) nativeSurfaceCreated, kTypeVoid,
-                    "Landroid/view/Surface;", NULL);
-
-    addNativeMethod("nativeSurfaceChanged", (void *) nativeSurfaceChanged, kTypeVoid,
-                    kTypeInt, kTypeInt, NULL);
-    registerNativeMethods(env);
 }
 
 
@@ -359,7 +361,6 @@ void ben::ngp::GPUImageRender::resetFilter(ben::ngp::GPUImageFilter *filter) {
 
     glUseProgram(this->getFilter()->getGlProgId());
     this->surfaceChange(this->getOutputWidth(), this->getOutputHeight());
-
 
 }
 

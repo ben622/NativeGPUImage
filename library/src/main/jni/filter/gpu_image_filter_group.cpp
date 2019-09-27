@@ -91,12 +91,7 @@ void ben::ngp::GPUImageFilterGroup::onDraw(int textureId, float *cubeBufferPtr,
                         1.0f, -1.0f,
                         -1.0f, 1.0f,
                         1.0f, 1.0f,
-                }, (size % 2 == 0) ? new float[8]{
-                        0.0f, 1.0f,
-                        1.0f, 1.0f,
-                        0.0f, 0.0f,
-                        1.0f, 0.0f,
-                } : glTextureBufferPtr);
+                }, (size % 2 == 0) ? glTextureFlipBufferPtr : glTextureBufferPtr);
             } else {
                 filter->onDraw(previousTexture, glCubeBufferPtr, glTextureBufferPtr);
             }

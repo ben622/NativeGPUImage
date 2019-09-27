@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import com.ben.android.library.GPUImageRender;
 import com.ben.android.library.NGPNativeBridge;
 import com.ben.android.library.filter.DilationFilter;
+import com.ben.android.library.filter.GPUImageVignetteFilter;
+import com.ben.android.library.filter.GPUImageWeakPixelInclusionFilter;
 import com.ben.android.library.filter.GPUImageWhiteBalanceFilter;
 import com.ben.android.library.filter.GaussianBlurFilter;
 import com.ben.android.library.filter.PixelationFilter;
@@ -35,11 +37,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void setFilter(View view) {
         //NGPNativeBridge.setFilter(new PixelationFilter(110f));
-        //NGPNativeBridge.setFilter(new ZoomBlurFilter());
+//        NGPNativeBridge.setFilter(new ZoomBlurFilter());
         NGPNativeBridge.setFilter(new DilationFilter(1));
         //NGPNativeBridge.setFilter(new GaussianBlurFilter(10));
         //NGPNativeBridge.setFilter(new GPUImageWhiteBalanceFilter());
+//        NGPNativeBridge.setFilter(new GPUImageWeakPixelInclusionFilter());
+//        NGPNativeBridge.setFilter(new GPUImageVignetteFilter());
 
+
+        reqeustRender();
     }
 
     public void renderBitmap(View view) {
@@ -51,9 +57,10 @@ public class MainActivity extends AppCompatActivity {
         can.drawBitmap(bitmap, 0, 0, null);
 
         NGPNativeBridge.setBitmap(resizedBitmap);
+        reqeustRender();
     }
 
-    public void reqeustRender(View view) {
+    public void reqeustRender() {
         NGPNativeBridge.requestRender();
     }
 

@@ -1,17 +1,15 @@
 package com.ben.android.library;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.PixelFormat;
-import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+/**
+ * @author @zhangchuan622@gmail.com
+ * @version 1.0
+ * @create 2019/9/22
+ */
 public class GPUImageRender extends SurfaceView implements SurfaceHolder.Callback {
 
     public GPUImageRender(Context context) {
@@ -26,30 +24,22 @@ public class GPUImageRender extends SurfaceView implements SurfaceHolder.Callbac
 
     private void init() {
         SurfaceHolder holder = getHolder();
-        holder.setFormat(PixelFormat.RGBA_8888);
         holder.addCallback(this);
     }
 
     @Override
     public void surfaceCreated(final SurfaceHolder holder) {
-        nativeSurfaceCreated(holder.getSurface());
+        NGPNativeBridge.nativeSurfaceCreated(holder.getSurface());
 
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, final int w, final int h) {
-        nativeSurfaceChanged(w, h);
+        NGPNativeBridge.nativeSurfaceChanged(w, h);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-
+        NGPNativeBridge.nativeDestroyed();
     }
-
-
-    public native void nativeSurfaceCreated(Surface surface);
-
-    public native void nativeSurfaceChanged(int width, int height);
-
-    public native void nativeSurfaceDestroyed();
 }

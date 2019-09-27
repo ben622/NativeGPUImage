@@ -1,6 +1,7 @@
 package com.ben.android.library;
 
 import android.graphics.Bitmap;
+import android.view.Surface;
 
 import com.ben.android.library.filter.NativeFilter;
 
@@ -16,14 +17,14 @@ public class NGPNativeBridge {
         System.loadLibrary("gpuimage");
     }
     /**
-     * 设置一个新的filter给ngp，这将会清除之前的filter。
+     * set new filter to ngl.
      * @param filter
      * @param <T>
      */
     public native static <T extends NativeFilter> void setFilter(T filter);
 
     /**
-     * 渲染指定的bitmap
+     * render bitmap
      * @param bitmap
      */
     public native static void setBitmap(Bitmap bitmap);
@@ -34,7 +35,15 @@ public class NGPNativeBridge {
      */
     public native static void capture(Bitmap bitmap);
     /**
-     * 使用该方法请求渲染
+     * use this method request egl render.
      */
     public native static void requestRender();
+
+    public native static void nativeSurfaceCreated(Surface surface);
+
+    public native static void nativeSurfaceChanged(int width, int height);
+
+    public native static void nativeDestroyed();
+    //FBO
+    public native static void nativeCreateGL();
 }

@@ -5,22 +5,22 @@
 #include "gpu_image_dilation_filter.hpp"
 
 ben::ngp::GPUImageDilationFilter::GPUImageDilationFilter(JNIEnv *env)
-        : GPUImageTwoPassTextureSamplingFilter(VERTEX_SHADER_3, FRAGMENT_SHADER_3, VERTEX_SHADER_3,
-                                               FRAGMENT_SHADER_3, env) {
+        : GPUImageTwoPassTextureSamplingFilter(VERTEX_SHADER_2, FRAGMENT_SHADER_2, VERTEX_SHADER_2,
+                                               FRAGMENT_SHADER_2, env) {
     //必须在构造函数执行完以后才可以进行JNI操作
     initialize(env);
 
 }
 
 ben::ngp::GPUImageDilationFilter::GPUImageDilationFilter()
-        : GPUImageTwoPassTextureSamplingFilter(VERTEX_SHADER_3, FRAGMENT_SHADER_3, VERTEX_SHADER_3,
-                                               FRAGMENT_SHADER_3) {
+        : GPUImageTwoPassTextureSamplingFilter(VERTEX_SHADER_2, FRAGMENT_SHADER_2, VERTEX_SHADER_2,
+                                               FRAGMENT_SHADER_2) {
 
 }
 
 ben::ngp::GPUImageDilationFilter::GPUImageDilationFilter(int radius)
-        : GPUImageTwoPassTextureSamplingFilter(VERTEX_SHADER_1, FRAGMENT_SHADER_1, VERTEX_SHADER_1,
-                                               FRAGMENT_SHADER_1) {
+        : GPUImageTwoPassTextureSamplingFilter(VERTEX_SHADER_2, FRAGMENT_SHADER_2, VERTEX_SHADER_2,
+                                               FRAGMENT_SHADER_2) {
 
 }
 

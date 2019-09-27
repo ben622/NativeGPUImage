@@ -13,11 +13,14 @@
 #include "../filter/gpu_image_dilation_filter.hpp"
 #include "../filter/gpu_image_zoom_blur_filter.hpp"
 #include "../filter/gpu_image_white_balance_filter.hpp"
+#include "../filter/gpu_image_3x3_texture_sampling_filter.hpp"
+#include "../filter/gpu_image_weak_pixel_inclusion_filter.hpp"
+#include "../filter/gpu_image_vignette_filter.hpp"
 
 using namespace ben::jni;
-namespace ben{
-    namespace ngp{
-        class NGPNativeBridge:public JavaClass{
+namespace ben {
+    namespace ngp {
+        class NGPNativeBridge : public JavaClass {
         public:
             NGPNativeBridge(JNIEnv *env);
 
@@ -29,9 +32,22 @@ namespace ben{
 
         private:
             static void setFilter(JNIEnv *env, jclass javaThis, jobject object);
+
             static void setBitmap(JNIEnv *env, jclass javaThis, jobject object);
+
             static void requestRender(JNIEnv *env, jclass javaThis);
-            static void capture(JNIEnv *env, jclass javaThis,jobject object);
+
+            static void capture(JNIEnv *env, jclass javaThis, jobject object);
+
+            static void nativeSurfaceCreated(JNIEnv *env, jclass javaThis, jobject surface);
+
+            static void nativeSurfaceChanged(JNIEnv *env, jclass javaThis, jint width, jint height);
+
+            static void nativeDestroyed(JNIEnv *env, jclass javaThis);
+
+            static void nativeCreateGL(JNIEnv *env, jclass javaThis);
+
+
         };
     }
 }

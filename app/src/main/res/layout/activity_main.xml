@@ -17,11 +17,6 @@
         android:layout_height="wrap_content"
         android:text="设置filter"
         android:onClick="setFilter"/>
-   <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="request render"
-        android:onClick="reqeustRender"/>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -40,7 +40,7 @@ void ben::ngp::GPUImageZoomBlurFilter::setBlurCenter(float pointXF, float pointY
 
 void ben::ngp::GPUImageZoomBlurFilter::setBlurSize(int blurSize) {
     this->blurSize = blurSize;
-    setFloat(blurSizeLocation, 1.0);
+    setFloat(blurSizeLocation, 1.0f);
 }
 
 const char *ben::ngp::GPUImageZoomBlurFilter::getCanonicalName() const {

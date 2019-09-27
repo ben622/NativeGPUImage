@@ -20,9 +20,10 @@ ADD_LIBRARY(gpuimage
         ${ROOT}/filter/gpu_image_dilation_filter.cpp
         ${ROOT}/filter/gpu_image_zoom_blur_filter.hpp
         ${ROOT}/filter/gpu_image_white_balance_filter.cpp
+        ${ROOT}/filter/gpu_image_3x3_texture_sampling_filter.hpp
+        ${ROOT}/filter/gpu_image_weak_pixel_inclusion_filter.hpp
+        ${ROOT}/filter/gpu_image_vignette_filter.hpp
         ${ROOT}/global_native_class_ptr.cpp
-        ${ROOT}/native_gpu_filter.cpp
-        ${ROOT}/native_texture_image.cpp
         ${ROOT}/gpu_image_render.cpp
         ${ROOT}/main.cpp)
 

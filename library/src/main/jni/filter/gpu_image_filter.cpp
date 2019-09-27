@@ -54,8 +54,7 @@ GPUImageFilter::onDraw(int textureId, float *cubeBufferPtr, float *textureBuffer
 
     glVertexAttribPointer(glAttribPosition, 2, GL_FLOAT, false, 0, cubeBufferPtr);
     glEnableVertexAttribArray(glAttribPosition);
-    glVertexAttribPointer(glAttribTextureCoordinate, 2, GL_FLOAT, false, 0,
-                          textureBufferPtr);
+    glVertexAttribPointer(glAttribTextureCoordinate, 2, GL_FLOAT, false, 0,textureBufferPtr);
     glEnableVertexAttribArray(glAttribTextureCoordinate);
     if (textureId != NO_TEXTURE) {
         glActiveTexture(GL_TEXTURE0);

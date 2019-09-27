@@ -29,6 +29,17 @@ void ben::ngp::NGPNativeBridge::initialize(JNIEnv *env) {
 
     addNativeMethod("requestRender", (void *) &requestRender,
                     kTypeVoid, NULL);
+
+    addNativeMethod("nativeSurfaceCreated", (void *) nativeSurfaceCreated, kTypeVoid,
+                    "Landroid/view/Surface;", NULL);
+
+    addNativeMethod("nativeSurfaceChanged", (void *) nativeSurfaceChanged, kTypeVoid,
+                    kTypeInt, kTypeInt, NULL);
+
+    addNativeMethod("nativeDestroyed", (void *) nativeDestroyed, kTypeVoid, NULL);
+
+    addNativeMethod("nativeCreateGL", (void *) nativeCreateGL, kTypeVoid, NULL);
+
     registerNativeMethods(env);
 }
 
@@ -40,11 +51,33 @@ const char *ben::ngp::NGPNativeBridge::getCanonicalName() const {
     return "com/ben/android/library/NGPNativeBridge";
 }
 
-void ben::ngp::NGPNativeBridge::capture(JNIEnv *env, jclass javaThis,jobject object) {
+void
+ben::ngp::NGPNativeBridge::nativeSurfaceCreated(JNIEnv *env, jclass javaThis, jobject surface) {
+    getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->nativeSurfaceCreated(env, javaThis,
+                                                                                    surface);
+}
+
+void ben::ngp::NGPNativeBridge::nativeSurfaceChanged(JNIEnv *env, jclass javaThis, jint width,
+                                                     jint height) {
+    getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->nativeSurfaceChanged(env, javaThis,
+                                                                                    width, height);
+
+}
+
+void ben::ngp::NGPNativeBridge::nativeDestroyed(JNIEnv *env, jclass javaThis) {
+    getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->nativeDestroyed(env, javaThis);
+}
+
+void ben::ngp::NGPNativeBridge::nativeCreateGL(JNIEnv *env, jclass javaThis) {
+    getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->nativeCreateGL(env, javaThis);
+
+}
+
+void ben::ngp::NGPNativeBridge::capture(JNIEnv *env, jclass javaThis, jobject object) {
     GPUImageRender *render = getNativeClassPtr<GPUImageRender>(
             GPU_IMAGE_RENDER_CLASS);
     render->getFilter()->setIsFBO(true);
-    if (dynamic_cast<GPUImageFilterGroup*>(render->getFilter())!=NULL) {
+    if (dynamic_cast<GPUImageFilterGroup *>(render->getFilter()) != NULL) {
         GPUImageFilterGroup *filterGroup = dynamic_cast<GPUImageFilterGroup *>(render->getFilter());
         for (ben::ngp::GPUImageFilter *filter : filterGroup->getFilters()) {
             filter->setIsFBO(true);
@@ -84,10 +117,10 @@ void ben::ngp::NGPNativeBridge::capture(JNIEnv *env, jclass javaThis,jobject obj
         }
     }
     AndroidBitmap_unlockPixels(env, object);
-    LOGI("%s","read pixels successful!");
+    LOGI("%s", "read pixels successful!");
 
     render->getFilter()->setIsFBO(false);
-    if (dynamic_cast<GPUImageFilterGroup*>(render->getFilter())!=NULL) {
+    if (dynamic_cast<GPUImageFilterGroup *>(render->getFilter()) != NULL) {
         GPUImageFilterGroup *filterGroup = dynamic_cast<GPUImageFilterGroup *>(render->getFilter());
         for (ben::ngp::GPUImageFilter *filter : filterGroup->getFilters()) {
             filter->setIsFBO(false);
@@ -99,16 +132,13 @@ void ben::ngp::NGPNativeBridge::capture(JNIEnv *env, jclass javaThis,jobject obj
 }
 
 void ben::ngp::NGPNativeBridge::requestRender(JNIEnv *env, jclass javaThis) {
-    GPUImageRender *render = getNativeClassPtr<GPUImageRender>(
-            GPU_IMAGE_RENDER_CLASS);
-    render->reqeustRender();
+    getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->reqeustRender();
 }
 
 void ben::ngp::NGPNativeBridge::setBitmap(JNIEnv *env, jclass javaThis, jobject object) {
     GPUImageRender *render = getNativeClassPtr<GPUImageRender>(
             GPU_IMAGE_RENDER_CLASS);
     //set rotation
-    render->setRotation(ROTATION_180);
     render->renderBitmap(env, object);
 }
 
@@ -120,6 +150,7 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
     LOGI("java filter type:%d", nativeFilterPtr->getFilterType());
     GPUImageRender *render = getNativeClassPtr<GPUImageRender>(
             GPU_IMAGE_RENDER_CLASS);
+    render->getFilter()->destory();
     switch (nativeFilterPtr->getFilterType()) {
         case CONTRAST: {
             break;
@@ -166,9 +197,7 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
         case PIXELATION: {
             GPUImagePixelationFilter *filterPtr = getNativeClassPtr<GPUImagePixelationFilter>(
                     JAVA_PIXELATION_FILTER);
-            LOGE("pixel %f",filterPtr->getPixel());
             filterPtr->setJavaObject(env, object);
-            LOGE("pixel %f",filterPtr->getPixel());
             render->resetFilter(filterPtr);
             break;
         }
@@ -198,6 +227,10 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case VIGNETTE: {
+            GPUImageVignetteFilter *filterPtr = getNativeClassPtr<GPUImageVignetteFilter>(
+                    JAVA_VIGNETTE_FILTER);
+            //filterPtr->setJavaObject(env, object);
+            render->resetFilter(filterPtr);
             break;
         }
         case TONE_CURVE: {
@@ -288,9 +321,7 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             //高斯滤波
             GPUImageGaussianBlurFilter *filterPtr = getNativeClassPtr<GPUImageGaussianBlurFilter>(
                     JAVA_GAUSSIAN_BLUR_FILTER);
-            LOGE("blursize %f",filterPtr->getBlurSize());
             filterPtr->setJavaObject(env, object);
-            LOGE("blursize %f",filterPtr->getBlurSize());
             break;
         }
         case CROSSHATCH: {
@@ -305,11 +336,8 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
         case DILATION: {
             GPUImageDilationFilter *filterPtr = getNativeClassPtr<GPUImageDilationFilter>(
                     JAVA_DILATION_FILTER);
-            LOGE("radius %f",filterPtr->getRadius());
             filterPtr->setJavaObject(env, object);
-            LOGE("radius %f",filterPtr->getRadius());
             render->resetFilter(filterPtr);
-            render->setRotation(ROTATION_180);
             break;
         }
         case KUWAHARA: {
@@ -349,6 +377,10 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case WEAK_PIXEL_INCLUSION: {
+            GPUImageWeakPixelInclusionFilter *filterPtr = getNativeClassPtr<GPUImageWeakPixelInclusionFilter>(
+                    JAVA_WEAK_PIXEL_INCLUSION_FILTER);
+            filterPtr->setJavaObject(env, object);
+            render->resetFilter(filterPtr);
             break;
         }
         case FALSE_COLOR: {
