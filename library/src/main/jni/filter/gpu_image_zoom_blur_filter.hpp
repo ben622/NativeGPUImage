@@ -64,6 +64,8 @@ namespace ben {
             void setBlurCenter(float pointXF, float pointYF);
 
             void setBlurSize(int blurSize);
+
+            void onDrawPre() override;
         };
     }
 }

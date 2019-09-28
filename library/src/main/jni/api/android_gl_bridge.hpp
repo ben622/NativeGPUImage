@@ -16,6 +16,9 @@
 #include "../filter/gpu_image_3x3_texture_sampling_filter.hpp"
 #include "../filter/gpu_image_weak_pixel_inclusion_filter.hpp"
 #include "../filter/gpu_image_vignette_filter.hpp"
+#include "../filter/gpu_image_vibrance_filter.hpp"
+#include "../filter/gpu_image_add_blend_filter.hpp"
+
 
 using namespace ben::jni;
 namespace ben {

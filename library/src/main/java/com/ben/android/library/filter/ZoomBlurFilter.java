@@ -21,7 +21,7 @@ public class ZoomBlurFilter extends NativeFilter {
     public ZoomBlurFilter(PointF pointF) {
         this(null, 0);
     }
-     public ZoomBlurFilter(PointF pointF,int blurSize) {
+     public ZoomBlurFilter(PointF pointF,float blurSize) {
         super(FilterType.ZOOM_BLUR.ordinal());
         if (pointF != null) {
             this.pointXF = pointF.x;

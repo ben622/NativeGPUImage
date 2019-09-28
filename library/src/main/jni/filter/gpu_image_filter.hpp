@@ -8,14 +8,18 @@
 #include "../include/jni/JniHelpers.h"
 #include "../include/queue.h"
 #include "../util/filter_tools.hpp"
-#include "../util/open_gl_util.hpp"
 #include "../util/yuv-decoder.hpp"
+#include "../util/rotation.hpp"
+#include "../util/open_gl_util.hpp"
+#include "../util/textur_rotation_util.hpp"
 #include <cstring>
 #include <vector>
 #include <pthread.h>
 
 using namespace ben::jni;
 using namespace std;
+
+typedef void (*CALLBACK)(void *);
 
 enum GL_DRAW_TYPE {
     DRAW_INTEGER,
@@ -27,6 +31,7 @@ enum GL_DRAW_TYPE {
     DRAW_POINT,
     DRAW_UNIFORM_MATRIX3F,
     DRAW_UNIFORM_MATRIX4F,
+    DRAW_CALLBACK,
 };
 typedef struct runOnDrawArgs {
     int location;
@@ -38,25 +43,31 @@ typedef struct runOnDrawArgs {
     float y;
     GL_DRAW_TYPE glDrawType;
     void *filter; //link ben::ngp::GPUImageFilter
+    CALLBACK callback;
+    void *callbackArg;
 } GL_VARS;
 
 #define GET_STR(x) #x
 
 static char *NO_FILTER_VERTEX_SHADER = GET_STR(
-        attribute vec4 position;
-        attribute vec4 inputTextureCoordinate;
-        varying vec2 textureCoordinate;
-        void main()
-        {
+        attribute
+        vec4 position;
+        attribute
+        vec4 inputTextureCoordinate;
+        varying
+        vec2 textureCoordinate;
+        void main() {
             gl_Position = position;
             textureCoordinate = inputTextureCoordinate.xy;
         }
 );
 static char *NO_FILTER_FRAGMENT_SHADER = GET_STR(
-        varying highp vec2 textureCoordinate;
-        uniform sampler2D inputImageTexture;
-        void main()
-        {
+        varying
+        highp
+        vec2 textureCoordinate;
+        uniform
+        sampler2D inputImageTexture;
+        void main() {
             gl_FragColor = texture2D(inputImageTexture, textureCoordinate);
         }
 );
@@ -83,7 +94,7 @@ namespace ben {
             vector<GL_VARS *> runOnDrawGLVars;
         public:
             //register jni api
-            GPUImageFilter(JNIEnv *env):JavaClass(env) {
+            GPUImageFilter(JNIEnv *env) : JavaClass(env) {
                 this->vertexShader = NO_FILTER_VERTEX_SHADER;
                 this->fragmentShader = NO_FILTER_FRAGMENT_SHADER;
             };
@@ -106,7 +117,7 @@ namespace ben {
 
             GPUImageFilter(char *vertexShader, char *fragmentShader);
 
-            GPUImageFilter(char *vertexShader, char *fragmentShader,JNIEnv *env);
+            GPUImageFilter(char *vertexShader, char *fragmentShader, JNIEnv *env);
 
             ~GPUImageFilter() {}
 
@@ -124,7 +135,9 @@ namespace ben {
 
             void destory();
 
-            void onDrawArraysPre();
+            virtual void onDrawArraysPre();
+
+            virtual void onDrawPre();
 
             void ifNeedInit();
 
@@ -132,6 +145,8 @@ namespace ben {
 
             //////////////////run on draw////////////////
             void addDrawThread(GL_VARS *glVars);
+
+            void addDrawThread(CALLBACK callback,void* callbackArg);
 
             void setInteger(int location, int intValue);
 
@@ -152,6 +167,8 @@ namespace ben {
             void setUniformMatrix4f(int location, float *arrayValuePtr);
 
             void runPendingOnDrawTasks();
+
+            void run(GL_VARS *glVars);
 
             ////////////////////getter and setter/////////////////////////
             char *getVertexShader() const {

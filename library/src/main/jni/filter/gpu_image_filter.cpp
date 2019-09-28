@@ -51,7 +51,6 @@ GPUImageFilter::onDraw(int textureId, float *cubeBufferPtr, float *textureBuffer
         LOGE("%s", "isFilterInitialized is false!");
         return;
     }
-
     glVertexAttribPointer(glAttribPosition, 2, GL_FLOAT, false, 0, cubeBufferPtr);
     glEnableVertexAttribArray(glAttribPosition);
     glVertexAttribPointer(glAttribTextureCoordinate, 2, GL_FLOAT, false, 0,textureBufferPtr);
@@ -93,6 +92,10 @@ void GPUImageFilter::onDrawArraysPre() {
 
 }
 
+void GPUImageFilter::onDrawPre() {
+
+}
+
 void GPUImageFilter::ifNeedInit() {
     if (!isFilterInitialized) {
         this->onInit();
@@ -100,14 +103,11 @@ void GPUImageFilter::ifNeedInit() {
     }
 }
 
-/**
- * run draw thread callback.
- * @param arg
- * @return
- */
-static void *onRunDrawGlCallback(void *arg) {
-    GL_VARS *glVars = static_cast<GL_VARS *>(arg);
-    static_cast<GPUImageFilter *>(glVars->filter)->ifNeedInit();
+void GPUImageFilter::run(GL_VARS *glVars) {
+    GPUImageFilter *filter = static_cast<GPUImageFilter *>(glVars->filter);
+
+    filter->ifNeedInit();
+
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_INTEGER) {
         LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_INTEGER");
         glUniform1i(glVars->location, glVars->intValue);
@@ -142,14 +142,18 @@ static void *onRunDrawGlCallback(void *arg) {
     }
 
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX3F) {
-        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX3F");
+        LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX3F");
         glUniformMatrix3fv(glVars->location, 1, false, glVars->arrayValuePtr);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX4F) {
-        LOGE("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX4F");
+        LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_UNIFORM_MATRIX4F");
         glUniformMatrix4fv(glVars->location, 1, false, glVars->arrayValuePtr);
     }
-    return 0;
+    if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_CALLBACK) {
+        LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_CALLBACK");
+        (*glVars->callback)(glVars->callbackArg);
+    }
+
 
 }
 
@@ -157,6 +161,16 @@ void GPUImageFilter::addDrawThread(GL_VARS *glVars) {
     runOnDrawGLVars.push_back(glVars);
 }
 
+
+void GPUImageFilter::addDrawThread(CALLBACK callback, void * callbackArg) {
+    GL_VARS *glVars = new GL_VARS();
+    glVars->callback = callback;
+    glVars->callbackArg = callbackArg;
+    glVars->filter = this;
+    glVars->glDrawType = GL_DRAW_TYPE::DRAW_CALLBACK;
+    addDrawThread(glVars);
+
+}
 
 void GPUImageFilter::setInteger(int location, int intValue) {
     GL_VARS *glVars = new GL_VARS();
@@ -247,20 +261,10 @@ void GPUImageFilter::runPendingOnDrawTasks() {
     if (this->runOnDrawGLVars.empty()) {
         return;
     }
-    pthread_t *pt = (pthread_t *) malloc(runOnDrawGLVars.size() * sizeof(pthread_t));
-    vector<GL_VARS *> temp = vector<GL_VARS *>(runOnDrawGLVars.size());
     for (int i = runOnDrawGLVars.size() - 1; i >= 0; i--) {
-        temp[i] = runOnDrawGLVars[i];
+        run(runOnDrawGLVars[i]);
     }
-    for (int i = runOnDrawGLVars.size() - 1; i >= 0; i--) {
-        pthread_create(&pt[i], NULL, onRunDrawGlCallback, temp[i]);
-    }
-    for (int i = runOnDrawGLVars.size() - 1; i >= 0; i--) {
-        pthread_join(pt[i], NULL);
-    }
-    runOnDrawGLVars.clear();
-    temp.clear();
-    free(pt);
+
 
 }
 

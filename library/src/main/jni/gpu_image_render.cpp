@@ -343,7 +343,7 @@ void ben::ngp::GPUImageRender::resetFilter(ben::ngp::GPUImageFilter *filter) {
     filter->setNativeWindow(nativeWindow);
     filter->setEglDisplay(&display);
     filter->setEglSurface(&winSurface);
-    if (dynamic_cast<GPUImageFilterGroup*>(filter)!=NULL) {
+    if (dynamic_cast<GPUImageFilterGroup *>(filter) != NULL) {
         GPUImageFilterGroup *filterGroup = dynamic_cast<GPUImageFilterGroup *>(filter);
         for (ben::ngp::GPUImageFilter *filter : filterGroup->getFilters()) {
             filter->setNativeWindow(nativeWindow);
@@ -368,7 +368,7 @@ void ben::ngp::GPUImageRender::resetFilter(ben::ngp::GPUImageFilter *filter) {
  *
  * @param jbitmap
  */
-void ben::ngp::GPUImageRender::renderBitmap(JNIEnv *env,jobject jbitmap) {
+void ben::ngp::GPUImageRender::renderBitmap(JNIEnv *env, jobject jbitmap) {
     AndroidBitmapInfo bitmapInfo;
     if (AndroidBitmap_getInfo(env, jbitmap, &bitmapInfo) < 0) {
         return;

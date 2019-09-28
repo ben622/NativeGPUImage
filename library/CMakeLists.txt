@@ -23,6 +23,9 @@ ADD_LIBRARY(gpuimage
         ${ROOT}/filter/gpu_image_3x3_texture_sampling_filter.hpp
         ${ROOT}/filter/gpu_image_weak_pixel_inclusion_filter.hpp
         ${ROOT}/filter/gpu_image_vignette_filter.hpp
+        ${ROOT}/filter/gpu_image_vibrance_filter.hpp
+        ${ROOT}/filter/gpu_image_two_input_filter.cpp
+        ${ROOT}/filter/gpu_image_add_blend_filter.cpp
         ${ROOT}/global_native_class_ptr.cpp
         ${ROOT}/gpu_image_render.cpp
         ${ROOT}/main.cpp)

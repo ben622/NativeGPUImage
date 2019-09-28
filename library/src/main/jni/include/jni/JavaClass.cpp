@@ -74,7 +74,7 @@ namespace ben {
 
         void JavaClass::setJavaObject(JNIEnv *env, jobject javaThis) {
             LOGI("Setting fields from Java object of type '%s' to native instance",
-                      getSimpleName());
+                 getSimpleName());
 
             // Set up field mappings, if this has not already been done
             if (_field_mappings.empty()) {
@@ -115,8 +115,11 @@ namespace ben {
                     } else if (TYPE_EQUALS(mapping->type, kTypeChar)) {
                         wchar_t *address = static_cast<wchar_t *>(mapping->address);
                         *address = env->GetCharField(javaThis, field);
+                    } else if (TYPE_EQUALS(mapping->type, kTypeBitmap)) {
+                        jobject *address = static_cast<jobject *>(mapping->address);
+                        *address = env->GetObjectField(javaThis, field);
                     } else {
-                        LOG_ERROR("Unable to copy data to field '%s'", key.c_str());
+                        LOGE("Unable to copy data to field '%s'", key.c_str());
                     }
                 }
             }
@@ -329,7 +332,7 @@ namespace ben {
             std::string signature;
             JavaClassUtils::makeSignatureWithList(signature, return_type, arguments);
             nativeMethod.signature = const_cast<char *>(strdup(signature.c_str()));
-            LOGD("Native signature is '%s',pointer is '%p'", nativeMethod.signature,nativeMethod);
+            LOGD("Native signature is '%s',pointer is '%p'", nativeMethod.signature, nativeMethod);
             va_end(arguments);
 
             _jni_methods.push_back(nativeMethod);

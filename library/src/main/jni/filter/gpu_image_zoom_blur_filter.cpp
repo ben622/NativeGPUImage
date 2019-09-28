@@ -69,3 +69,8 @@ void ben::ngp::GPUImageZoomBlurFilter::mapFields() {
     mapField("blurSize", kTypeFloat, &blurSize);
 }
 
+void ben::ngp::GPUImageZoomBlurFilter::onDrawPre() {
+    GPUImageFilter::onDrawPre();
+}
+
+

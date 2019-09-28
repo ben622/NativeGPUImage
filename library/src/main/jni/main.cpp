@@ -28,6 +28,8 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *jvm, void *) {
     classRegistryPtr->add(env, new GPUImage3x3TextureSamplingFilter(env));
     classRegistryPtr->add(env, new GPUImageWeakPixelInclusionFilter(env));
     classRegistryPtr->add(env, new GPUImageVignetteFilter(env));
+    classRegistryPtr->add(env, new GPUImageVibranceFilter(env));
+    classRegistryPtr->add(env, new GPUImageAddBlendFilter(env));
     //register android gl bridge.
     classRegistryPtr->add(env, new NativeFilter(env));
     classRegistryPtr->add(env, new NGPNativeBridge(env));

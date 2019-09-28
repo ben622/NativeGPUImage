@@ -8,12 +8,12 @@
 ben::ngp::GPUImagePixelationFilter::GPUImagePixelationFilter(JNIEnv *env) : GPUImageFilter(NO_FILTER_VERTEX_SHADER, PIXELATION_FRAGMENT_SHADER,env) {
     //必须在构造函数执行完以后才可以进行JNI操作
     initialize(env);
-    this->pixel = 50.0;
+    this->pixel = 0.0;
 }
 
 
 ben::ngp::GPUImagePixelationFilter::GPUImagePixelationFilter():GPUImageFilter(NO_FILTER_VERTEX_SHADER, PIXELATION_FRAGMENT_SHADER) {
-    this->pixel = 50.0;
+    this->pixel = 0.0;
 }
 
 void ben::ngp::GPUImagePixelationFilter::onOutputSizeChanged(int width, int height) {

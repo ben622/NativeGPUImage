@@ -63,18 +63,7 @@ namespace ben {
             return iProgId;
         }
 
-        /**
-         * 根据Bitmap对象生成纹理
-         * @param env
-         * @param jbitmap
-         * @param width
-         * @param height
-         * @param usedTexId
-         * @return
-         */
-        static GLuint loadTextureByBitmap(JNIEnv *env,jobject jbitmap,int width,int height,int usedTexId) {
-            void* pixel_source = NULL;
-            AndroidBitmap_lockPixels(env, jbitmap, &pixel_source);
+        static GLuint loadTextureByPixel(void* pixel_source,int width,int height,int usedTexId) {
             GLuint renderbuffers;
             if (usedTexId == NO_TEXTURE) {
                 glGenTextures(1, &renderbuffers);
@@ -95,9 +84,28 @@ namespace ben {
                 glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
                                 pixel_source);
             }
+            return renderbuffers;
+        }
+
+
+        /**
+         * 根据Bitmap对象生成纹理
+         * @param env
+         * @param jbitmap
+         * @param width
+         * @param height
+         * @param usedTexId
+         * @return
+         */
+        static GLuint loadTextureByBitmap(JNIEnv *env,jobject jbitmap,int width,int height,int usedTexId) {
+            void* pixel_source = NULL;
+            AndroidBitmap_lockPixels(env, jbitmap, &pixel_source);
+            GLuint renderbuffers;
+            renderbuffers = loadTextureByPixel(pixel_source, width, height, usedTexId);
             AndroidBitmap_unlockPixels(env, jbitmap);
             return renderbuffers;
         }
+
 
 
     }
