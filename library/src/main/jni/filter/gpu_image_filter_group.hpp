@@ -31,6 +31,8 @@ namespace ben {
 
             void onInit();
 
+            void onInitialized() override;
+
             void onDestory();
 
             void

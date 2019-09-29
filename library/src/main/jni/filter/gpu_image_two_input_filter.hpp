@@ -47,7 +47,6 @@ namespace ben {
             GPUImageTwoInputFilter(char *fragmentShader);
             GPUImageTwoInputFilter(char *fragmentShader,JNIEnv *env);
             GPUImageTwoInputFilter(char *vertexShader, char *fragmentShader, JNIEnv *env);
-
             virtual void setBitmap(jobject jbitmap);
 
             virtual void

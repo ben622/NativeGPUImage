@@ -48,7 +48,6 @@
 #define kTypeObject "java/lang/Object"
 /** @brief android  bitmap primitive */
 #define kTypeBitmap "Landroid/graphics/Bitmap;"
-
 /**
  * @brief Java class builder macro
  *

@@ -26,6 +26,20 @@ ADD_LIBRARY(gpuimage
         ${ROOT}/filter/gpu_image_vibrance_filter.hpp
         ${ROOT}/filter/gpu_image_two_input_filter.cpp
         ${ROOT}/filter/gpu_image_add_blend_filter.cpp
+        ${ROOT}/filter/gpu_image_toon_filter.hpp
+        ${ROOT}/filter/gpu_image_gamma_filter.hpp
+        ${ROOT}/filter/gpu_image_false_color_filter.hpp
+        ${ROOT}/filter/gpu_image_exposure_filter.hpp
+        ${ROOT}/filter/gpu_image_exclusion_blend_filter.hpp
+        ${ROOT}/filter/gpu_image_3x3_convolution_filter.hpp
+        ${ROOT}/filter/gpu_image_emboss_filter.hpp
+        ${ROOT}/filter/gpu_image_divide_blend_filter.hpp
+        ${ROOT}/filter/gpu_image_mix_blend_filter.hpp
+        ${ROOT}/filter/gpu_image_alpha_blend_filter.hpp
+        ${ROOT}/filter/gpu_image_dissolve_blend_filter.hpp
+        ${ROOT}/filter/gpu_image_directional_sobel_edge_detection_filter.hpp
+        ${ROOT}/filter/gpu_image_grayscale_filter.hpp
+        ${ROOT}/filter/gpu_image_sobel_edge_detection_filter.hpp
         ${ROOT}/global_native_class_ptr.cpp
         ${ROOT}/gpu_image_render.cpp
         ${ROOT}/main.cpp)

@@ -19,7 +19,18 @@ import android.widget.ImageView;
 import com.ben.android.library.GPUImageRender;
 import com.ben.android.library.NGPNativeBridge;
 import com.ben.android.library.filter.DilationFilter;
+import com.ben.android.library.filter.GPUImage3x3ConvolutionFilter;
 import com.ben.android.library.filter.GPUImageAddBlendFilter;
+import com.ben.android.library.filter.GPUImageAlphaBlendFilter;
+import com.ben.android.library.filter.GPUImageDissolveBlendFilter;
+import com.ben.android.library.filter.GPUImageDivideBlendFilter;
+import com.ben.android.library.filter.GPUImageEmbossFilter;
+import com.ben.android.library.filter.GPUImageExclusionBlendFilter;
+import com.ben.android.library.filter.GPUImageExposureFilter;
+import com.ben.android.library.filter.GPUImageFalseColorFilter;
+import com.ben.android.library.filter.GPUImageGammaFilter;
+import com.ben.android.library.filter.GPUImageSobelEdgeDetectionFilter;
+import com.ben.android.library.filter.GPUImageToonFilter;
 import com.ben.android.library.filter.GPUImageVibranceFilter;
 import com.ben.android.library.filter.GPUImageVignetteFilter;
 import com.ben.android.library.filter.GPUImageWeakPixelInclusionFilter;
@@ -49,15 +60,20 @@ public class MainActivity extends AppCompatActivity {
 //        NGPNativeBridge.setFilter(new GPUImageWeakPixelInclusionFilter());
 //        NGPNativeBridge.setFilter(new GPUImageVignetteFilter(new PointF(0.5f,0.5f), new float[]{0.0f, 0.0f, 0.0f}, 0.2f, 0.75f));
 //        NGPNativeBridge.setFilter(new GPUImageVibranceFilter(1.5f));
-        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(Color.WHITE);
-        paint.setTextSize(20);
-        canvas.drawText("ben622",30,30,paint);
+//        NGPNativeBridge.setFilter(new GPUImageAddBlendFilter(BitmapFactory.decodeResource(getResources(), R.drawable.lookup_amatorka)));
+//        NGPNativeBridge.setFilter(new GPUImageAddBlendFilter(createWatermark("ben622")));
+//        NGPNativeBridge.setFilter(new GPUImageToonFilter(0.5f,20.0f));
+//        NGPNativeBridge.setFilter(new GPUImageGammaFilter(2.0f));
+//        NGPNativeBridge.setFilter(new GPUImageFalseColorFilter());
+//        NGPNativeBridge.setFilter(new GPUImageExposureFilter());
+//        NGPNativeBridge.setFilter(new GPUImageExclusionBlendFilter());
+//        NGPNativeBridge.setFilter(new GPUImage3x3ConvolutionFilter(new float[]{0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f}));
+//        NGPNativeBridge.setFilter(new GPUImageEmbossFilter());
+//        NGPNativeBridge.setFilter(new GPUImageDivideBlendFilter(createWatermark("ben622")));
+//        NGPNativeBridge.setFilter(new GPUImageAlphaBlendFilter(BitmapFactory.decodeResource(getResources(), R.drawable.lookup_amatorka),0.5f));
+//        NGPNativeBridge.setFilter(new GPUImageDissolveBlendFilter(BitmapFactory.decodeResource(getResources(), R.drawable.lookup_amatorka),1.0f));
+        NGPNativeBridge.setFilter(new GPUImageSobelEdgeDetectionFilter(1.7f));
 
-        //NGPNativeBridge.setFilter(new GPUImageAddBlendFilter(BitmapFactory.decodeResource(getResources(), R.drawable.lookup_amatorka)));
-        NGPNativeBridge.setFilter(new GPUImageAddBlendFilter(bitmap));
         reqeustRender();
     }
 
@@ -89,5 +105,15 @@ public class MainActivity extends AppCompatActivity {
                 .setView(imageView)
                 .create().show();
 
+    }
+
+    public Bitmap createWatermark(String value) {
+        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(20);
+        canvas.drawText(value, 30, 30, paint);
+        return bitmap;
     }
 }

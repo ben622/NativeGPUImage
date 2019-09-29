@@ -257,5 +257,9 @@ void ben::ngp::GPUImageFilterGroup::clearFilter() {
 
 }
 
+void ben::ngp::GPUImageFilterGroup::onInitialized() {
+    GPUImageFilter::onInitialized();
+}
+
 
 

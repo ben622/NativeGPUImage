@@ -18,6 +18,20 @@
 #include "../filter/gpu_image_vignette_filter.hpp"
 #include "../filter/gpu_image_vibrance_filter.hpp"
 #include "../filter/gpu_image_add_blend_filter.hpp"
+#include "../filter/gpu_image_toon_filter.hpp"
+#include "../filter/gpu_image_gamma_filter.hpp"
+#include "../filter/gpu_image_false_color_filter.hpp"
+#include "../filter/gpu_image_exposure_filter.hpp"
+#include "../filter/gpu_image_exclusion_blend_filter.hpp"
+#include "../filter/gpu_image_3x3_convolution_filter.hpp"
+#include "../filter/gpu_image_emboss_filter.hpp"
+#include "../filter/gpu_image_divide_blend_filter.hpp"
+#include "../filter/gpu_image_mix_blend_filter.hpp"
+#include "../filter/gpu_image_alpha_blend_filter.hpp"
+#include "../filter/gpu_image_dissolve_blend_filter.hpp"
+#include "../filter/gpu_image_directional_sobel_edge_detection_filter.hpp"
+#include "../filter/gpu_image_grayscale_filter.hpp"
+#include "../filter/gpu_image_sobel_edge_detection_filter.hpp"
 
 
 using namespace ben::jni;
@@ -50,6 +64,8 @@ namespace ben {
 
             static void nativeCreateGL(JNIEnv *env, jclass javaThis);
 
+        private:
+            static void readBitmapPixel(JNIEnv *env, GPUImageTwoInputFilter *filter);
 
         };
     }

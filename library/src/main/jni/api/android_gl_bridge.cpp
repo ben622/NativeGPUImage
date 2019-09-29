@@ -165,24 +165,41 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case SOBEL_EDGE_DETECTION: {
+            GPUImageSobelEdgeDetectionFilter *filterPtr = getNativeClassPtr<GPUImageSobelEdgeDetectionFilter>(
+                    JAVA_SOBEL_EDGE_DETECTION_FILTER);
+            filterPtr->setJavaObject(env, object);
+            render->resetFilter(filterPtr);
+            filterPtr->setSize(filterPtr->getSize());
             break;
         }
         case THRESHOLD_EDGE_DETECTION: {
             break;
         }
         case THREE_X_THREE_CONVOLUTION: {
+            GPUImage3x3ConvolutionFilter *filterPtr = getNativeClassPtr<GPUImage3x3ConvolutionFilter>(
+                    JAVA_3X3_CONVOLUTION_FILTER);
+            filterPtr->setJavaObject(env, object);
+            render->resetFilter(filterPtr);
             break;
         }
         case FILTER_GROUP: {
             break;
         }
         case EMBOSS: {
+            GPUImageEmbossFilter *filterPtr = getNativeClassPtr<GPUImageEmbossFilter>(
+                    JAVA_EMBOSS_FILTER);
+            filterPtr->setJavaObject(env, object);
+            render->resetFilter(filterPtr);
             break;
         }
         case POSTERIZE: {
             break;
         }
         case GAMMA: {
+            GPUImageGammaFilter *filterPtr = getNativeClassPtr<GPUImageGammaFilter>(
+                    JAVA_GAMMA_FILTER);
+            filterPtr->setJavaObject(env, object);
+            render->resetFilter(filterPtr);
             break;
         }
         case BRIGHTNESS: {
@@ -207,6 +224,10 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case EXPOSURE: {
+            GPUImageExposureFilter *filterPtr = getNativeClassPtr<GPUImageExposureFilter>(
+                    JAVA_EXPOSURE_FILTER);
+            filterPtr->setJavaObject(env, object);
+            render->resetFilter(filterPtr);
             break;
         }
         case HIGHLIGHT_SHADOW: {
@@ -258,9 +279,19 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case BLEND_DISSOLVE: {
+            GPUImageDissolveBlendFilter *filterPtr = getNativeClassPtr<GPUImageDissolveBlendFilter>(
+                    JAVA_DISSOLVE_BLEND_FILTER);
+            filterPtr->setJavaObject(env, object);
+            readBitmapPixel(env, filterPtr);
+            render->resetFilter(filterPtr);
             break;
         }
         case BLEND_EXCLUSION: {
+            GPUImageExclusionBlendFilter *filterPtr = getNativeClassPtr<GPUImageExclusionBlendFilter>(
+                    JAVA_EXCLUSION_BLEND_FILTER);
+            filterPtr->setJavaObject(env, object);
+            readBitmapPixel(env, filterPtr);
+            render->resetFilter(filterPtr);
             break;
         }
         case BLEND_SOURCE_OVER: {
@@ -276,30 +307,16 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             GPUImageAddBlendFilter *filterPtr = getNativeClassPtr<GPUImageAddBlendFilter>(
                     JAVA_ADD_BLEND_FILTER);
             filterPtr->setJavaObject(env, object);
-            AndroidBitmapInfo bitmapInfo;
-            if (AndroidBitmap_getInfo(env,
-                                      const_cast<jobject>(filterPtr->getBitmap()),
-                                      &bitmapInfo) < 0) {
-                return;
-            }
-            int bitmapWidth = bitmapInfo.width;
-            int bitmapHeight = bitmapInfo.height;
-            LOGI("image width %d, height %d, format %d", bitmapWidth, bitmapHeight,
-                 bitmapInfo.format);
-            if (bitmapInfo.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
-                LOGE("%s", "invalid rgb format error!");
-                return;
-            }
-            void* pixel_source = NULL;
-            AndroidBitmap_lockPixels(env,  const_cast<jobject>(filterPtr->getBitmap()), &pixel_source);
-            filterPtr->setPxiel(pixel_source);
-            AndroidBitmap_unlockPixels(env, const_cast<jobject>(filterPtr->getBitmap()));
-            filterPtr->setBitmapWidth(bitmapWidth);
-            filterPtr->setBitmapHeight(bitmapHeight);
+            readBitmapPixel(env, filterPtr);
             render->resetFilter(filterPtr);
             break;
         }
         case BLEND_DIVIDE: {
+            GPUImageDivideBlendFilter *filterPtr = getNativeClassPtr<GPUImageDivideBlendFilter>(
+                    JAVA_DIVIDE_BLEND_FILTER);
+            filterPtr->setJavaObject(env, object);
+            readBitmapPixel(env, filterPtr);
+            render->resetFilter(filterPtr);
             break;
         }
         case BLEND_MULTIPLY: {
@@ -312,6 +329,11 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case BLEND_ALPHA: {
+            GPUImageAlphaBlendFilter *filterPtr = getNativeClassPtr<GPUImageAlphaBlendFilter>(
+                    JAVA_ALPHA_BLEND_FILTER);
+            filterPtr->setJavaObject(env, object);
+            readBitmapPixel(env, filterPtr);
+            render->resetFilter(filterPtr);
             break;
         }
         case BLEND_COLOR: {
@@ -378,6 +400,10 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case TOON: {
+            GPUImageToonFilter *filterPtr = getNativeClassPtr<GPUImageToonFilter>(
+                    JAVA_TOON_FILTER);
+            filterPtr->setJavaObject(env, object);
+            render->resetFilter(filterPtr);
             break;
         }
         case SMOOTH_TOON: {
@@ -412,6 +438,10 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case FALSE_COLOR: {
+            GPUImageFalseColorFilter *filterPtr = getNativeClassPtr<GPUImageFalseColorFilter>(
+                    JAVA_FALSE_COLOR_FILTER);
+            filterPtr->setJavaObject(env, object);
+            render->resetFilter(filterPtr);
             break;
         }
         case COLOR_BALANCE: {
@@ -452,5 +482,30 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
         }
     }
 
+
+}
+
+void
+ben::ngp::NGPNativeBridge::readBitmapPixel(JNIEnv *env, ben::ngp::GPUImageTwoInputFilter *filter) {
+    AndroidBitmapInfo bitmapInfo;
+    if (AndroidBitmap_getInfo(env,
+                              const_cast<jobject>(filter->getBitmap()),
+                              &bitmapInfo) < 0) {
+        return;
+    }
+    int bitmapWidth = bitmapInfo.width;
+    int bitmapHeight = bitmapInfo.height;
+    LOGI("image width %d, height %d, format %d", bitmapWidth, bitmapHeight,
+         bitmapInfo.format);
+    if (bitmapInfo.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("%s", "invalid rgb format error!");
+        return;
+    }
+    void* pixel_source = NULL;
+    AndroidBitmap_lockPixels(env,  const_cast<jobject>(filter->getBitmap()), &pixel_source);
+    filter->setPxiel(pixel_source);
+    AndroidBitmap_unlockPixels(env, const_cast<jobject>(filter->getBitmap()));
+    filter->setBitmapWidth(bitmapWidth);
+    filter->setBitmapHeight(bitmapHeight);
 
 }
