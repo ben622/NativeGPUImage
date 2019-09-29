@@ -156,6 +156,10 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case GRAYSCALE: {
+            GPUImageGrayscaleFilter *filterPtr = getNativeClassPtr<GPUImageGrayscaleFilter>(
+                    JAVA_GRAYSCALE_FILTER);
+            filterPtr->setJavaObject(env, object);
+            render->resetFilter(filterPtr);
             break;
         }
         case SHARPEN: {

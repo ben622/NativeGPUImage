@@ -29,6 +29,7 @@ import com.ben.android.library.filter.GPUImageExclusionBlendFilter;
 import com.ben.android.library.filter.GPUImageExposureFilter;
 import com.ben.android.library.filter.GPUImageFalseColorFilter;
 import com.ben.android.library.filter.GPUImageGammaFilter;
+import com.ben.android.library.filter.GPUImageGrayscaleFilter;
 import com.ben.android.library.filter.GPUImageSobelEdgeDetectionFilter;
 import com.ben.android.library.filter.GPUImageToonFilter;
 import com.ben.android.library.filter.GPUImageVibranceFilter;
@@ -72,7 +73,8 @@ public class MainActivity extends AppCompatActivity {
 //        NGPNativeBridge.setFilter(new GPUImageDivideBlendFilter(createWatermark("ben622")));
 //        NGPNativeBridge.setFilter(new GPUImageAlphaBlendFilter(BitmapFactory.decodeResource(getResources(), R.drawable.lookup_amatorka),0.5f));
 //        NGPNativeBridge.setFilter(new GPUImageDissolveBlendFilter(BitmapFactory.decodeResource(getResources(), R.drawable.lookup_amatorka),1.0f));
-        NGPNativeBridge.setFilter(new GPUImageSobelEdgeDetectionFilter(1.7f));
+//        NGPNativeBridge.setFilter(new GPUImageSobelEdgeDetectionFilter(1.7f));
+        NGPNativeBridge.setFilter(new GPUImageGrayscaleFilter());
 
         reqeustRender();
     }
@@ -94,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void capture(View view) {
-        int width = gpuImageRender.getMeasuredWidth();
+        /*int width = gpuImageRender.getMeasuredWidth();
         int height = gpuImageRender.getMeasuredHeight();
         Bitmap resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         NGPNativeBridge.capture(resultBitmap);
@@ -103,7 +105,9 @@ public class MainActivity extends AppCompatActivity {
         imageView.setImageBitmap(resultBitmap);
         new AlertDialog.Builder(this)
                 .setView(imageView)
-                .create().show();
+                .create().show();*/
+
+        NGPNativeBridge.nativeCreateGL();
 
     }
 

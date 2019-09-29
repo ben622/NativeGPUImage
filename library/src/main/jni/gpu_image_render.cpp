@@ -14,6 +14,9 @@ static EGLSurface winSurface;
 static EGLDisplay display;
 static ANativeWindow *nativeWindow;
 
+static EGLSurface fboEglSurface;
+static EGLDisplay fboEglDisp;
+
 void ben::ngp::GPUImageRender::nativeSurfaceCreated(JNIEnv *env, jclass javaThis, jobject surface) {
     //1.准备opengl环境
     nativeWindow = ANativeWindow_fromSurface(env, surface);
@@ -113,7 +116,119 @@ void ben::ngp::GPUImageRender::nativeDestroyed(JNIEnv *env, jclass javaThis) {
 }
 
 void ben::ngp::GPUImageRender::nativeCreateGL(JNIEnv *env, jclass javaThis) {
+    // EGL config attributes
+    const EGLint confAttr[] =
+            {
+                    EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,// very important!
+                    EGL_SURFACE_TYPE,EGL_PBUFFER_BIT,//EGL_WINDOW_BIT EGL_PBUFFER_BIT we will create a pixelbuffer surface
+                    EGL_RED_SIZE,   8,
+                    EGL_GREEN_SIZE, 8,
+                    EGL_BLUE_SIZE,  8,
+                    EGL_ALPHA_SIZE, 8,// if you need the alpha channel
+                    EGL_DEPTH_SIZE, 8,// if you need the depth buffer
+                    EGL_STENCIL_SIZE,8,
+                    EGL_NONE
+            };
+    // EGL context attributes
+    const EGLint ctxAttr[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 2,// very important!
+            EGL_NONE
+    };
+    // surface attributes
+    // the surface size is set to the input frame size
+    const EGLint surfaceAttr[] = {
+            EGL_WIDTH,512,
+            EGL_HEIGHT,512,
+            EGL_NONE
+    };
+    EGLint eglMajVers, eglMinVers;
+    EGLint numConfigs;
 
+    fboEglSurface = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if(fboEglSurface == EGL_NO_DISPLAY)
+    {
+        //Unable to open connection to local windowing system
+        LOGI("%s","Unable to open connection to local windowing system");
+    }
+    if(!eglInitialize(fboEglSurface, &eglMajVers, &eglMinVers))
+    {
+        // Unable to initialize EGL. Handle and recover
+        LOGI("%s", "Unable to initialize EGL");
+    }
+    LOGI("EGL init with version %d.%d", eglMajVers, eglMinVers);
+    // choose the first config, i.e. best config
+    EGLConfig config;
+    if(!eglChooseConfig(fboEglSurface, confAttr, &config, 1, &numConfigs))
+    {
+        LOGI("%s", "some config is wrong");
+    }
+    else
+    {
+        LOGI("%s", "all configs is OK");
+    }
+    // create a pixelbuffer surface
+    fboEglSurface = eglCreatePbufferSurface(fboEglDisp, config, surfaceAttr);
+    if(fboEglSurface == EGL_NO_SURFACE)
+    {
+        switch(eglGetError())
+        {
+            case EGL_BAD_ALLOC:
+                // Not enough resources available. Handle and recover
+                LOGE("%s","Not enough resources available");
+                break;
+            case EGL_BAD_CONFIG:
+                // Verify that provided EGLConfig is valid
+                LOGE("%s","provided EGLConfig is invalid");
+                break;
+            case EGL_BAD_PARAMETER:
+                // Verify that the EGL_WIDTH and EGL_HEIGHT are
+                // non-negative values
+                LOGE("%s","provided EGL_WIDTH and EGL_HEIGHT is invalid");
+                break;
+            case EGL_BAD_MATCH:
+                // Check window and EGLConfig attributes to determine
+                // compatibility and pbuffer-texture parameters
+                LOGE("%s","Check window and EGLConfig attributes");
+                break;
+        }
+    }
+    EGLContext context  = eglCreateContext(fboEglDisp, config, EGL_NO_CONTEXT, ctxAttr);
+    if(context == EGL_NO_CONTEXT)
+    {
+        EGLint error = eglGetError();
+        if(error == EGL_BAD_CONFIG)
+        {
+            // Handle error and recover
+            LOGE("%s","EGL_BAD_CONFIG");
+        }
+    }
+    if(!eglMakeCurrent(fboEglDisp, fboEglSurface, fboEglSurface, context))
+    {
+        LOGI("%s","MakeCurrent failed");
+    }
+    LOGI("%s","initialize success!");
+
+    //2.初始化GPUImageRender
+    ben::ngp::GPUImageRender *render = getNativeClassPtr<ben::ngp::GPUImageRender>(
+            GPU_IMAGE_RENDER_CLASS);
+    if (!render) {
+        LOGE("%s", "render is null");
+        return;
+    }
+
+    //gl background
+    glClearColor(render->getBackgroundRed(), render->getBackgroundGreen(),
+                 render->getBackgroundBlue(), 1);
+    glDisable(GL_DEPTH_TEST);
+
+    //构造默认filter
+    render->setIsPreparGLEnvironment(JNI_TRUE);
+
+    ben::ngp::GPUImageFilter *filter = new ben::ngp::GPUImageFilter();
+    filter->setIsFBO(true);
+    render->setFilter(filter);
+    //filter init
+    render->getFilter()->ifNeedInit();
 
 }
 

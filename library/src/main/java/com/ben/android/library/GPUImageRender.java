@@ -11,6 +11,15 @@ import android.view.SurfaceView;
  * @create 2019/9/22
  */
 public class GPUImageRender extends SurfaceView implements SurfaceHolder.Callback {
+    private OnEGPEnvironmentListener onEGPEnvironmentListener;
+
+    public OnEGPEnvironmentListener getOnEGPEnvironmentListener() {
+        return onEGPEnvironmentListener;
+    }
+
+    public void setOnEGPEnvironmentListener(OnEGPEnvironmentListener onEGPEnvironmentListener) {
+        this.onEGPEnvironmentListener = onEGPEnvironmentListener;
+    }
 
     public GPUImageRender(Context context) {
         super(context);
@@ -36,6 +45,9 @@ public class GPUImageRender extends SurfaceView implements SurfaceHolder.Callbac
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, final int w, final int h) {
         NGPNativeBridge.nativeSurfaceChanged(w, h);
+        if (onEGPEnvironmentListener != null) {
+            onEGPEnvironmentListener.onCreateEGLFinish();
+        }
     }
 
     @Override
