@@ -51,6 +51,14 @@ ADD_LIBRARY(gpuimage
         ${ROOT}/filter/gpu_image_sharpen_filter.hpp
         ${ROOT}/filter/gpu_image_highlight_shadow_filter.hpp
         ${ROOT}/filter/gpu_image_haze_filter.hpp
+        ${ROOT}/filter/gpu_image_solarize_filter.hpp
+        ${ROOT}/filter/gpu_image_luminance_filter.hpp
+        ${ROOT}/filter/gpu_image_luminance_threshold_filter.hpp
+        ${ROOT}/filter/gpu_image_halftone_filter.hpp
+        ${ROOT}/filter/gpu_image_crosshatch_filter.hpp
+        ${ROOT}/filter/gpu_image_sobel_threshold_filter.hpp
+        ${ROOT}/filter/gpu_image_threshold_edge_detection_filter.hpp
+        ${ROOT}/filter/gpu_image_sketch_filter.hpp
         ${ROOT}/global_native_class_ptr.cpp
         ${ROOT}/gpu_image_render.cpp
         ${ROOT}/main.cpp)

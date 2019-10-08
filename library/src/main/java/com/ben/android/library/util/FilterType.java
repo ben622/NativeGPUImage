@@ -78,5 +78,6 @@ public enum FilterType {
     HALFTONE,
     TRANSFORM2D,
     SOLARIZE,
-    VIBRANCE
+    VIBRANCE,
+    SOBEL_THRESHOLD
 }

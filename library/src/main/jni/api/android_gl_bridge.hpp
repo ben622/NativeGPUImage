@@ -43,6 +43,14 @@
 #include "../filter/gpu_image_sharpen_filter.hpp"
 #include "../filter/gpu_image_highlight_shadow_filter.hpp"
 #include "../filter/gpu_image_haze_filter.hpp"
+#include "../filter/gpu_image_solarize_filter.hpp"
+#include "../filter/gpu_image_luminance_filter.hpp"
+#include "../filter/gpu_image_luminance_threshold_filter.hpp"
+#include "../filter/gpu_image_halftone_filter.hpp"
+#include "../filter/gpu_image_crosshatch_filter.hpp"
+#include "../filter/gpu_image_sobel_threshold_filter.hpp"
+#include "../filter/gpu_image_threshold_edge_detection_filter.hpp"
+#include "../filter/gpu_image_sketch_filter.hpp"
 
 
 using namespace ben::jni;

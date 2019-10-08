@@ -84,7 +84,9 @@ namespace ben {
             HALFTONE,
             TRANSFORM2D,
             SOLARIZE,
-            VIBRANCE
+            VIBRANCE,
+            //add
+            SOBEL_THRESHOLD
         };
 
     }

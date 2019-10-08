@@ -14,6 +14,7 @@ import com.ben.android.library.filter.GPUImageAddBlendFilter;
 import com.ben.android.library.filter.GPUImageAlphaBlendFilter;
 import com.ben.android.library.filter.GPUImageBrightnessFilter;
 import com.ben.android.library.filter.GPUImageContrastFilter;
+import com.ben.android.library.filter.GPUImageCrosshatchFilter;
 import com.ben.android.library.filter.GPUImageDissolveBlendFilter;
 import com.ben.android.library.filter.GPUImageDivideBlendFilter;
 import com.ben.android.library.filter.GPUImageEmbossFilter;
@@ -22,16 +23,23 @@ import com.ben.android.library.filter.GPUImageExposureFilter;
 import com.ben.android.library.filter.GPUImageFalseColorFilter;
 import com.ben.android.library.filter.GPUImageGammaFilter;
 import com.ben.android.library.filter.GPUImageGrayscaleFilter;
+import com.ben.android.library.filter.GPUImageHalftoneFilter;
 import com.ben.android.library.filter.GPUImageHazeFilter;
 import com.ben.android.library.filter.GPUImageHighlightShadowFilter;
 import com.ben.android.library.filter.GPUImageHueFilter;
 import com.ben.android.library.filter.GPUImageLevelsFilter;
+import com.ben.android.library.filter.GPUImageLuminanceFilter;
+import com.ben.android.library.filter.GPUImageLuminanceThresholdFilter;
 import com.ben.android.library.filter.GPUImageMonochromeFilter;
 import com.ben.android.library.filter.GPUImageRGBDilationFilter;
 import com.ben.android.library.filter.GPUImageRGBFilter;
 import com.ben.android.library.filter.GPUImageSaturationFilter;
 import com.ben.android.library.filter.GPUImageSharpenFilter;
+import com.ben.android.library.filter.GPUImageSketchFilter;
 import com.ben.android.library.filter.GPUImageSobelEdgeDetectionFilter;
+import com.ben.android.library.filter.GPUImageSobelThresholdFilter;
+import com.ben.android.library.filter.GPUImageSolarizeFilter;
+import com.ben.android.library.filter.GPUImageThresholdEdgeDetectionFilter;
 import com.ben.android.library.filter.GPUImageToonFilter;
 import com.ben.android.library.filter.GPUImageVibranceFilter;
 import com.ben.android.library.filter.GPUImageVignetteFilter;
@@ -54,6 +62,13 @@ public class ImageAdapter extends BaseQuickAdapter<NativeFilter, BaseViewHolder>
     public ImageAdapter(final Context context) {
         super(R.layout.item_image_layout, new ArrayList<NativeFilter>() {
             {
+                add(new GPUImageSketchFilter());
+                add(new GPUImageThresholdEdgeDetectionFilter());
+                add(new GPUImageCrosshatchFilter());
+                add(new GPUImageHalftoneFilter());
+                add(new GPUImageLuminanceThresholdFilter());
+                add(new GPUImageLuminanceFilter());
+                add(new GPUImageSolarizeFilter(0.01f));
                 add(new GPUImageHazeFilter());
                 add(new GPUImageHighlightShadowFilter(0.5f,0.5f));
                 add(new GPUImageSharpenFilter(-4.0f));

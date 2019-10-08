@@ -53,6 +53,14 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *jvm, void *) {
     classRegistryPtr->add(env, new GPUImageSharpenFilter(env));
     classRegistryPtr->add(env, new GPUImageHighlightShadowFilter(env));
     classRegistryPtr->add(env, new GPUImageHazeFilter(env));
+    classRegistryPtr->add(env, new GPUImageSolarizeFilter(env));
+    classRegistryPtr->add(env, new GPUImageLuminanceFilter(env));
+    classRegistryPtr->add(env, new GPUImageLuminanceThresholdFilter(env));
+    classRegistryPtr->add(env, new GPUImageHalftoneFilter(env));
+    classRegistryPtr->add(env, new GPUImageCrosshatchFilter(env));
+    classRegistryPtr->add(env, new GPUImageSobelThresholdFilter(env));
+    classRegistryPtr->add(env, new GPUImageThresholdEdgeDetectionFilter(env));
+    classRegistryPtr->add(env, new GPUImageSketchFilter(env));
     //register android gl bridge.
     classRegistryPtr->add(env, new NativeFilter(env));
     classRegistryPtr->add(env, new NGPNativeBridge(env));

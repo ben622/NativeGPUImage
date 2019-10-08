@@ -178,6 +178,16 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case THRESHOLD_EDGE_DETECTION: {
+            GPUImageThresholdEdgeDetectionFilter *filterPtr = getNativeClassPtr<GPUImageThresholdEdgeDetectionFilter>(
+                    JAVA_THRESHOLD_EDGE_DETECTION_FILTER);
+            filterPtr->setJavaObject(env, object);
+            render->resetFilter(filterPtr);
+            filterPtr->setSize(filterPtr->getSize());
+            filterPtr->setThreshold(filterPtr->getThreshold());
+            break;
+        }
+        case SOBEL_THRESHOLD: {
+            filterPtr = getNativeClassPtr<GPUImageSobelThresholdFilter>(JAVA_SOBEL_THRESHOLD_FILTER);
             break;
         }
         case THREE_X_THREE_CONVOLUTION: {
@@ -252,9 +262,11 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case LUMINANCE: {
+            filterPtr = getNativeClassPtr<GPUImageLuminanceFilter>(JAVA_LUMINANCE_FILTER);
             break;
         }
         case LUMINANCE_THRESHSOLD: {
+            filterPtr = getNativeClassPtr<GPUImageLuminanceThresholdFilter>(JAVA_LUMINANCE_THRESHOLD_FILTER);
             break;
         }
         case BLEND_COLOR_BURN: {
@@ -358,11 +370,11 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case GAUSSIAN_BLUR: {
-            //高斯滤波
             filterPtr = getNativeClassPtr<GPUImageGaussianBlurFilter>(JAVA_GAUSSIAN_BLUR_FILTER);
             break;
         }
         case CROSSHATCH: {
+            filterPtr = getNativeClassPtr<GPUImageCrosshatchFilter>(JAVA_CROSSHATCH_FILTER);
             break;
         }
         case BOX_BLUR: {
@@ -387,6 +399,7 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case SKETCH: {
+            filterPtr = getNativeClassPtr<GPUImageSketchFilter>(JAVA_SKETCH_FILTER);
             break;
         }
         case TOON: {
@@ -441,12 +454,14 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case HALFTONE: {
+            filterPtr = getNativeClassPtr<GPUImageHalftoneFilter>(JAVA_HALFTONE_FILTER);
             break;
         }
         case TRANSFORM2D: {
             break;
         }
         case SOLARIZE: {
+            filterPtr = getNativeClassPtr<GPUImageSolarizeFilter>(JAVA_SOLARIZE_FILTER);
             break;
         }
         case VIBRANCE: {
