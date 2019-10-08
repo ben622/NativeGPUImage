@@ -32,6 +32,17 @@
 #include "../filter/gpu_image_directional_sobel_edge_detection_filter.hpp"
 #include "../filter/gpu_image_grayscale_filter.hpp"
 #include "../filter/gpu_image_sobel_edge_detection_filter.hpp"
+#include "../filter/gpu_image_saturation_filter.hpp"
+#include "../filter/gpu_image_contrast_filter.hpp"
+#include "../filter/gpu_image_brightness_filter.hpp"
+#include "../filter/gpu_image_levels_filter.hpp"
+#include "../filter/gpu_image_rgb_filter.hpp"
+#include "../filter/gpu_image_rgb_dilation_filter.hpp"
+#include "../filter/gpu_image_hue_filter.hpp"
+#include "../filter/gpu_image_monochrome_filter.hpp"
+#include "../filter/gpu_image_sharpen_filter.hpp"
+#include "../filter/gpu_image_highlight_shadow_filter.hpp"
+#include "../filter/gpu_image_haze_filter.hpp"
 
 
 using namespace ben::jni;

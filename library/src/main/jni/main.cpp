@@ -42,6 +42,17 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *jvm, void *) {
     classRegistryPtr->add(env, new GPUImageDissolveBlendFilter(env));
     classRegistryPtr->add(env, new GPUImageGrayscaleFilter(env));
     classRegistryPtr->add(env, new GPUImageSobelEdgeDetectionFilter(env));
+    classRegistryPtr->add(env, new GPUImageSaturationFilter(env));
+    classRegistryPtr->add(env, new GPUImageContrastFilter(env));
+    classRegistryPtr->add(env, new GPUImageBrightnessFilter(env));
+    classRegistryPtr->add(env, new GPUImageLevelsFilter(env));
+    classRegistryPtr->add(env, new GPUImageRGBFilter(env));
+    classRegistryPtr->add(env, new GPUImageRGBDilationFilter(env));
+    classRegistryPtr->add(env, new GPUImageHueFilter(env));
+    classRegistryPtr->add(env, new GPUImageMonochromeFilter(env));
+    classRegistryPtr->add(env, new GPUImageSharpenFilter(env));
+    classRegistryPtr->add(env, new GPUImageHighlightShadowFilter(env));
+    classRegistryPtr->add(env, new GPUImageHazeFilter(env));
     //register android gl bridge.
     classRegistryPtr->add(env, new NativeFilter(env));
     classRegistryPtr->add(env, new NGPNativeBridge(env));

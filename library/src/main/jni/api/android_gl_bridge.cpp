@@ -151,18 +151,19 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
     GPUImageRender *render = getNativeClassPtr<GPUImageRender>(
             GPU_IMAGE_RENDER_CLASS);
     render->getFilter()->destory();
+
+    GPUImageFilter *filterPtr = NULL;
     switch (nativeFilterPtr->getFilterType()) {
         case CONTRAST: {
+            filterPtr = getNativeClassPtr<GPUImageContrastFilter>(JAVA_CONTRAST_FILTER);
             break;
         }
         case GRAYSCALE: {
-            GPUImageGrayscaleFilter *filterPtr = getNativeClassPtr<GPUImageGrayscaleFilter>(
-                    JAVA_GRAYSCALE_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageGrayscaleFilter>(JAVA_GRAYSCALE_FILTER);
             break;
         }
         case SHARPEN: {
+            filterPtr = getNativeClassPtr<GPUImageSharpenFilter>(JAVA_SHARPEN_FILTER);
             break;
         }
         case SEPIA: {
@@ -180,77 +181,63 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case THREE_X_THREE_CONVOLUTION: {
-            GPUImage3x3ConvolutionFilter *filterPtr = getNativeClassPtr<GPUImage3x3ConvolutionFilter>(
-                    JAVA_3X3_CONVOLUTION_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImage3x3ConvolutionFilter>(JAVA_3X3_CONVOLUTION_FILTER);
             break;
         }
         case FILTER_GROUP: {
             break;
         }
         case EMBOSS: {
-            GPUImageEmbossFilter *filterPtr = getNativeClassPtr<GPUImageEmbossFilter>(
-                    JAVA_EMBOSS_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageEmbossFilter>(JAVA_EMBOSS_FILTER);
             break;
         }
         case POSTERIZE: {
             break;
         }
         case GAMMA: {
-            GPUImageGammaFilter *filterPtr = getNativeClassPtr<GPUImageGammaFilter>(
-                    JAVA_GAMMA_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageGammaFilter>(JAVA_GAMMA_FILTER);
             break;
         }
         case BRIGHTNESS: {
+            filterPtr = getNativeClassPtr<GPUImageBrightnessFilter>(JAVA_BRIGHTNESS_FILTER);
             break;
         }
         case INVERT: {
             break;
         }
         case HUE: {
+            filterPtr = getNativeClassPtr<GPUImageHueFilter>(JAVA_HUE_FILTER);
             break;
         }
         case PIXELATION: {
-            GPUImagePixelationFilter *filterPtr = getNativeClassPtr<GPUImagePixelationFilter>(
-                    JAVA_PIXELATION_FILTER);
-            LOGE("%f",filterPtr->getPixel());
-            filterPtr->setJavaObject(env, object);
-            LOGE("%f",filterPtr->getPixel());
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImagePixelationFilter>(JAVA_PIXELATION_FILTER);
             break;
         }
         case SATURATION: {
+            filterPtr = getNativeClassPtr<GPUImageSaturationFilter>(JAVA_SATURATION_FILTER);
             break;
         }
         case EXPOSURE: {
-            GPUImageExposureFilter *filterPtr = getNativeClassPtr<GPUImageExposureFilter>(
-                    JAVA_EXPOSURE_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageExposureFilter>(JAVA_EXPOSURE_FILTER);
             break;
         }
         case HIGHLIGHT_SHADOW: {
+            filterPtr = getNativeClassPtr<GPUImageHighlightShadowFilter>(JAVA_HIGHLIGHT_SHADOW_FILTER);
             break;
         }
         case MONOCHROME: {
+            filterPtr = getNativeClassPtr<GPUImageMonochromeFilter>(JAVA_MONOCHROME_FILTER);
             break;
         }
         case OPACITY: {
             break;
         }
         case RGB: {
+            filterPtr = getNativeClassPtr<GPUImageRGBFilter>(JAVA_RGB_FILTER);
             break;
         }
         case WHITE_BALANCE: {
-            GPUImageWhiteBalanceFilter *filterPtr = getNativeClassPtr<GPUImageWhiteBalanceFilter>(
-                    JAVA_WHITE_BALANCE_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageWhiteBalanceFilter>(JAVA_WHITE_BALANCE_FILTER);
             break;
         }
         case VIGNETTE: {
@@ -372,10 +359,7 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
         }
         case GAUSSIAN_BLUR: {
             //高斯滤波
-            GPUImageGaussianBlurFilter *filterPtr = getNativeClassPtr<GPUImageGaussianBlurFilter>(
-                    JAVA_GAUSSIAN_BLUR_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageGaussianBlurFilter>(JAVA_GAUSSIAN_BLUR_FILTER);
             break;
         }
         case CROSSHATCH: {
@@ -388,26 +372,25 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case DILATION: {
-            GPUImageDilationFilter *filterPtr = getNativeClassPtr<GPUImageDilationFilter>(
-                    JAVA_DILATION_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageDilationFilter>(JAVA_DILATION_FILTER);
             break;
         }
         case KUWAHARA: {
             break;
         }
         case RGB_DILATION: {
+            GPUImageRGBDilationFilter *filterPtr = getNativeClassPtr<GPUImageRGBDilationFilter>(
+                    JAVA_RGB_DILATION_FILTER);
+            filterPtr->setJavaObject(env, object);
+            filterPtr->switchShader();
+            render->resetFilter(filterPtr);
             break;
         }
         case SKETCH: {
             break;
         }
         case TOON: {
-            GPUImageToonFilter *filterPtr = getNativeClassPtr<GPUImageToonFilter>(
-                    JAVA_TOON_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageToonFilter>(JAVA_TOON_FILTER);
             break;
         }
         case SMOOTH_TOON: {
@@ -420,6 +403,7 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case HAZE: {
+            filterPtr = getNativeClassPtr<GPUImageHazeFilter>(JAVA_HAZE_FILTER);
             break;
         }
         case LAPLACIAN: {
@@ -435,33 +419,25 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case WEAK_PIXEL_INCLUSION: {
-            GPUImageWeakPixelInclusionFilter *filterPtr = getNativeClassPtr<GPUImageWeakPixelInclusionFilter>(
-                    JAVA_WEAK_PIXEL_INCLUSION_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageWeakPixelInclusionFilter>(JAVA_WEAK_PIXEL_INCLUSION_FILTER);
             break;
         }
         case FALSE_COLOR: {
-            GPUImageFalseColorFilter *filterPtr = getNativeClassPtr<GPUImageFalseColorFilter>(
-                    JAVA_FALSE_COLOR_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageFalseColorFilter>(JAVA_FALSE_COLOR_FILTER);
             break;
         }
         case COLOR_BALANCE: {
             break;
         }
         case LEVELS_FILTER_MIN: {
+            filterPtr = getNativeClassPtr<GPUImageLevelsFilter>(JAVA_LEVELS_FILTER);
             break;
         }
         case BILATERAL_BLUR: {
             break;
         }
         case ZOOM_BLUR: {
-            GPUImageZoomBlurFilter *filterPtr = getNativeClassPtr<GPUImageZoomBlurFilter>(
-                    JAVA_ZOOM_BLUR_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageZoomBlurFilter>(JAVA_ZOOM_BLUR_FILTER);
             break;
         }
         case HALFTONE: {
@@ -474,10 +450,7 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case VIBRANCE: {
-            GPUImageVibranceFilter *filterPtr = getNativeClassPtr<GPUImageVibranceFilter>(
-                    JAVA_VIBRANCE_FILTER);
-            filterPtr->setJavaObject(env, object);
-            render->resetFilter(filterPtr);
+            filterPtr = getNativeClassPtr<GPUImageVibranceFilter>(JAVA_VIBRANCE_FILTER);
             break;
         }
         default: {
@@ -485,7 +458,10 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
     }
-
+    if (filterPtr != NULL) {
+        filterPtr->setJavaObject(env, object);
+        render->resetFilter(filterPtr);
+    }
 
 }
 
@@ -505,8 +481,8 @@ ben::ngp::NGPNativeBridge::readBitmapPixel(JNIEnv *env, ben::ngp::GPUImageTwoInp
         LOGE("%s", "invalid rgb format error!");
         return;
     }
-    void* pixel_source = NULL;
-    AndroidBitmap_lockPixels(env,  const_cast<jobject>(filter->getBitmap()), &pixel_source);
+    void *pixel_source = NULL;
+    AndroidBitmap_lockPixels(env, const_cast<jobject>(filter->getBitmap()), &pixel_source);
     filter->setPxiel(pixel_source);
     AndroidBitmap_unlockPixels(env, const_cast<jobject>(filter->getBitmap()));
     filter->setBitmapWidth(bitmapWidth);
