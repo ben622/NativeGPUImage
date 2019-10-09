@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PointF;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 
 import com.ben.android.library.NGPNativeBridge;
 import com.ben.android.library.filter.DilationFilter;
@@ -37,7 +36,6 @@ import com.ben.android.library.filter.GPUImageSaturationFilter;
 import com.ben.android.library.filter.GPUImageSharpenFilter;
 import com.ben.android.library.filter.GPUImageSketchFilter;
 import com.ben.android.library.filter.GPUImageSobelEdgeDetectionFilter;
-import com.ben.android.library.filter.GPUImageSobelThresholdFilter;
 import com.ben.android.library.filter.GPUImageSolarizeFilter;
 import com.ben.android.library.filter.GPUImageThresholdEdgeDetectionFilter;
 import com.ben.android.library.filter.GPUImageToonFilter;
@@ -108,9 +106,9 @@ public class ImageAdapter extends BaseQuickAdapter<NativeFilter, BaseViewHolder>
 
     @Override
     protected void convert(@NonNull BaseViewHolder helper, NativeFilter item) {
-        NGPNativeBridge.setFilter(item);
+        NGPNativeBridge.nativeApplyFilter(item);
         Bitmap resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        NGPNativeBridge.capture(resultBitmap);
+        NGPNativeBridge.nativeCapture(resultBitmap);
         helper.setImageBitmap(R.id.mImageView, resultBitmap);
     }
 

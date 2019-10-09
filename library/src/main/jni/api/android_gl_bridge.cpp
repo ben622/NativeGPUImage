@@ -15,19 +15,19 @@ ben::ngp::NGPNativeBridge::NGPNativeBridge(JNIEnv *env) : JavaClass(env) {
 
 void ben::ngp::NGPNativeBridge::initialize(JNIEnv *env) {
     setClass(env);
-    addNativeMethod("setFilter", (void *) &setFilter,
+    addNativeMethod("nativeApplyFilter", (void *) &nativeApplyFilter,
                     kTypeVoid,
                     "Lcom/ben/android/library/filter/NativeFilter;", NULL);
 
-    addNativeMethod("setBitmap", (void *) &setBitmap,
+    addNativeMethod("nativeApplyBitmap", (void *) &nativeApplyBitmap,
                     kTypeVoid,
                     "Landroid/graphics/Bitmap;", NULL);
 
-    addNativeMethod("capture", (void *) &capture,
+    addNativeMethod("nativeCapture", (void *) &nativeCapture,
                     kTypeVoid,
                     "Landroid/graphics/Bitmap;", NULL);
 
-    addNativeMethod("requestRender", (void *) &requestRender,
+    addNativeMethod("nativeRequestRender", (void *) &nativeRequestRender,
                     kTypeVoid, NULL);
 
     addNativeMethod("nativeSurfaceCreated", (void *) nativeSurfaceCreated, kTypeVoid,
@@ -73,7 +73,7 @@ void ben::ngp::NGPNativeBridge::nativeCreateGL(JNIEnv *env, jclass javaThis) {
 
 }
 
-void ben::ngp::NGPNativeBridge::capture(JNIEnv *env, jclass javaThis, jobject object) {
+void ben::ngp::NGPNativeBridge::nativeCapture(JNIEnv *env, jclass javaThis, jobject object) {
     GPUImageRender *render = getNativeClassPtr<GPUImageRender>(
             GPU_IMAGE_RENDER_CLASS);
     render->getFilter()->setIsFBO(true);
@@ -131,18 +131,20 @@ void ben::ngp::NGPNativeBridge::capture(JNIEnv *env, jclass javaThis, jobject ob
     }
 }
 
-void ben::ngp::NGPNativeBridge::requestRender(JNIEnv *env, jclass javaThis) {
+
+
+void ben::ngp::NGPNativeBridge::nativeRequestRender(JNIEnv *env, jclass javaThis) {
     getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->reqeustRender();
 }
 
-void ben::ngp::NGPNativeBridge::setBitmap(JNIEnv *env, jclass javaThis, jobject object) {
+void ben::ngp::NGPNativeBridge::nativeApplyBitmap(JNIEnv *env, jclass javaThis, jobject object) {
     GPUImageRender *render = getNativeClassPtr<GPUImageRender>(
             GPU_IMAGE_RENDER_CLASS);
     //set rotation
     render->renderBitmap(env, object);
 }
 
-void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject object) {
+void ben::ngp::NGPNativeBridge::nativeApplyFilter(JNIEnv *env, jclass javaThis, jobject object) {
     //convert java object to native object.
     NativeFilter *nativeFilterPtr = getNativeClassPtr<NativeFilter>(JAVA_NATIVE_FILTER);
     LOGI("native filter type:%d", nativeFilterPtr->getFilterType());
@@ -187,11 +189,13 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case SOBEL_THRESHOLD: {
-            filterPtr = getNativeClassPtr<GPUImageSobelThresholdFilter>(JAVA_SOBEL_THRESHOLD_FILTER);
+            filterPtr = getNativeClassPtr<GPUImageSobelThresholdFilter>(
+                    JAVA_SOBEL_THRESHOLD_FILTER);
             break;
         }
         case THREE_X_THREE_CONVOLUTION: {
-            filterPtr = getNativeClassPtr<GPUImage3x3ConvolutionFilter>(JAVA_3X3_CONVOLUTION_FILTER);
+            filterPtr = getNativeClassPtr<GPUImage3x3ConvolutionFilter>(
+                    JAVA_3X3_CONVOLUTION_FILTER);
             break;
         }
         case FILTER_GROUP: {
@@ -232,7 +236,8 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case HIGHLIGHT_SHADOW: {
-            filterPtr = getNativeClassPtr<GPUImageHighlightShadowFilter>(JAVA_HIGHLIGHT_SHADOW_FILTER);
+            filterPtr = getNativeClassPtr<GPUImageHighlightShadowFilter>(
+                    JAVA_HIGHLIGHT_SHADOW_FILTER);
             break;
         }
         case MONOCHROME: {
@@ -266,7 +271,8 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case LUMINANCE_THRESHSOLD: {
-            filterPtr = getNativeClassPtr<GPUImageLuminanceThresholdFilter>(JAVA_LUMINANCE_THRESHOLD_FILTER);
+            filterPtr = getNativeClassPtr<GPUImageLuminanceThresholdFilter>(
+                    JAVA_LUMINANCE_THRESHOLD_FILTER);
             break;
         }
         case BLEND_COLOR_BURN: {
@@ -432,7 +438,8 @@ void ben::ngp::NGPNativeBridge::setFilter(JNIEnv *env, jclass javaThis, jobject 
             break;
         }
         case WEAK_PIXEL_INCLUSION: {
-            filterPtr = getNativeClassPtr<GPUImageWeakPixelInclusionFilter>(JAVA_WEAK_PIXEL_INCLUSION_FILTER);
+            filterPtr = getNativeClassPtr<GPUImageWeakPixelInclusionFilter>(
+                    JAVA_WEAK_PIXEL_INCLUSION_FILTER);
             break;
         }
         case FALSE_COLOR: {

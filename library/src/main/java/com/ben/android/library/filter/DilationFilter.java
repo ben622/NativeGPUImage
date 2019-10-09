@@ -1,5 +1,7 @@
 package com.ben.android.library.filter;
 
+import android.support.annotation.IntRange;
+
 import com.ben.android.library.jni.annotations.UsedByNativeCode;
 import com.ben.android.library.util.FilterType;
 
@@ -22,7 +24,7 @@ public class DilationFilter extends NativeFilter {
     }
     @SuppressWarnings("UnusedDeclaration")
     @UsedByNativeCode
-    public void setRadius(int radius) {
+    public void setRadius(@IntRange(from = 1,to = 4) int radius) {
         this.radius = radius;
     }
 

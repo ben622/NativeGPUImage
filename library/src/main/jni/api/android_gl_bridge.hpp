@@ -67,13 +67,13 @@ namespace ben {
             virtual const char *getCanonicalName() const;
 
         private:
-            static void setFilter(JNIEnv *env, jclass javaThis, jobject object);
+            static void nativeApplyFilter(JNIEnv *env, jclass javaThis, jobject object);
 
-            static void setBitmap(JNIEnv *env, jclass javaThis, jobject object);
+            static void nativeApplyBitmap(JNIEnv *env, jclass javaThis, jobject object);
 
-            static void requestRender(JNIEnv *env, jclass javaThis);
+            static void nativeRequestRender(JNIEnv *env, jclass javaThis);
 
-            static void capture(JNIEnv *env, jclass javaThis, jobject object);
+            static void nativeCapture(JNIEnv *env, jclass javaThis, jobject object);
 
             static void nativeSurfaceCreated(JNIEnv *env, jclass javaThis, jobject surface);
 
@@ -82,6 +82,8 @@ namespace ben {
             static void nativeDestroyed(JNIEnv *env, jclass javaThis);
 
             static void nativeCreateGL(JNIEnv *env, jclass javaThis);
+
+            //static void nativeCreateGL(JNIEnv *env, jclass javaThis, jint width, jint height);
 
         private:
             static void readBitmapPixel(JNIEnv *env, GPUImageTwoInputFilter *filter);

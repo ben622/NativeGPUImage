@@ -14,8 +14,10 @@ static EGLSurface winSurface;
 static EGLDisplay display;
 static ANativeWindow *nativeWindow;
 
-static EGLSurface fboEglSurface;
-static EGLDisplay fboEglDisp;
+static EGLConfig eglConf;
+static EGLSurface eglSurface;
+static EGLContext eglCtx;
+static EGLDisplay eglDisp;
 
 void ben::ngp::GPUImageRender::nativeSurfaceCreated(JNIEnv *env, jclass javaThis, jobject surface) {
     //1.准备opengl环境
@@ -112,97 +114,92 @@ void ben::ngp::GPUImageRender::nativeSurfaceChanged(JNIEnv *env, jclass javaThis
 }
 
 void ben::ngp::GPUImageRender::nativeDestroyed(JNIEnv *env, jclass javaThis) {
-
+// TODO nativeDestroyed
 }
 
 void ben::ngp::GPUImageRender::nativeCreateGL(JNIEnv *env, jclass javaThis) {
-    // EGL config attributes
     const EGLint confAttr[] =
             {
-                    EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,// very important!
-                    EGL_SURFACE_TYPE,EGL_PBUFFER_BIT,//EGL_WINDOW_BIT EGL_PBUFFER_BIT we will create a pixelbuffer surface
-                    EGL_RED_SIZE,   8,
+                    EGL_RED_SIZE, 8,
                     EGL_GREEN_SIZE, 8,
-                    EGL_BLUE_SIZE,  8,
-                    EGL_ALPHA_SIZE, 8,// if you need the alpha channel
-                    EGL_DEPTH_SIZE, 8,// if you need the depth buffer
-                    EGL_STENCIL_SIZE,8,
+                    EGL_BLUE_SIZE, 8,
+                    EGL_ALPHA_SIZE, 8,
+                    EGL_DEPTH_SIZE, 16,
+                    EGL_STENCIL_SIZE, 0,
+                    EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                    EGL_SURFACE_TYPE,
+                    EGL_PBUFFER_BIT,
                     EGL_NONE
             };
-    // EGL context attributes
     const EGLint ctxAttr[] = {
-            EGL_CONTEXT_CLIENT_VERSION, 2,// very important!
+            EGL_CONTEXT_CLIENT_VERSION, 2,
             EGL_NONE
     };
     // surface attributes
-    // the surface size is set to the input frame size
     const EGLint surfaceAttr[] = {
-            EGL_WIDTH,512,
-            EGL_HEIGHT,512,
+            EGL_WIDTH,1080,
+            EGL_HEIGHT,1920,
             EGL_NONE
     };
-    EGLint eglMajVers, eglMinVers;
     EGLint numConfigs;
 
-    fboEglSurface = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    if(fboEglSurface == EGL_NO_DISPLAY)
+    eglDisp = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if(eglDisp == EGL_NO_DISPLAY)
     {
         //Unable to open connection to local windowing system
         LOGI("%s","Unable to open connection to local windowing system");
     }
-    if(!eglInitialize(fboEglSurface, &eglMajVers, &eglMinVers))
+    if(!eglInitialize(eglDisp,NULL, NULL))
     {
         // Unable to initialize EGL. Handle and recover
-        LOGI("%s", "Unable to initialize EGL");
+        LOGI("%s","Unable to initialize EGL");
     }
-    LOGI("EGL init with version %d.%d", eglMajVers, eglMinVers);
     // choose the first config, i.e. best config
-    EGLConfig config;
-    if(!eglChooseConfig(fboEglSurface, confAttr, &config, 1, &numConfigs))
+    if(!eglChooseConfig(eglDisp, confAttr, &eglConf, 1, &numConfigs))
     {
-        LOGI("%s", "some config is wrong");
+        LOGI("%s","some config is wrong");
     }
     else
     {
-        LOGI("%s", "all configs is OK");
+        LOGI("%s","all configs is OK");
     }
     // create a pixelbuffer surface
-    fboEglSurface = eglCreatePbufferSurface(fboEglDisp, config, surfaceAttr);
-    if(fboEglSurface == EGL_NO_SURFACE)
+    eglSurface = eglCreatePbufferSurface(eglDisp, eglConf, surfaceAttr);
+    if(eglSurface == EGL_NO_SURFACE)
     {
         switch(eglGetError())
         {
             case EGL_BAD_ALLOC:
                 // Not enough resources available. Handle and recover
-                LOGE("%s","Not enough resources available");
+                LOGI("%s","Not enough resources available");
                 break;
             case EGL_BAD_CONFIG:
                 // Verify that provided EGLConfig is valid
-                LOGE("%s","provided EGLConfig is invalid");
+                LOGI("%s","provided EGLConfig is invalid");
                 break;
             case EGL_BAD_PARAMETER:
                 // Verify that the EGL_WIDTH and EGL_HEIGHT are
                 // non-negative values
-                LOGE("%s","provided EGL_WIDTH and EGL_HEIGHT is invalid");
+                LOGI("%s","provided EGL_WIDTH and EGL_HEIGHT is invalid");
                 break;
             case EGL_BAD_MATCH:
                 // Check window and EGLConfig attributes to determine
                 // compatibility and pbuffer-texture parameters
-                LOGE("%s","Check window and EGLConfig attributes");
+                LOGI("%s","Check window and EGLConfig attributes");
                 break;
         }
     }
-    EGLContext context  = eglCreateContext(fboEglDisp, config, EGL_NO_CONTEXT, ctxAttr);
-    if(context == EGL_NO_CONTEXT)
+    eglCtx = eglCreateContext(eglDisp, eglConf, EGL_NO_CONTEXT, ctxAttr);
+    if(eglCtx == EGL_NO_CONTEXT)
     {
         EGLint error = eglGetError();
         if(error == EGL_BAD_CONFIG)
         {
             // Handle error and recover
-            LOGE("%s","EGL_BAD_CONFIG");
+            LOGI("%s","EGL_BAD_CONFIG");
         }
     }
-    if(!eglMakeCurrent(fboEglDisp, fboEglSurface, fboEglSurface, context))
+    if(!eglMakeCurrent(eglDisp, eglSurface, eglSurface, eglCtx))
     {
         LOGI("%s","MakeCurrent failed");
     }
@@ -226,6 +223,8 @@ void ben::ngp::GPUImageRender::nativeCreateGL(JNIEnv *env, jclass javaThis) {
 
     ben::ngp::GPUImageFilter *filter = new ben::ngp::GPUImageFilter();
     filter->setIsFBO(true);
+    filter->setEglDisplay(&eglDisp);
+    filter->setEglSurface(&eglSurface);
     render->setFilter(filter);
     //filter init
     render->getFilter()->ifNeedInit();

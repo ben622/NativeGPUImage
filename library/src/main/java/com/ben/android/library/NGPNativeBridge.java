@@ -21,23 +21,17 @@ public class NGPNativeBridge {
      * @param filter
      * @param <T>
      */
-    public native static <T extends NativeFilter> void setFilter(T filter);
+    public native static <T extends NativeFilter> void nativeApplyFilter(T filter);
 
-    /**
-     * render bitmap
-     * @param bitmap
-     */
-    public native static void setBitmap(Bitmap bitmap);
+    public native static void nativeApplyBitmap(Bitmap bitmap);
 
-    /**
-     * 从gl中获取渲染后的bitmap
-     * @param bitmap
-     */
-    public native static void capture(Bitmap bitmap);
+    public native static void nativeApplyYUV420(byte[] yuv);
+
+    public native static void nativeCapture(Bitmap bitmap);
     /**
      * use this method request egl render.
      */
-    public native static void requestRender();
+    public native static void nativeRequestRender();
 
     public native static void nativeSurfaceCreated(Surface surface);
 
@@ -46,4 +40,7 @@ public class NGPNativeBridge {
     public native static void nativeDestroyed();
     //FBO
     public native static void nativeCreateGL();
+
+    //public native static void nativeCreateGL(int width,int height);
+
 }

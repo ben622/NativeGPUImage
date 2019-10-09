@@ -13,7 +13,6 @@ import com.ben.android.library.NGPNativeBridge
 import com.ben.android.nativegpuimage.adapter.ImageAdapter
 import com.chad.library.adapter.base.BaseQuickAdapter
 import kotlinx.android.synthetic.main.activity_image.*
-import android.widget.Toast
 
 
 class ImageActivity : AppCompatActivity() {
@@ -32,8 +31,8 @@ class ImageActivity : AppCompatActivity() {
             val can = Canvas(resizedBitmap)
             can.drawARGB(0x00, 0x00, 0x00, 0x00)
             can.drawBitmap(bitmap, 0f, 0f, null)
-            NGPNativeBridge.setBitmap(resizedBitmap)
-            NGPNativeBridge.requestRender()
+            NGPNativeBridge.nativeApplyBitmap(resizedBitmap)
+            NGPNativeBridge.nativeRequestRender()
 
             var adapter = ImageAdapter(this)
             adapter.width = mGPUImageRender.measuredWidth
@@ -42,8 +41,8 @@ class ImageActivity : AppCompatActivity() {
             mRecyclerView.adapter = adapter
             adapter.setOnItemClickListener(object : BaseQuickAdapter.OnItemClickListener {
                 override fun onItemClick(_adapter: BaseQuickAdapter<*, *>?, view: View?, position: Int) {
-                    NGPNativeBridge.setFilter(adapter.data.get(position))
-                    NGPNativeBridge.requestRender()
+                    NGPNativeBridge.nativeApplyFilter(adapter.data.get(position))
+                    NGPNativeBridge.nativeRequestRender()
                 }
 
             })
