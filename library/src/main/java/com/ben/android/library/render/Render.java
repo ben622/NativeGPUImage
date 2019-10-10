@@ -13,6 +13,12 @@ public class Render  {
     private int position;
     private Resource resource;
 
+    private Render(NativeFilter filter, int position, Resource resource) {
+        this.filter = filter;
+        this.position = position;
+        this.resource = resource;
+    }
+
     public NativeFilter getFilter() {
         return filter;
     }
@@ -35,5 +41,8 @@ public class Render  {
 
     public void setResource(Resource resource) {
         this.resource = resource;
+    }
+    public static Render obtain(Resource resource,NativeFilter filter, int position){
+        return new Render(filter, position, resource);
     }
 }

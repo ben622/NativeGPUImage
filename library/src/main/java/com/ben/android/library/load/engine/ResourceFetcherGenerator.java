@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 
 import com.ben.android.library.load.fetcher.DataFetcher;
 
+import java.util.concurrent.Callable;
+
 import javax.sql.DataSource;
 
 /**
@@ -12,7 +14,7 @@ import javax.sql.DataSource;
  * @version 1.0
  * @create 2019/10/9
  */
-public interface DataFetcherGenerator {
+public interface ResourceFetcherGenerator<T> extends Runnable, Callable<T> {
 
     interface FetcherReadyCallback {
 
@@ -21,5 +23,4 @@ public interface DataFetcherGenerator {
         void onDataFetcherFailed( Exception e);
     }
 
-    void start();
 }

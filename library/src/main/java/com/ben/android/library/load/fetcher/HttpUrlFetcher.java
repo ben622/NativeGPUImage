@@ -49,11 +49,26 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
             callback.onLoadFailed(e);
         }
     }
+
+    @Override
+    public InputStream loadData() {
+        try {
+            return loadDataWithRedirects(new URL(Uri.encode(url, ALLOWED_URI_CHARS)), 0, null);
+        } catch (IOException e) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Failed to load data for url", e);
+            }
+        }
+        return null;
+    }
+
     private InputStream loadDataWithRedirects(URL url, int redirects,Map<String, String> headers) throws IOException {
 
         urlConnection = connectionFactory.build(url);
-        for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
-            urlConnection.addRequestProperty(headerEntry.getKey(), headerEntry.getValue());
+        if (headers != null) {
+            for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
+                urlConnection.addRequestProperty(headerEntry.getKey(), headerEntry.getValue());
+            }
         }
         urlConnection.setConnectTimeout(timeout);
         urlConnection.setReadTimeout(timeout);

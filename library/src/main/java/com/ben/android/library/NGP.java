@@ -39,7 +39,7 @@ public class NGP {
     }
 
 
-    public static RenderManager with(@NonNull Context context) {
-        return null;
+    public static RenderBuilder with(@NonNull Context context) {
+        return new RenderBuilder(context);
     }
 }

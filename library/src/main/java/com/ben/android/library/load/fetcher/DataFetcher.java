@@ -14,4 +14,6 @@ public interface DataFetcher<T> {
         void onLoadFailed(@NonNull Exception e);
     }
     void loadData(DataCallback<? super T> callback);
+
+    T loadData();
 }

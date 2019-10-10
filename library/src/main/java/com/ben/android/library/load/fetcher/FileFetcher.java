@@ -35,4 +35,16 @@ public class FileFetcher implements DataFetcher<InputStream>{
             callback.onLoadFailed(e);
         }
     }
+
+    @Override
+    public InputStream loadData() {
+        try {
+           return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "file not found ["+file.getPath()+"]", e);
+            }
+        }
+        return null;
+    }
 }

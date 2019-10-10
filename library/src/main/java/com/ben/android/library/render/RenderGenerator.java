@@ -1,37 +1,26 @@
 package com.ben.android.library.render;
 
-import android.graphics.Bitmap;
 
 import com.ben.android.library.NGPNativeBridge;
-import com.ben.android.library.load.engine.DataGenerator;
-import com.ben.android.library.load.engine.Resource;
 
-import java.io.File;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author @zhangchuan622@gmail.com
  * @version 1.0
  * @create 2019/10/9
  */
-public class RenderGenerator implements RenderFetcherGenerator {
-    private Resource resource;
-    private DataGenerator dataGenerator;
+public class RenderGenerator implements RenderFetcherGenerator{
+    private LinkedBlockingQueue<Render> mRenderQueue = new LinkedBlockingQueue<>();
     @Override
-    public void applyBitmaps(Bitmap... bitmaps) {
-    }
+    public void run() {
+        synchronized (RenderGenerator.class) {
+            try {
+                Render render = mRenderQueue.take();
 
-    @Override
-    public void applyBitmapByUrls(String... urls) {
-
-    }
-
-    @Override
-    public void applyBitmapByFiles(String... files) {
-
-    }
-
-    @Override
-    public void applyBitmapByFiles(File... files) {
-
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

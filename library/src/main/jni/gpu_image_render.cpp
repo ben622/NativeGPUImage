@@ -115,6 +115,15 @@ void ben::ngp::GPUImageRender::nativeSurfaceChanged(JNIEnv *env, jclass javaThis
 
 void ben::ngp::GPUImageRender::nativeDestroyed(JNIEnv *env, jclass javaThis) {
 // TODO nativeDestroyed
+    this->getFilter()->destory();
+    eglMakeCurrent(eglDisp, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglDestroyContext(eglDisp, eglCtx);
+    eglDestroySurface(eglDisp, eglSurface);
+    eglTerminate(eglDisp);
+
+    eglDisp = EGL_NO_DISPLAY;
+    eglSurface = EGL_NO_SURFACE;
+    eglCtx = EGL_NO_CONTEXT;
 }
 
 void ben::ngp::GPUImageRender::nativeCreateGL(JNIEnv *env, jclass javaThis) {
@@ -478,10 +487,7 @@ void ben::ngp::GPUImageRender::resetFilter(ben::ngp::GPUImageFilter *filter) {
 
 }
 
-/**
- *
- * @param jbitmap
- */
+
 void ben::ngp::GPUImageRender::renderBitmap(JNIEnv *env, jobject jbitmap) {
     AndroidBitmapInfo bitmapInfo;
     if (AndroidBitmap_getInfo(env, jbitmap, &bitmapInfo) < 0) {
@@ -509,10 +515,10 @@ void ben::ngp::GPUImageRender::surfaceChange(int width, int height) {
     //reset width height。
     int windowWidth = width;
     int windowHeight = height;
-    if (windowWidth > windowHeight) {
+   /* if (windowWidth > windowHeight) {
         windowHeight = width;
         windowWidth = height;
-    }
+    }*/
     this->setOutputWidth(windowWidth);
     this->setOutputHeight(windowHeight);
     glViewport(0, 0, windowWidth, windowHeight);

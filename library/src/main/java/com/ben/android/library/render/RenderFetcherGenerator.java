@@ -11,14 +11,8 @@ import java.io.File;
  * @version 1.0
  * @create 2019/10/9
  */
-public interface RenderFetcherGenerator {
+public interface RenderFetcherGenerator extends Runnable {
 
-    void applyBitmaps(Bitmap... bitmaps);
 
-    void applyBitmapByUrls(String... urls);
-
-    void applyBitmapByFiles(String... files);
-
-    void applyBitmapByFiles(File... files);
 
 }

@@ -184,19 +184,18 @@ void ben::ngp::GPUImageFilterGroup::updateMergedFilters() {
 }
 
 void ben::ngp::GPUImageFilterGroup::destroyFramebuffers() {
-    /* if (frameBufferTextures != NULL) {
-         glDeleteTextures(frameBufferTexturesSize,
-                          reinterpret_cast<const GLuint *>(frameBufferTextures));
+     if (frameBufferTextures != NULL) {
+         glDeleteTextures(1,reinterpret_cast<const GLuint *>(frameBufferTextures));
          //remove pointer
          frameBufferTexturesSize = 0;
          delete frameBufferTextures;
      }
      if (frameBuffers != NULL) {
-         glDeleteFramebuffers(frameBuffersSize, reinterpret_cast<const GLuint *>(frameBuffers));
+         glDeleteFramebuffers(1, reinterpret_cast<const GLuint *>(frameBuffers));
          //remove pointer
          frameBuffersSize = 0;
          delete frameBuffers;
-     }*/
+     }
 }
 
 void ben::ngp::GPUImageFilterGroup::addFilter(ben::ngp::GPUImageFilter *aFilter) {

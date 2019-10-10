@@ -65,7 +65,7 @@ namespace ben {
 
         static GLuint loadTextureByPixel(void* pixel_source,int width,int height,int usedTexId) {
             GLuint renderbuffers;
-            if (usedTexId == NO_TEXTURE) {
+           /* if (usedTexId == NO_TEXTURE) {
                 glGenTextures(1, &renderbuffers);
                 glBindTexture(GL_TEXTURE_2D, renderbuffers);
                 glTexParameterf(GL_TEXTURE_2D,
@@ -80,10 +80,26 @@ namespace ben {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                              pixel_source);
             } else {
-                glBindTexture(GL_TEXTURE_2D, renderbuffers);
+                //替换原来的纹理
+                glBindTexture(GL_TEXTURE_2D, usedTexId);
                 glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
                                 pixel_source);
-            }
+            }*/
+
+            glGenTextures(1, &renderbuffers);
+            glBindTexture(GL_TEXTURE_2D, renderbuffers);
+            glTexParameterf(GL_TEXTURE_2D,
+                            GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D,
+                            GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D,
+                            GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameterf(GL_TEXTURE_2D,
+                            GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                         pixel_source);
+
             return renderbuffers;
         }
 
