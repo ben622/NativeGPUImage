@@ -65,7 +65,7 @@ namespace ben {
 
         static GLuint loadTextureByPixel(void* pixel_source,int width,int height,int usedTexId) {
             GLuint renderbuffers;
-           /* if (usedTexId == NO_TEXTURE) {
+            /*if (usedTexId == NO_TEXTURE) {
                 glGenTextures(1, &renderbuffers);
                 glBindTexture(GL_TEXTURE_2D, renderbuffers);
                 glTexParameterf(GL_TEXTURE_2D,
@@ -84,7 +84,15 @@ namespace ben {
                 glBindTexture(GL_TEXTURE_2D, usedTexId);
                 glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
                                 pixel_source);
-            }*/
+            }
+            */
+
+            if (usedTexId != NO_TEXTURE) {
+                LOGI("%s ", "free memory!");
+                glDeleteTextures(1, (const GLuint *) new int[1]{
+                        usedTexId
+                });
+            }
 
             glGenTextures(1, &renderbuffers);
             glBindTexture(GL_TEXTURE_2D, renderbuffers);
@@ -99,6 +107,7 @@ namespace ben {
 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                          pixel_source);
+
 
             return renderbuffers;
         }
