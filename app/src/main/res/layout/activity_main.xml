@@ -10,23 +10,8 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="设置bitmap"
-        android:onClick="renderBitmap"/>
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="设置filter"
-        android:onClick="setFilter"/>
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="capture"
-        android:onClick="capture"/>
+        android:text="FBO Test"
+        android:onClick="fboTest"/>
 
-
-    <com.ben.android.library.GPUImageRender
-        android:id="@+id/mGPUImageRender"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
 </LinearLayout>

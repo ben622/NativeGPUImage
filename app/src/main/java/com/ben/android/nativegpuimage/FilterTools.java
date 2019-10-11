@@ -1,20 +1,9 @@
 package com.ben.android.nativegpuimage;
 
-import android.graphics.Bitmap;
+import android.content.Context;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.PointF;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
 
-import com.ben.android.library.NGP;
-import com.ben.android.library.NGPFilterListener;
-import com.ben.android.library.NGPNativeBridge;
-import com.ben.android.library.Result;
 import com.ben.android.library.filter.DilationFilter;
 import com.ben.android.library.filter.GPUImage3x3ConvolutionFilter;
 import com.ben.android.library.filter.GPUImageAddBlendFilter;
@@ -55,39 +44,21 @@ import com.ben.android.library.filter.GaussianBlurFilter;
 import com.ben.android.library.filter.NativeFilter;
 import com.ben.android.library.filter.PixelationFilter;
 import com.ben.android.library.filter.ZoomBlurFilter;
-import com.ben.android.library.render.Render;
-import com.ben.android.library.util.Rotation;
-import com.ben.android.library.util.ScaleType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FBOActivity extends AppCompatActivity {
-
-    private String TAG = this.getClass().getSimpleName();
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fbo);
-    }
-
-    public void OnClick(View view) {
-        NGP.initialize(this);
-
-        final ImageView imageView = new ImageView(this);
-       /* new AlertDialog.Builder(this)
-                .setView(imageView)
-                .create().show();*/
-        final List<NativeFilter> filters = new ArrayList<NativeFilter>() {
+public class FilterTools {
+    public static List<NativeFilter> getFilters(final Context context) {
+        return  new ArrayList<NativeFilter>() {
             {
-               /* add(new GPUImageSketchFilter());
+                add(new GPUImageSketchFilter());
                 add(new GPUImageThresholdEdgeDetectionFilter());
                 add(new GPUImageCrosshatchFilter());
                 add(new GPUImageHalftoneFilter());
-                add(new GPUImageLuminanceThresholdFilter());*/
+                add(new GPUImageLuminanceThresholdFilter());
                 add(new GPUImageLuminanceFilter());
-                //add(new GPUImageSolarizeFilter(0.01f));
+                add(new GPUImageSolarizeFilter(0.01f));
                 add(new GPUImageHazeFilter());
                 add(new GPUImageHighlightShadowFilter(0.5f, 0.5f));
                 add(new GPUImageSharpenFilter(-4.0f));
@@ -109,8 +80,8 @@ public class FBOActivity extends AppCompatActivity {
                 add(new GPUImageSobelEdgeDetectionFilter(1.7f));
                 add(new GPUImageGrayscaleFilter());
                 add(new GPUImageVibranceFilter(1.5f));
-                add(new GPUImageAddBlendFilter(BitmapFactory.decodeResource(getResources(), R.drawable.lookup_amatorka)));
-                add(new GPUImageAddBlendFilter(BitmapFactory.decodeResource(getResources(), R.drawable.lookup_amatorka)));
+                add(new GPUImageAddBlendFilter(BitmapFactory.decodeResource(context.getResources(), R.drawable.lookup_amatorka)));
+                add(new GPUImageAddBlendFilter(BitmapFactory.decodeResource(context.getResources(), R.drawable.lookup_amatorka)));
                 add(new GPUImageToonFilter(0.5f, 20.0f));
                 add(new GPUImageGammaFilter(2.0f));
                 add(new GPUImageFalseColorFilter());
@@ -118,54 +89,10 @@ public class FBOActivity extends AppCompatActivity {
                 add(new GPUImageExclusionBlendFilter());
                 add(new GPUImage3x3ConvolutionFilter(new float[]{0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f}));
                 add(new GPUImageEmbossFilter());
-                add(new GPUImageDivideBlendFilter(BitmapFactory.decodeResource(getResources(), R.drawable.lookup_amatorka)));
-                add(new GPUImageAlphaBlendFilter(BitmapFactory.decodeResource(getResources(), R.drawable.lookup_amatorka), 0.5f));
-                add(new GPUImageDissolveBlendFilter(BitmapFactory.decodeResource(getResources(), R.drawable.lookup_amatorka), 1.0f));
+                add(new GPUImageDivideBlendFilter(BitmapFactory.decodeResource(context.getResources(), R.drawable.lookup_amatorka)));
+                add(new GPUImageAlphaBlendFilter(BitmapFactory.decodeResource(context.getResources(), R.drawable.lookup_amatorka), 0.5f));
+                add(new GPUImageDissolveBlendFilter(BitmapFactory.decodeResource(context.getResources(), R.drawable.lookup_amatorka), 1.0f));
             }
         };
-       new Thread(new Runnable() {
-           @Override
-           public void run() {
-
-
-               List<Result> results = NGP.with(FBOActivity.this)
-                       .applyBitmapByUrls(
-                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo1.jpg",
-                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo2.jpg",
-                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo3.jpg",
-                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo4.jpg",
-                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo5.jpg"
-                       )
-                       .applyBitmaps(
-                               R.drawable.photo1,
-                               R.drawable.photo2,
-                               R.drawable.photo3,
-                               R.drawable.photo4,
-                               R.drawable.photo5
-                       )
-                       .applyFilter(new GPUImageSaturationFilter(2.0f))
-                       //.applyWidth(1000)   //指定宽度渲染，不指定宽度则按原图宽度渲染
-                       //.applyHeight(1000)  //指定高度渲染，不指定高度则按原图高度渲染
-                       //.applyRotation(Rotation.ROTATION_90)   //旋转90度进行渲染
-                       //.applyScaleType(ScaleType.CENTER_CROP) //默认 ScaleType.CENTER_INSIDE
-                       .applyNGPFilter(new NGPFilterListener() {
-                           @Override
-                           public Render.UpgradRender apply(Render.UpgradRender render, int position) {
-                               //针对批量处理单独设置filter
-                               render.setFilter(filters.get(position));
-                               return render;
-                           }
-                       })
-                       .build()
-                       .get();
-
-               for (Result result : results) {
-                   Log.e(TAG, result.getPath() );
-               }
-
-           }
-       }).start();
-
-
     }
 }

@@ -3,6 +3,7 @@ package com.ben.android.library.load.engine;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -21,7 +22,7 @@ public class ResourceGenerator implements ResourceFetcherGenerator<Resource>, Da
     private DataFetcher<InputStream> fetcher;
     private int position;
 
-    public ResourceGenerator(int position,DataFetcher<InputStream> fetcher, ResourceFetcherGenerator.FetcherReadyCallback fetcherReadyCallback) {
+    public ResourceGenerator(int position, DataFetcher<InputStream> fetcher, ResourceFetcherGenerator.FetcherReadyCallback fetcherReadyCallback) {
         this.fetcherReadyCallback = fetcherReadyCallback;
         this.fetcher = fetcher;
         this.position = position;
@@ -31,13 +32,15 @@ public class ResourceGenerator implements ResourceFetcherGenerator<Resource>, Da
     public void onDataReady(@Nullable Object data) {
         Bitmap bitmap = transcode(data);
 
-        fetcherReadyCallback.onDataFetcherReady(Resource.obtain(bitmap,position));
+        fetcherReadyCallback.onDataFetcherReady(Resource.obtain(bitmap, position));
     }
 
     private Bitmap transcode(@Nullable Object data) {
+        if (data == null) return null;
+
         Bitmap bitmap = null;
         if (data instanceof InputStream) {
-            bitmap = BitmapFactory.decodeStream((InputStream) data);
+            bitmap = BitmapFactory.decodeStream((InputStream) data );
         }
         if (data instanceof byte[]) {
             byte[] bytes = (byte[]) data;
@@ -61,6 +64,8 @@ public class ResourceGenerator implements ResourceFetcherGenerator<Resource>, Da
         }
     }
 
+
+
     @Override
     public void onLoadFailed(@NonNull Exception e) {
         fetcherReadyCallback.onDataFetcherFailed(e);
@@ -72,7 +77,7 @@ public class ResourceGenerator implements ResourceFetcherGenerator<Resource>, Da
     }
 
     @Override
-    public Resource call(){
-        return Resource.obtain(transcode(fetcher.loadData()),position);
+    public Resource call() {
+        return Resource.obtain(transcode(fetcher.loadData()), position);
     }
 }

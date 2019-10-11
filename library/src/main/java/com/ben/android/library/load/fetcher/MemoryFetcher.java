@@ -5,25 +5,22 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 
-
 /**
  * @author @zhangchuan622@gmail.com
  * @version 1.0
  * @create 2019/10/10
  */
-public class ResourceFetcher implements DataFetcher<Bitmap> {
-    private Resources resource;
-    private int resId;
+public class MemoryFetcher implements DataFetcher<Bitmap> {
+    private Bitmap bitmap;
 
-    public ResourceFetcher(Resources resource, int resId) {
-        this.resource = resource;
-        this.resId = resId;
+    public MemoryFetcher(Bitmap bitmap) {
+        this.bitmap = bitmap;
     }
 
     @Override
     public void loadData(DataCallback<? super Bitmap> callback) {
         try {
-            callback.onDataReady(BitmapFactory.decodeResource(resource, resId));
+            callback.onDataReady(bitmap);
         } catch (Exception e) {
             callback.onLoadFailed(e);
         }
@@ -32,6 +29,6 @@ public class ResourceFetcher implements DataFetcher<Bitmap> {
 
     @Override
     public Bitmap loadData() {
-        return BitmapFactory.decodeResource(resource, resId);
+        return bitmap;
     }
 }

@@ -10,7 +10,6 @@ INCLUDE_DIRECTORIES(${ROOT}/include)
 
 
 add_subdirectory(${ROOT}/include/jni)
-add_subdirectory(${ROOT}/include/lib_json)
 add_subdirectory(${ROOT}/filter)
 add_subdirectory(${ROOT}/api)
 

@@ -8,6 +8,8 @@ import com.ben.android.library.filter.NativeFilter;
 import com.ben.android.library.load.fetcher.DataFetcher;
 import com.ben.android.library.load.fetcher.FileFetcher;
 import com.ben.android.library.load.fetcher.HttpUrlFetcher;
+import com.ben.android.library.load.fetcher.MemoryFetcher;
+import com.ben.android.library.load.fetcher.ResourceFetcher;
 import com.ben.android.library.util.Rotation;
 import com.ben.android.library.util.ScaleType;
 
@@ -24,6 +26,7 @@ public class RenderBuilder {
     private Context context;
     private boolean isGif;
     private NativeFilter filter;
+    private List<NativeFilter> multipleFilter;
     private List<NGPListener> listeners;
     private List<DataFetcher> fetchers;
     //批处理过滤
@@ -38,6 +41,11 @@ public class RenderBuilder {
         this.context = context;
         listeners = new ArrayList<>();
         fetchers = new ArrayList<>();
+        multipleFilter = new ArrayList<>();
+    }
+
+    public List<NativeFilter> getMultipleFilter() {
+        return multipleFilter;
     }
 
     public Rotation getRotation() {
@@ -105,10 +113,26 @@ public class RenderBuilder {
         this.filter = filter;
         return this;
     }
+    public <T extends NativeFilter> RenderBuilder applyMultipleFilter(T... filters){
+        for (T t : filters) {
+            multipleFilter.add(t);
+        }
+        return this;
+    }
+
 
 
     public RenderBuilder applyBitmaps(Bitmap... bitmaps) {
+        for (Bitmap bitmap : bitmaps) {
+            fetchers.add(new MemoryFetcher(bitmap));
+        }
+        return this;
+    }
 
+    public RenderBuilder applyBitmaps(int... resourceId) {
+        for (int id : resourceId) {
+            fetchers.add(new ResourceFetcher(context.getResources(), id));
+        }
         return this;
     }
 

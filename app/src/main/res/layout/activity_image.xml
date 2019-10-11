@@ -7,8 +7,8 @@
     android:background="#000000"
     android:orientation="vertical"
     tools:context=".ImageActivity">
-    <com.ben.android.library.GPUImageRender
-        android:id="@+id/mGPUImageRender"
+    <ImageView
+        android:id="@+id/mImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/mRecyclerView"/>

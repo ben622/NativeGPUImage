@@ -37,12 +37,12 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
     private ImageView targetView;
     private List<Result> mResultList = new ArrayList<>();
 
-    private Handler mHandler = new Handler(){
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case RESPONSE_CODE:
-                    if (mResultList.size()<=0) return;
+                    if (mResultList.size() <= 0) return;
                     if (mResultList.size() > 1 && targetView != null) {
                         targetView.setImageBitmap(BitmapFactory.decodeFile(mResultList.get(0).getPath()));
                     }
@@ -61,7 +61,7 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
         async();
     }
 
-    public List<Result> get(){
+    public List<Result> get() {
         return sync();
     }
 
@@ -79,49 +79,88 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
     }
 
     /**
-     * 同步堵塞渲染
+     * 同步渲染
+     *
      * @return
      */
-    private List<Result> sync(){
+    private List<Result> sync() {
         NGPNativeBridge.nativeCreateGL();
-        for (int i = 0; i < builder.getFetchers().size(); i++) {
-            DataFetcher fetcher = builder.getFetchers().get(i);
-            Resource resource = NGPExecutors.submit(new ResourceGenerator(i,fetcher, this));
-            if (resource == null) {
-                Log.e(TAG, "resource  null!");
-                continue;
+        if (builder.getMultipleFilter().isEmpty()) {
+            for (int i = 0; i < builder.getFetchers().size(); i++) {
+                DataFetcher fetcher = builder.getFetchers().get(i);
+                Resource resource = NGPExecutors.submit(new ResourceGenerator(i, fetcher, this));
+                if (resource == null) {
+                    Log.e(TAG, "resource  null!");
+                    continue;
+                }
+
+                NativeFilter applyFilter = builder.getFilter();
+                if (builder.getFilterListener() != null) {
+                    Render.UpgradRender upgradRender = Render.UpgradRender.obtain(applyFilter);
+                    upgradRender = builder.getFilterListener().apply(upgradRender, resource.getPosition());
+                    applyFilter = upgradRender.getFilter();
+                }
+
+                int width = builder.getWidth() <= 0 ? resource.getBitmap().getWidth() : builder.getWidth();
+                int height = builder.getHeight() <= 0 ? resource.getBitmap().getHeight() : builder.getHeight();
+                NGPNativeBridge.nativeSurfaceChanged(width, height);
+                NGPNativeBridge.nativeApplyFilter(applyFilter);
+                NGPNativeBridge.nativeApplyRotation(Rotation.getValue(builder.getRotation()), false, false);
+                NGPNativeBridge.nativeApplyScaleType(builder.getScaleType().ordinal());
+                NGPNativeBridge.nativeApplyBitmap(resource.getBitmap());
+                Bitmap resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                NGPNativeBridge.nativeCapture(resultBitmap);
+
+                try {
+                    File file = new File(NGP.get().getConfigure().getCacheDir(), System.currentTimeMillis() + ".jpg");
+                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                    resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                    bos.flush();
+                    bos.close();
+                    resultBitmap.recycle();
+                    mResultList.add(Result.obtain(file));
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
+        }else{
+            //一对多渲染
+            for (NativeFilter nativeFilter : builder.getMultipleFilter()) {
+                for (int i = 0; i < builder.getFetchers().size(); i++) {
+                    DataFetcher fetcher = builder.getFetchers().get(i);
+                    Resource resource = NGPExecutors.submit(new ResourceGenerator(i, fetcher, this));
+                    if (resource == null) {
+                        Log.e(TAG, "resource  null!");
+                        continue;
+                    }
+                    NativeFilter applyFilter = nativeFilter;
+                    int width = builder.getWidth() <= 0 ? resource.getBitmap().getWidth() : builder.getWidth();
+                    int height = builder.getHeight() <= 0 ? resource.getBitmap().getHeight() : builder.getHeight();
+                    NGPNativeBridge.nativeSurfaceChanged(width, height);
+                    NGPNativeBridge.nativeApplyFilter(applyFilter);
+                    NGPNativeBridge.nativeApplyRotation(Rotation.getValue(builder.getRotation()), false, false);
+                    NGPNativeBridge.nativeApplyScaleType(builder.getScaleType().ordinal());
+                    NGPNativeBridge.nativeApplyBitmap(resource.getBitmap());
+                    Bitmap resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    NGPNativeBridge.nativeCapture(resultBitmap);
 
-            NativeFilter applyFilter = builder.getFilter();
-            if (builder.getFilterListener() != null) {
-                Render.UpgradRender upgradRender = Render.UpgradRender.obtain(applyFilter);
-                upgradRender = builder.getFilterListener().apply(upgradRender, resource.getPosition());
-                applyFilter = upgradRender.getFilter();
+                    try {
+                        File file = new File(NGP.get().getConfigure().getCacheDir(), System.currentTimeMillis() + ".jpg");
+                        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                        resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                        bos.flush();
+                        bos.close();
+                        resultBitmap.recycle();
+                        mResultList.add(Result.obtain(file));
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
             }
-
-            int width = builder.getWidth() <= 0 ? resource.getBitmap().getWidth() : builder.getWidth();
-            int height = builder.getHeight() <= 0 ? resource.getBitmap().getHeight() : builder.getHeight();
-            NGPNativeBridge.nativeSurfaceChanged(width, height);
-            NGPNativeBridge.nativeApplyFilter(applyFilter);
-            NGPNativeBridge.nativeApplyRotation(Rotation.getValue(builder.getRotation()), false, false);
-            NGPNativeBridge.nativeApplyScaleType(builder.getScaleType().ordinal());
-            NGPNativeBridge.nativeApplyBitmap(resource.getBitmap());
-            Bitmap resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            NGPNativeBridge.nativeCapture(resultBitmap);
-
-            try {
-                File file = new File(NGP.get().getConfigure().getCacheDir(), System.currentTimeMillis() + ".jpg");
-                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-                bos.flush();
-                bos.close();
-                resultBitmap.recycle();
-                mResultList.add(Result.obtain(file));
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
         }
         NGPNativeBridge.nativeDestroyed();
         return mResultList;

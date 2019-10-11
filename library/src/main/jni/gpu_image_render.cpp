@@ -7,6 +7,8 @@
 #include "util/jni_util.hpp"
 #include "util/open_gl_util.hpp"
 #include <math.h>
+#define MAX_FBO_SURFACE_WIDTH 5000
+#define MAX_FBO_SURFACE_HEIGHT 5000
 
 using namespace ben::util;
 
@@ -161,8 +163,8 @@ void ben::ngp::GPUImageRender::nativeCreateGL(JNIEnv *env, jclass javaThis) {
     };
     // surface attributes
     const EGLint surfaceAttr[] = {
-            EGL_WIDTH,1080,
-            EGL_HEIGHT,1920,
+            EGL_WIDTH,MAX_FBO_SURFACE_WIDTH,
+            EGL_HEIGHT,MAX_FBO_SURFACE_HEIGHT,
             EGL_NONE
     };
     EGLint numConfigs;

@@ -4,6 +4,41 @@ Idea from: [iOS GPUImage framework](https://github.com/BradLarson/GPUImage2), [a
 
 最近在android直播工程中想要加入滤镜处理，有试过opencv但是使用opencv进行图像处理对cpu造成了很大的压力，以至于礼物动效UI都出现了卡顿。因为需要实时对摄像头采集的数据进行滤镜渲染，最终放弃了opencv的想法改而使用以GPU处理图像的高性能特效gpu-image framework。目前gpuiamge库在android版本中只有java版本，所以本工程是对android-gpuimage的native重写,尽可能的实现android-gpuimage和gpuimage中的特性。
 
+### FBO CASE
+```
+ List<Result> results = NGP.with(FBOActivity.this)
+                       .applyBitmapByUrls(
+                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo1.jpg",
+                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo2.jpg",
+                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo3.jpg",
+                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo4.jpg",
+                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo5.jpg"
+                       )
+                       .applyBitmaps(
+                               R.drawable.photo1,
+                               R.drawable.photo2,
+                               R.drawable.photo3,
+                               R.drawable.photo4,
+                               R.drawable.photo5
+                       )
+                       .applyFilter(new GPUImageSaturationFilter(2.0f)) //设置默认Filter
+                       .applyMultipleFilter(...)                        //如果设置MultipleFilter则按照一张图像渲染一个滤镜进行渲染
+                       .applyWidth(1000)                                //指定宽度渲染，不指定宽度则按原图宽度渲染
+                       .applyHeight(1000)                               //指定高度渲染，不指定高度则按原图高度渲染
+                       .applyRotation(Rotation.ROTATION_90)             //旋转90度进行渲染
+                       .applyScaleType(ScaleType.CENTER_CROP)           //默认 ScaleType.CENTER_INSIDE
+                       .applyNGPFilter(new NGPFilterListener() {        //设置过滤器，当批量渲染时（非MultipleFilter）
+                           @Override
+                           public Render.UpgradRender apply(Render.UpgradRender render, int position) {
+                               //针对批量处理单独设置filter
+                               render.setFilter(filters.get(position));
+                               return render;
+                           }
+                       })
+                       .build()
+                       .get();
+```
+
 ### Support status of [GPUImage for iOS](https://github.com/BradLarson/GPUImage2) shaders
 - [x] Saturation
 - [x] Contrast
