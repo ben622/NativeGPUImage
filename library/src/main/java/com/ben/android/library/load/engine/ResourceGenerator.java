@@ -19,16 +19,19 @@ import java.io.InputStream;
 public class ResourceGenerator implements ResourceFetcherGenerator<Resource>, DataFetcher.DataCallback<Object> {
     private ResourceFetcherGenerator.FetcherReadyCallback fetcherReadyCallback;
     private DataFetcher<InputStream> fetcher;
+    private int position;
 
-    public ResourceGenerator(DataFetcher<InputStream> fetcher, ResourceFetcherGenerator.FetcherReadyCallback fetcherReadyCallback) {
+    public ResourceGenerator(int position,DataFetcher<InputStream> fetcher, ResourceFetcherGenerator.FetcherReadyCallback fetcherReadyCallback) {
         this.fetcherReadyCallback = fetcherReadyCallback;
         this.fetcher = fetcher;
+        this.position = position;
     }
 
     @Override
     public void onDataReady(@Nullable Object data) {
         Bitmap bitmap = transcode(data);
-        fetcherReadyCallback.onDataFetcherReady(Resource.obtain(bitmap));
+
+        fetcherReadyCallback.onDataFetcherReady(Resource.obtain(bitmap,position));
     }
 
     private Bitmap transcode(@Nullable Object data) {
@@ -40,6 +43,10 @@ public class ResourceGenerator implements ResourceFetcherGenerator<Resource>, Da
             byte[] bytes = (byte[]) data;
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         }
+        if (data instanceof Bitmap) {
+            bitmap = (Bitmap) data;
+        }
+
         if (bitmap.getConfig() != Bitmap.Config.ARGB_8888) {
             Bitmap resizedBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(),
                     Bitmap.Config.ARGB_8888);
@@ -66,6 +73,6 @@ public class ResourceGenerator implements ResourceFetcherGenerator<Resource>, Da
 
     @Override
     public Resource call(){
-        return Resource.obtain(transcode(fetcher.loadData()));
+        return Resource.obtain(transcode(fetcher.loadData()),position);
     }
 }

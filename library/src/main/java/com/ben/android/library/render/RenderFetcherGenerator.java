@@ -12,7 +12,9 @@ import java.io.File;
  * @create 2019/10/9
  */
 public interface RenderFetcherGenerator extends Runnable {
+    void put(Render render);
 
+    void stop();
 
-
+    void activ();
 }

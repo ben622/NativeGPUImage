@@ -38,7 +38,15 @@ void ben::ngp::NGPNativeBridge::initialize(JNIEnv *env) {
 
     addNativeMethod("nativeDestroyed", (void *) nativeDestroyed, kTypeVoid, NULL);
 
+    addNativeMethod("nativeDestorySurfaceGL", (void *) nativeDestorySurfaceGL, kTypeVoid, NULL);
+
     addNativeMethod("nativeCreateGL", (void *) nativeCreateGL, kTypeVoid, NULL);
+
+    addNativeMethod("nativeApplyRotation", (void *) nativeApplyRotation, kTypeVoid, kTypeInt,
+                    kTypeBool, kTypeBool, NULL);
+
+    addNativeMethod("nativeApplyScaleType", (void *) nativeApplyScaleType, kTypeVoid, kTypeInt,
+                    NULL);
 
     registerNativeMethods(env);
 }
@@ -66,6 +74,12 @@ void ben::ngp::NGPNativeBridge::nativeSurfaceChanged(JNIEnv *env, jclass javaThi
 
 void ben::ngp::NGPNativeBridge::nativeDestroyed(JNIEnv *env, jclass javaThis) {
     getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->nativeDestroyed(env, javaThis);
+}
+
+void ben::ngp::NGPNativeBridge::nativeDestorySurfaceGL(JNIEnv *env, jclass javaThis) {
+    getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->nativeDestorySurfaceGL(env,
+                                                                                      javaThis);
+
 }
 
 void ben::ngp::NGPNativeBridge::nativeCreateGL(JNIEnv *env, jclass javaThis) {
@@ -132,7 +146,6 @@ void ben::ngp::NGPNativeBridge::nativeCapture(JNIEnv *env, jclass javaThis, jobj
 }
 
 
-
 void ben::ngp::NGPNativeBridge::nativeRequestRender(JNIEnv *env, jclass javaThis) {
     getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->reqeustRender();
 }
@@ -140,8 +153,20 @@ void ben::ngp::NGPNativeBridge::nativeRequestRender(JNIEnv *env, jclass javaThis
 void ben::ngp::NGPNativeBridge::nativeApplyBitmap(JNIEnv *env, jclass javaThis, jobject object) {
     GPUImageRender *render = getNativeClassPtr<GPUImageRender>(
             GPU_IMAGE_RENDER_CLASS);
-    //set rotation
     render->renderBitmap(env, object);
+}
+
+void ben::ngp::NGPNativeBridge::nativeApplyRotation(JNIEnv *env, jclass javaThis, jint rotation,
+                                                    jboolean flipHorizontal,
+                                                    jboolean flipVertical) {
+    getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->setRotation(fromInt(rotation),
+                                                                           flipHorizontal,
+                                                                           flipVertical);
+}
+
+void ben::ngp::NGPNativeBridge::nativeApplyScaleType(JNIEnv *env, jclass javaThis, jint scaleType) {
+    getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->setScaleType(
+            fromScaleValue(scaleType));
 }
 
 void ben::ngp::NGPNativeBridge::nativeApplyFilter(JNIEnv *env, jclass javaThis, jobject object) {

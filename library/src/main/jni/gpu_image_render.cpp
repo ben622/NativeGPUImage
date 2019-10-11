@@ -11,6 +11,7 @@
 using namespace ben::util;
 
 static EGLSurface winSurface;
+static EGLContext context;
 static EGLDisplay display;
 static ANativeWindow *nativeWindow;
 
@@ -64,7 +65,7 @@ void ben::ngp::GPUImageRender::nativeSurfaceCreated(JNIEnv *env, jclass javaThis
     const EGLint ctxAttr[] = {
             EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE
     };
-    EGLContext context = eglCreateContext(display, config, EGL_NO_CONTEXT, ctxAttr);
+    context = eglCreateContext(display, config, EGL_NO_CONTEXT, ctxAttr);
     if (context == EGL_NO_CONTEXT) {
         LOGE("%s", "eglCreateContext failed!");
         return;
@@ -114,8 +115,8 @@ void ben::ngp::GPUImageRender::nativeSurfaceChanged(JNIEnv *env, jclass javaThis
 }
 
 void ben::ngp::GPUImageRender::nativeDestroyed(JNIEnv *env, jclass javaThis) {
-// TODO nativeDestroyed
     this->getFilter()->destory();
+
     eglMakeCurrent(eglDisp, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(eglDisp, eglCtx);
     eglDestroySurface(eglDisp, eglSurface);
@@ -124,6 +125,20 @@ void ben::ngp::GPUImageRender::nativeDestroyed(JNIEnv *env, jclass javaThis) {
     eglDisp = EGL_NO_DISPLAY;
     eglSurface = EGL_NO_SURFACE;
     eglCtx = EGL_NO_CONTEXT;
+}
+
+void ben::ngp::GPUImageRender::nativeDestorySurfaceGL(JNIEnv *env, jclass javaThis) {
+    this->getFilter()->destory();
+
+    eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglDestroyContext(display, context);
+    eglDestroySurface(display, winSurface);
+    eglTerminate(display);
+
+    display = EGL_NO_DISPLAY;
+    winSurface = EGL_NO_SURFACE;
+    context = EGL_NO_CONTEXT;
+
 }
 
 void ben::ngp::GPUImageRender::nativeCreateGL(JNIEnv *env, jclass javaThis) {
@@ -376,6 +391,8 @@ ScaleType ben::ngp::GPUImageRender::getScaleType() const {
 }
 
 void ben::ngp::GPUImageRender::setScaleType(ScaleType scaleType) {
+    if(this->scaleType == scaleType)
+        return;
     GPUImageRender::scaleType = scaleType;
 }
 
@@ -456,6 +473,9 @@ void ben::ngp::GPUImageRender::setRotation(Rotation rotation) {
 
 void
 ben::ngp::GPUImageRender::setRotation(Rotation rotation, bool flipHorizontal, bool flipVertical) {
+    if (rotation == this->rotation)
+        return;
+
     this->flipHorizontal = flipHorizontal;
     this->flipVertical = flipVertical;
     setRotation(rotation);

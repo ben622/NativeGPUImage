@@ -8,6 +8,8 @@ import com.ben.android.library.filter.NativeFilter;
 import com.ben.android.library.load.fetcher.DataFetcher;
 import com.ben.android.library.load.fetcher.FileFetcher;
 import com.ben.android.library.load.fetcher.HttpUrlFetcher;
+import com.ben.android.library.util.Rotation;
+import com.ben.android.library.util.ScaleType;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,15 +24,15 @@ public class RenderBuilder {
     private Context context;
     private boolean isGif;
     private NativeFilter filter;
-    private ImageView targetView;
     private List<NGPListener> listeners;
     private List<DataFetcher> fetchers;
     //批处理过滤
     private NGPFilterListener filterListener;
     private int width;
     private int height;
+    private Rotation rotation = Rotation.NORMAL;
+    private ScaleType scaleType = ScaleType.CENTER_INSIDE;
 
-    private boolean isAsync = true;
 
     public RenderBuilder(Context context) {
         this.context = context;
@@ -38,8 +40,12 @@ public class RenderBuilder {
         fetchers = new ArrayList<>();
     }
 
-    public boolean isAsync() {
-        return isAsync;
+    public Rotation getRotation() {
+        return rotation;
+    }
+
+    public ScaleType getScaleType() {
+        return scaleType;
     }
 
     public Context getContext() {
@@ -54,9 +60,6 @@ public class RenderBuilder {
         return filter;
     }
 
-    public ImageView getTargetView() {
-        return targetView;
-    }
 
     public List<NGPListener> getListeners() {
         return listeners;
@@ -136,13 +139,15 @@ public class RenderBuilder {
         return this;
     }
 
-    /**
-     * 是否同步渲染，如果为同步则在当前线程堵塞渲染
-     * @param isAsync true async else sync.
-     * @return
-     */
-    public RenderBuilder isAsync(boolean isAsync) {
-        this.isAsync = isAsync;
+
+
+    public RenderBuilder applyRotation(Rotation rotation) {
+        this.rotation = rotation;
+        return this;
+    }
+
+    public RenderBuilder applyScaleType(ScaleType scaleType) {
+        this.scaleType = scaleType;
         return this;
     }
 
@@ -150,11 +155,7 @@ public class RenderBuilder {
         this.isGif = true;
         return this;
     }
-
-    public RenderManager into(ImageView imageView) {
-        this.targetView = imageView;
-        RenderManager renderManager = new RenderManager(this);
-        renderManager.begin();
-        return renderManager;
+    public RenderManager build(){
+        return new RenderManager(this);
     }
 }

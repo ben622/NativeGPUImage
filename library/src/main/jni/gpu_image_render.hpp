@@ -58,6 +58,8 @@ namespace ben {
 
             void nativeCreateGL(JNIEnv *env, jclass javaThis);
 
+            void nativeDestorySurfaceGL(JNIEnv *env, jclass javaThis);
+
         public:
             GPUImageRender();
 

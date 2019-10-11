@@ -10,16 +10,22 @@ import android.graphics.Bitmap;
  */
 public class Resource {
     private Bitmap bitmap;
+    private int position;
 
-    private Resource(Bitmap bitmap) {
+    private Resource(Bitmap bitmap, int position) {
         this.bitmap = bitmap;
+        this.position = position;
     }
 
-    public static Resource obtain(Bitmap src){
-        return new Resource(src);
+    public static Resource obtain(Bitmap src, int position){
+        return new Resource(src,position);
     }
 
     public Bitmap getBitmap() {
         return bitmap;
+    }
+
+    public int getPosition() {
+        return position;
     }
 }

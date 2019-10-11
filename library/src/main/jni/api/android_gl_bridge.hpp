@@ -81,9 +81,14 @@ namespace ben {
 
             static void nativeDestroyed(JNIEnv *env, jclass javaThis);
 
+            static void nativeDestorySurfaceGL(JNIEnv *env, jclass javaThis);
+
             static void nativeCreateGL(JNIEnv *env, jclass javaThis);
 
-            //static void nativeCreateGL(JNIEnv *env, jclass javaThis, jint width, jint height);
+            static void nativeApplyRotation(JNIEnv *env, jclass javaThis, jint rotation, jboolean flipHorizontal, jboolean flipVertical);
+
+            static void nativeApplyScaleType(JNIEnv *env, jclass javaThis, jint scaleType);
+
 
         private:
             static void readBitmapPixel(JNIEnv *env, GPUImageTwoInputFilter *filter);

@@ -2,10 +2,6 @@ package com.ben.android.library.filter;
 
 import com.ben.android.library.jni.NativeObject;
 import com.ben.android.library.jni.annotations.UsedByNativeCode;
-import com.ben.android.library.util.FilterTools;
-import com.ben.android.library.util.FilterType;
-
-import java.util.HashMap;
 
 /**
  * @author @zhangchuan622@gmail.com

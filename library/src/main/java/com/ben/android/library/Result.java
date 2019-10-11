@@ -1,8 +1,12 @@
 package com.ben.android.library;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
+
+import java.io.File;
 
 /**
  * @author @zhangchuan622@gmail.com
@@ -10,18 +14,16 @@ import android.support.annotation.Nullable;
  * @create 2019/10/10
  */
 public class Result {
-    @Nullable
-    private Bitmap bitmap;
     @NonNull
     private String path;
 
-    @Nullable
-    public Bitmap getBitmap() {
-        return bitmap;
+    public Result( @NonNull String path) {
+        this.path = path;
     }
 
-    public void setBitmap(@Nullable Bitmap bitmap) {
-        this.bitmap = bitmap;
+    @Nullable
+    public Bitmap getBitmap() {
+        return TextUtils.isEmpty(path) ? null : BitmapFactory.decodeFile(path);
     }
 
     @NonNull
@@ -29,7 +31,8 @@ public class Result {
         return path;
     }
 
-    public void setPath(@NonNull String path) {
-        this.path = path;
+    public static Result obtain(File file) {
+        return new Result(file.getPath());
     }
+
 }

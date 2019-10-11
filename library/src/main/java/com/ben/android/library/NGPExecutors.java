@@ -27,10 +27,6 @@ public final class NGPExecutors {
     private static final BlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(512);
     private static final RejectedExecutionHandler policy = new ThreadPoolExecutor.DiscardPolicy();
     private static final NGPThreadFactory threadFactry = new NGPThreadFactory();
-
-    private static final BlockingQueue<Runnable> FETCHER_QUEUE = new ArrayBlockingQueue<>(100);
-    private static final BlockingQueue<Runnable> RENDER_QUEUE = new ArrayBlockingQueue<>(100);
-
     private static final ExecutorService executorService = new ThreadPoolExecutor(
             CORE_POOL_SIZE,
             maximum_pool_size,
@@ -39,14 +35,6 @@ public final class NGPExecutors {
             queue,
             policy
     );
-
-    /**
-     * 创建渲染线程和待处理资源线程
-     */
-    public static void initialize() {
-        executorService.submit(new FetcherRunnable());
-        executorService.submit(new RenderRunnable());
-    }
 
     public static void execute(Runnable t){
         executorService.execute(t);
@@ -65,16 +53,6 @@ public final class NGPExecutors {
         return null;
     }
 
-
-    public static void putFetcher(Runnable t) {
-
-    }
-
-    public static void putRender(Runnable t){
-
-    }
-
-
     private static class NGPThreadFactory implements ThreadFactory {
         @Override
         public Thread newThread(Runnable r) {
@@ -82,32 +60,5 @@ public final class NGPExecutors {
         }
     }
 
-    private static class FetcherRunnable implements Runnable{
-        @Override
-        public void run() {
-            try {
-                Runnable runnable = FETCHER_QUEUE.take();
-                executorService.submit(runnable);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    private static class RenderRunnable implements Runnable{
-        @Override
-        public void run() {
-            try {
-                NGPNativeBridge.nativeCreateGL();
 
-
-
-                NGPNativeBridge.nativeDestroyed();
-                Runnable runnable = RENDER_QUEUE.take();
-                executorService.submit(runnable);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }
-    }
 }
