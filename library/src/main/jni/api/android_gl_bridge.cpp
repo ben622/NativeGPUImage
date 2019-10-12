@@ -175,6 +175,8 @@ void ben::ngp::NGPNativeBridge::nativeApplyFilter(JNIEnv *env, jclass javaThis, 
     LOGI("native filter type:%d", nativeFilterPtr->getFilterType());
     nativeFilterPtr->setJavaObject(env, object);
     LOGI("java filter type:%d", nativeFilterPtr->getFilterType());
+    if (nativeFilterPtr->getFilterType() == -1)
+        return;
     GPUImageRender *render = getNativeClassPtr<GPUImageRender>(
             GPU_IMAGE_RENDER_CLASS);
     render->getFilter()->destory();

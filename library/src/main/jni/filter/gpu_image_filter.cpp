@@ -113,7 +113,7 @@ void GPUImageFilter::run(GL_VARS *glVars) {
         glUniform1i(glVars->location, glVars->intValue);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT) {
-        LOGI("gl thread type [%s]", "GL_DRAW_TYPE::DRAW_FLOAT");
+        LOGI("gl thread type [%s] [%f]", "GL_DRAW_TYPE::DRAW_FLOAT",glVars->floatValue);
         glUniform1f(glVars->location, glVars->floatValue);
     }
     if (glVars->glDrawType == GL_DRAW_TYPE::DRAW_FLOAT_VEC2) {
@@ -264,8 +264,7 @@ void GPUImageFilter::runPendingOnDrawTasks() {
     for (int i = runOnDrawGLVars.size() - 1; i >= 0; i--) {
         run(runOnDrawGLVars[i]);
     }
-
-
+    runOnDrawGLVars.clear();
 }
 
 ANativeWindow *GPUImageFilter::getNativeWindow() const {

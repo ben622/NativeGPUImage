@@ -32,6 +32,8 @@ public class GPUImage3x3ConvolutionFilter extends GPUImage3x3TextureSamplingFilt
     public GPUImage3x3ConvolutionFilter(final float[] convolutionKernel) {
         this(FilterType.THREE_X_THREE_CONVOLUTION.ordinal(), convolutionKernel);
     }
+
+
     public GPUImage3x3ConvolutionFilter(int filterType,final float[] convolutionKernel) {
         super(filterType);
         if (convolutionKernel == null && convolutionKernel.length < 9) {
@@ -48,6 +50,17 @@ public class GPUImage3x3ConvolutionFilter extends GPUImage3x3TextureSamplingFilt
         this.v9 = convolutionKernel[8];
     }
 
+    public void setConvolutionKernel(final float[] convolutionKernel) {
+        this.v1 = convolutionKernel[0];
+        this.v2 = convolutionKernel[1];
+        this.v3 = convolutionKernel[2];
+        this.v4 = convolutionKernel[3];
+        this.v5 = convolutionKernel[4];
+        this.v6 = convolutionKernel[5];
+        this.v7 = convolutionKernel[6];
+        this.v8 = convolutionKernel[7];
+        this.v9 = convolutionKernel[8];
+    }
     public float getV1() {
         return v1;
     }

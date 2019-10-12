@@ -6,6 +6,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.ben.android.library.filter.NativeFilter;
+
 import java.io.File;
 
 /**
@@ -16,9 +18,12 @@ import java.io.File;
 public class Result {
     @NonNull
     private String path;
-
-    public Result( @NonNull String path) {
+    private NativeFilter filter;
+    private String filterName;
+    public Result( NativeFilter filter, String filterName,@NonNull String path) {
         this.path = path;
+        this.filter = filter;
+        this.filterName = filterName;
     }
 
     @Nullable
@@ -31,8 +36,16 @@ public class Result {
         return path;
     }
 
-    public static Result obtain(File file) {
-        return new Result(file.getPath());
+    public NativeFilter getFilter() {
+        return filter;
+    }
+
+    public String getFilterName() {
+        return filterName;
+    }
+
+    public static Result obtain(NativeFilter filter,String filterName,File file) {
+        return new Result(filter,filterName,file.getPath());
     }
 
 }

@@ -15,6 +15,7 @@ import com.ben.android.library.load.engine.Resource;
 import com.ben.android.library.load.fetcher.DataFetcher;
 import com.ben.android.library.render.Render;
 import com.ben.android.library.render.RenderGenerator;
+import com.ben.android.library.util.FilterType;
 import com.ben.android.library.util.Rotation;
 
 import java.io.BufferedOutputStream;
@@ -118,7 +119,7 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
                     bos.flush();
                     bos.close();
                     resultBitmap.recycle();
-                    mResultList.add(Result.obtain(file));
+                    mResultList.add(Result.obtain(applyFilter, FilterType.getFilterName(applyFilter),file));
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -153,7 +154,7 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
                         bos.flush();
                         bos.close();
                         resultBitmap.recycle();
-                        mResultList.add(Result.obtain(file));
+                        mResultList.add(Result.obtain(applyFilter, FilterType.getFilterName(applyFilter),file));
 
                     } catch (IOException e) {
                         e.printStackTrace();

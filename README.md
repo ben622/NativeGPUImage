@@ -4,6 +4,8 @@ Idea from: [iOS GPUImage framework](https://github.com/BradLarson/GPUImage2), [a
 
 最近在android直播工程中想要加入滤镜处理，有试过opencv但是使用opencv进行图像处理对cpu造成了很大的压力，以至于礼物动效UI都出现了卡顿。因为需要实时对摄像头采集的数据进行滤镜渲染，最终放弃了opencv的想法改而使用以GPU处理图像的高性能特效gpu-image framework。目前gpuiamge库在android版本中只有java版本，所以本工程是对android-gpuimage的native重写,尽可能的实现android-gpuimage和gpuimage中的特性。
 
+<img src="./screen/capture1.gif" width="720px" height="1280px"/>
+<img src="./screen/capture2.gif" width="720px" height="1280px"/>
 ### FBO CASE
 ```
  List<Result> results = NGP.with(FBOActivity.this)

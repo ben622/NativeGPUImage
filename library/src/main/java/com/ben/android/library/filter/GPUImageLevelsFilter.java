@@ -216,6 +216,12 @@ public class GPUImageLevelsFilter extends NativeFilter {
         return min;
     }
 
+    public void setMin(float nMin, float nMid, float nMax) {
+        this.min = nMin;
+        this.mid = nMid;
+        this.max = nMax;
+    }
+
     public void setMin(float min) {
         this.min = min;
     }

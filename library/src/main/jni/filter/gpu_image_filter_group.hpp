@@ -15,10 +15,10 @@ namespace ben {
         private:
             std::vector<ben::ngp::GPUImageFilter*> filters;
             std::vector<ben::ngp::GPUImageFilter*> mergedFilters;
-            int *frameBuffers;
-            int frameBuffersSize;
-            int *frameBufferTextures;
-            int frameBufferTexturesSize;
+            int *frameBuffers = NULL;
+            int frameBuffersSize = 0;
+            int *frameBufferTextures = NULL;
+            int frameBufferTexturesSize = 0;
 
             float *glCubeBufferPtr;
             float *glTextureBufferPtr;

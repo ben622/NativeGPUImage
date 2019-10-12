@@ -7,11 +7,24 @@
     android:background="#000000"
     android:orientation="vertical"
     tools:context=".ImageActivity">
-    <ImageView
-        android:id="@+id/mImageView"
+    <com.ben.android.library.NGPSurfaceView
+        android:id="@+id/mSurfaceView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/mRecyclerView"/>
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/mRecyclerView"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:visibility="gone"
+        android:progressBackgroundTint="#9C27B0"
+        android:layout_marginBottom="20dp"
+        android:max="100" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/mRecyclerView"

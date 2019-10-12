@@ -45,3 +45,7 @@ void ben::ngp::GPUImageBrightnessFilter::setBrightness(float brightness) {
     GPUImageBrightnessFilter::brightness = brightness;
     setFloat(this->brightnessLocation, this->brightness);
 }
+
+float ben::ngp::GPUImageBrightnessFilter::getBrightness() const {
+    return brightness;
+}

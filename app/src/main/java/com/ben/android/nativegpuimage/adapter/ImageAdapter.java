@@ -65,6 +65,7 @@ public class ImageAdapter extends BaseQuickAdapter<Result, BaseViewHolder> {
 
     @Override
     protected void convert(@NonNull BaseViewHolder helper, Result item) {
+        helper.setText(R.id.mTextView, item.getFilterName());
         Glide.with(mContext).load(new File(item.getPath())).into((ImageView) helper.getView(R.id.mImageView));
     }
 }

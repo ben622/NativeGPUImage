@@ -10,7 +10,7 @@
 extern ben::jni::ClassRegistry *classRegistryPtr;
 namespace ben{
     namespace jni{
-        static const char *GPU_IMAGE_RENDER_CLASS = "com/ben/android/library/GPUImageRender";
+        static const char *GPU_IMAGE_RENDER_CLASS = "com/ben/android/library/NGPSurfaceView";
 
         template<typename TypeName>
         static TypeName* getNativeClassPtr(const char* className){

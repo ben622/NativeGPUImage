@@ -1,19 +1,11 @@
 package com.ben.android.nativegpuimage;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-import com.ben.android.library.GPUImageRender;
 import com.ben.android.library.NGP;
-import com.ben.android.library.NGPNativeBridge;
-import com.ben.android.library.filter.GPUImageGrayscaleFilter;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -43,6 +43,8 @@ namespace ben{
             virtual void onInitialized();
 
             void setBrightness(float brightness);
+
+            float getBrightness() const;
         };
     }
 }

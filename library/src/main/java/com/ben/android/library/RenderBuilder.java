@@ -113,7 +113,7 @@ public class RenderBuilder {
         this.filter = filter;
         return this;
     }
-    public <T extends NativeFilter> RenderBuilder applyMultipleFilter(T... filters){
+    public <T extends NativeFilter> RenderBuilder applyMultipleFilter(List<T> filters){
         for (T t : filters) {
             multipleFilter.add(t);
         }

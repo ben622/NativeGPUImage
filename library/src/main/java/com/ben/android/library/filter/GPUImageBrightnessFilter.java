@@ -26,4 +26,11 @@ public class GPUImageBrightnessFilter extends NativeFilter {
     public void setBrightness(float brightness) {
         this.brightness = brightness;
     }
+
+    @Override
+    public String toString() {
+        return "GPUImageBrightnessFilter{" +
+                "brightness=" + brightness +
+                '}';
+    }
 }

@@ -6,6 +6,7 @@ package com.ben.android.library.filter;
  * @create 2019/9/29
  */
 public class GPUImageDirectionalSobelEdgeDetectionFilter extends GPUImage3x3TextureSamplingFilter {
+
     public GPUImageDirectionalSobelEdgeDetectionFilter(int filterType) {
         super(filterType);
     }
