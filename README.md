@@ -6,6 +6,7 @@ Idea from: [iOS GPUImage framework](https://github.com/BradLarson/GPUImage2), [a
 
 <img src="./screen/capture1.gif" width="360px" height="640px"/>
 <img src="./screen/capture2.gif" width="360px" height="640px"/>
+
 ### FBO CASE
 ```
  List<Result> results = NGP.with(FBOActivity.this)
