@@ -88,6 +88,7 @@ class ImageActivity : AppCompatActivity() {
         mRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         mRecyclerView.adapter = adapter
 
+
         adapter.setOnItemClickListener(object : BaseQuickAdapter.OnItemClickListener {
             override fun onItemClick(_adapter: BaseQuickAdapter<*, *>?, view: View?, position: Int) {
                 filterAdjuster = GPUImageFilterTools.FilterAdjuster(filters.get(position))
@@ -109,6 +110,7 @@ class ImageActivity : AppCompatActivity() {
 
         })
 
+
         Thread({
             var result = NGP.with(this)
                     .applyBitmaps(R.drawable.photo4)
@@ -117,7 +119,7 @@ class ImageActivity : AppCompatActivity() {
                     .get()
             runOnUiThread {
                 adapter.setNewData(result)
-
+                mProgressBar.visibility = View.GONE
                 mSurfaceView.initialize()
                 mSurfaceView.setOnEGPEnvironmentListener {
                     NGPNativeBridge.nativeApplyFilter(filters.get(0))
