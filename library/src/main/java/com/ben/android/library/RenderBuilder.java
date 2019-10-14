@@ -27,7 +27,7 @@ public class RenderBuilder {
     private boolean isGif;
     private NativeFilter filter;
     private List<NativeFilter> multipleFilter;
-    private List<NGPListener> listeners;
+    private NGPListener listener;
     private List<DataFetcher> fetchers;
     //批处理过滤
     private NGPFilterListener filterListener;
@@ -35,13 +35,17 @@ public class RenderBuilder {
     private int height;
     private Rotation rotation = Rotation.NORMAL;
     private ScaleType scaleType = ScaleType.CENTER_INSIDE;
-
+    private boolean isAutoFile = true;
 
     public RenderBuilder(Context context) {
         this.context = context;
-        listeners = new ArrayList<>();
+        filter = new NativeFilter();
         fetchers = new ArrayList<>();
         multipleFilter = new ArrayList<>();
+    }
+
+    public boolean isAutoFile() {
+        return isAutoFile;
     }
 
     public List<NativeFilter> getMultipleFilter() {
@@ -69,8 +73,8 @@ public class RenderBuilder {
     }
 
 
-    public List<NGPListener> getListeners() {
-        return listeners;
+    public NGPListener getListener() {
+        return listener;
     }
 
     public List<DataFetcher> getFetchers() {
@@ -163,6 +167,10 @@ public class RenderBuilder {
         return this;
     }
 
+    public RenderBuilder applyNGPListener(NGPListener listener){
+        this.listener = listener;
+        return this;
+    }
 
 
     public RenderBuilder applyRotation(Rotation rotation) {
@@ -172,6 +180,16 @@ public class RenderBuilder {
 
     public RenderBuilder applyScaleType(ScaleType scaleType) {
         this.scaleType = scaleType;
+        return this;
+    }
+
+    /**
+     * 是否将渲染结果保存至磁盘
+     * @param isAutoFile false将会大幅提升NGP响应效率
+     * @return
+     */
+    public RenderBuilder autoFile(boolean isAutoFile) {
+        this.isAutoFile = isAutoFile;
         return this;
     }
 

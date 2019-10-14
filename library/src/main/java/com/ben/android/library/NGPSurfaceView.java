@@ -1,9 +1,7 @@
 package com.ben.android.library;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
@@ -16,10 +14,10 @@ import android.widget.FrameLayout;
 public class NGPSurfaceView extends FrameLayout implements SurfaceHolder.Callback {
     protected SurfaceView mSurfaceView;
     protected boolean isCreteGL = false;
-    private OnEGPEnvironmentListener onEGPEnvironmentListener;
+    private EGPEnvironmentListener EGPEnvironmentListener;
 
-    public void setOnEGPEnvironmentListener(OnEGPEnvironmentListener onEGPEnvironmentListener) {
-        this.onEGPEnvironmentListener = onEGPEnvironmentListener;
+    public void setEGPEnvironmentListener(EGPEnvironmentListener EGPEnvironmentListener) {
+        this.EGPEnvironmentListener = EGPEnvironmentListener;
     }
 
     public NGPSurfaceView(Context context) {
@@ -41,7 +39,7 @@ public class NGPSurfaceView extends FrameLayout implements SurfaceHolder.Callbac
     public void surfaceCreated(final SurfaceHolder holder) {
         NGPNativeBridge.nativeSurfaceCreated(holder.getSurface());
         isCreteGL = true;
-        if (onEGPEnvironmentListener!=null) onEGPEnvironmentListener.onCreateEGLFinish();
+        if (EGPEnvironmentListener !=null) EGPEnvironmentListener.onCreateEGLFinish();
     }
 
     @Override

@@ -35,11 +35,9 @@ void GPUImageFilter::onInit() {
 }
 
 void GPUImageFilter::onInitialized() {
-    LOGI("%s", "GPUImageFilter onInitialized");
 }
 
 void GPUImageFilter::onDestory() {
-    LOGI("%s", "GPUImageFilter onDestory");
 }
 
 void

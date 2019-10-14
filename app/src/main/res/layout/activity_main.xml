@@ -10,8 +10,14 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="FBO Test"
+        android:text="NGP API"
         android:onClick="fboTest"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show Render Bitmap"
+        android:onClick="showRenderBitmap"/>
 
 
 </LinearLayout>

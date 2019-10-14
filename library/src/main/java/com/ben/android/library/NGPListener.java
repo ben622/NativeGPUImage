@@ -10,7 +10,5 @@ public interface NGPListener {
 
     void onRenderFinish();
 
-    void onRenderComplete();
-
-    void onRenderError(Exception e);
+    void onRender(Result result);
 }

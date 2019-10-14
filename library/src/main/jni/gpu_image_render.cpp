@@ -117,6 +117,8 @@ void ben::ngp::GPUImageRender::nativeSurfaceChanged(JNIEnv *env, jclass javaThis
 }
 
 void ben::ngp::GPUImageRender::nativeDestroyed(JNIEnv *env, jclass javaThis) {
+    LOGI("%s", "GPUImageRender nativeDestroyed");
+
     this->getFilter()->destory();
 
     eglMakeCurrent(eglDisp, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);

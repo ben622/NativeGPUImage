@@ -6,7 +6,10 @@ import android.graphics.Bitmap;
 import com.ben.android.library.NGP;
 import com.ben.android.library.NGPNativeBridge;
 import com.ben.android.library.RenderBuilder;
+import com.ben.android.library.Result;
 import com.ben.android.library.load.engine.Resource;
+import com.ben.android.library.util.FilterType;
+import com.ben.android.library.util.NGPListenerTools;
 import com.ben.android.library.util.Rotation;
 
 import java.io.BufferedOutputStream;
@@ -22,29 +25,35 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class RenderGenerator implements RenderFetcherGenerator {
     private RenderBuilder builder;
+    private RenderFetcherCallback callback;
     private LinkedBlockingQueue<Render> mRenderQueue = new LinkedBlockingQueue<>();
     private Object condition = new Object();
     private boolean isStop = false;
 
-    public RenderGenerator(RenderBuilder builder) {
+    public RenderGenerator(RenderBuilder builder, RenderFetcherCallback callback) {
         this.builder = builder;
+        this.callback = callback;
     }
 
     @Override
     public void run() {
         synchronized (condition) {
+            NGPListenerTools.callRenderStart(builder.getListener());
             NGPNativeBridge.nativeCreateGL();
-            while (!isStop) {
+            while (true) {
+                if (isStop && mRenderQueue.size() <= 0) {
+                    break;
+                }
                 Render render = mRenderQueue.poll();
 
                 if (render == null) {
                     try {
                         condition.wait();
-                        render = mRenderQueue.poll();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
+                if (render == null) continue;
 
                 Resource resource = render.getResource();
                 if (resource == null) {
@@ -69,20 +78,33 @@ public class RenderGenerator implements RenderFetcherGenerator {
                 NGPNativeBridge.nativeCapture(resultBitmap);
 
                 try {
-                    File file = new File(NGP.get().getConfigure().getCacheDir(), System.currentTimeMillis() + ".jpg");
-                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                    resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-                    bos.flush();
-                    bos.close();
-                    resultBitmap.recycle();
-
+                    Result result = null;
+                    if (builder.isAutoFile()) {
+                        File file = new File(NGP.get().getConfigure().getCacheDir(), System.currentTimeMillis() + ".jpg");
+                        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                        resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                        bos.flush();
+                        bos.close();
+                        resultBitmap.recycle();
+                        if (callback != null) {
+                            result = Result.obtain(render.getFilter(), FilterType.getFilterName(render.getFilter()), file);
+                        }
+                    } else {
+                        if (callback != null) {
+                            result = Result.obtain(render.getFilter(), FilterType.getFilterName(render.getFilter()), resultBitmap);
+                        }
+                    }
+                    callback.onRenderReady(result);
+                    NGPListenerTools.callRenderComplete(builder.getListener(),result);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    if (callback != null) {
+                        callback.onRenderFailed(e);
+                    }
                 }
 
             }
-
             NGPNativeBridge.nativeDestroyed();
+            NGPListenerTools.callRenderFinish(builder.getListener());
         }
     }
 
@@ -90,6 +112,7 @@ public class RenderGenerator implements RenderFetcherGenerator {
     public void put(Render render) {
         try {
             mRenderQueue.put(render);
+            activ();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -98,8 +121,10 @@ public class RenderGenerator implements RenderFetcherGenerator {
 
     @Override
     public void stop() {
-        isStop = true;
-
+        synchronized (condition) {
+            isStop = true;
+            condition.notify();
+        }
     }
 
     @Override

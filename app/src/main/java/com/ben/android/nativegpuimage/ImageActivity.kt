@@ -8,7 +8,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import android.widget.Filter
 import android.widget.SeekBar
 import com.ben.android.library.NGP
 import com.ben.android.library.NGPNativeBridge
@@ -121,7 +120,7 @@ class ImageActivity : AppCompatActivity() {
                 adapter.setNewData(result)
                 mProgressBar.visibility = View.GONE
                 mSurfaceView.initialize()
-                mSurfaceView.setOnEGPEnvironmentListener {
+                mSurfaceView.setEGPEnvironmentListener {
                     NGPNativeBridge.nativeApplyFilter(filters.get(0))
                     NGPNativeBridge.nativeApplyBitmap(BitmapFactory.decodeResource(resources, R.drawable.photo4))
                 }

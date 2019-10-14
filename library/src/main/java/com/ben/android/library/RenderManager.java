@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -14,8 +16,10 @@ import com.ben.android.library.load.engine.ResourceGenerator;
 import com.ben.android.library.load.engine.Resource;
 import com.ben.android.library.load.fetcher.DataFetcher;
 import com.ben.android.library.render.Render;
+import com.ben.android.library.render.RenderFetcherGenerator;
 import com.ben.android.library.render.RenderGenerator;
 import com.ben.android.library.util.FilterType;
+import com.ben.android.library.util.NGPListenerTools;
 import com.ben.android.library.util.Rotation;
 
 import java.io.BufferedOutputStream;
@@ -31,11 +35,12 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @version 1.0
  * @create 2019/10/9
  */
-public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallback {
+public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallback, RenderFetcherGenerator.RenderFetcherCallback {
     private static final String TAG = RenderManager.class.getSimpleName();
     private static final int RESPONSE_CODE = 0x00;
     private RenderBuilder builder;
     private ImageView targetView;
+    private boolean intoTargetView;
     private List<Result> mResultList = new ArrayList<>();
 
     private Handler mHandler = new Handler() {
@@ -43,10 +48,8 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case RESPONSE_CODE:
-                    if (mResultList.size() <= 0) return;
-                    if (mResultList.size() > 1 && targetView != null) {
-                        targetView.setImageBitmap(BitmapFactory.decodeFile(mResultList.get(0).getPath()));
-                    }
+                    if (mResultList.size() <= 0 || targetView == null) return;
+                    targetView.setImageBitmap(mResultList.get(0).getBitmap());
                     break;
             }
         }
@@ -57,9 +60,14 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
         this.builder = builder;
     }
 
+    /**
+     * 渲染至imageView，如果有多个渲染对象则只渲染第一个。
+     *
+     * @param imageView
+     */
     public void into(ImageView imageView) {
         this.targetView = imageView;
-        async();
+        async(true);
     }
 
     public List<Result> get() {
@@ -69,10 +77,11 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
     /**
      * 异步渲染
      */
-    private void async() {
-        renderGenerator = new RenderGenerator(builder);
+    private void async(boolean isFirst) {
+        intoTargetView = isFirst;
+        renderGenerator = new RenderGenerator(builder, this);
         NGPExecutors.execute(renderGenerator);
-        for (int i = 0; i < builder.getFetchers().size(); i++) {
+        for (int i = 0; i < (isFirst ? (builder.getFetchers().isEmpty() ? 0 : 1) : builder.getFetchers().size()); i++) {
             DataFetcher fetcher = builder.getFetchers().get(i);
             NGPExecutors.execute(new ResourceGenerator(i,
                     fetcher, this));
@@ -85,6 +94,7 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
      * @return
      */
     private List<Result> sync() {
+        NGPListenerTools.callRenderStart(builder.getListener());
         NGPNativeBridge.nativeCreateGL();
         if (builder.getMultipleFilter().isEmpty()) {
             for (int i = 0; i < builder.getFetchers().size(); i++) {
@@ -113,20 +123,25 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
                 NGPNativeBridge.nativeCapture(resultBitmap);
 
                 try {
-                    File file = new File(NGP.get().getConfigure().getCacheDir(), System.currentTimeMillis() + ".jpg");
-                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                    resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-                    bos.flush();
-                    bos.close();
-                    resultBitmap.recycle();
-                    mResultList.add(Result.obtain(applyFilter, FilterType.getFilterName(applyFilter),file));
-
+                    Result result = null;
+                    if (builder.isAutoFile()) {
+                        File file = new File(NGP.get().getConfigure().getCacheDir(), System.currentTimeMillis() + ".jpg");
+                        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                        resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                        bos.flush();
+                        bos.close();
+                        resultBitmap.recycle();
+                        result = Result.obtain(applyFilter, FilterType.getFilterName(applyFilter), file);
+                    } else {
+                        result = Result.obtain(applyFilter, FilterType.getFilterName(applyFilter), resultBitmap);
+                    }
+                    mResultList.add(result);
+                    NGPListenerTools.callRenderComplete(builder.getListener(),result);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
-        }else{
+        } else {
             //一对多渲染
             for (NativeFilter nativeFilter : builder.getMultipleFilter()) {
                 for (int i = 0; i < builder.getFetchers().size(); i++) {
@@ -148,14 +163,20 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
                     NGPNativeBridge.nativeCapture(resultBitmap);
 
                     try {
-                        File file = new File(NGP.get().getConfigure().getCacheDir(), System.currentTimeMillis() + ".jpg");
-                        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                        resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-                        bos.flush();
-                        bos.close();
-                        resultBitmap.recycle();
-                        mResultList.add(Result.obtain(applyFilter, FilterType.getFilterName(applyFilter),file));
-
+                        Result result = null;
+                        if (builder.isAutoFile()) {
+                            File file = new File(NGP.get().getConfigure().getCacheDir(), System.currentTimeMillis() + ".jpg");
+                            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                            resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                            bos.flush();
+                            bos.close();
+                            resultBitmap.recycle();
+                            result = Result.obtain(applyFilter, FilterType.getFilterName(applyFilter), file);
+                        } else {
+                            result = Result.obtain(applyFilter, FilterType.getFilterName(applyFilter), resultBitmap);
+                        }
+                        mResultList.add(result);
+                        NGPListenerTools.callRenderComplete(builder.getListener(),result);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -164,17 +185,36 @@ public class RenderManager implements ResourceFetcherGenerator.FetcherReadyCallb
             }
         }
         NGPNativeBridge.nativeDestroyed();
+        NGPListenerTools.callRenderFinish(builder.getListener());
         return mResultList;
     }
 
     @Override
     public void onDataFetcherReady(Resource resource) {
         renderGenerator.put(Render.obtain(resource, builder.getFilter()));
-        renderGenerator.activ();
+        if (intoTargetView) {
+            renderGenerator.stop();
+        } else if (resource.getPosition() == builder.getFetchers().size() - 1) {
+            renderGenerator.stop();
+        }
+
     }
 
     @Override
     public void onDataFetcherFailed(Exception e) {
-        Log.e(TAG, "onDataFetcherFailed: " + e.getMessage());
+        Log.e(TAG, "DataFetcherFailed: " + e.getMessage());
+    }
+
+    @Override
+    public void onRenderReady(@Nullable Result result) {
+        mResultList.add(result);
+        if (intoTargetView) {
+            mHandler.sendEmptyMessage(RESPONSE_CODE);
+        }
+    }
+
+    @Override
+    public void onRenderFailed(@NonNull Exception e) {
+        Log.e(TAG, "RenderFailed: " + e.getMessage());
     }
 }

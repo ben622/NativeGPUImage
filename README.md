@@ -7,15 +7,32 @@ Idea from: [iOS GPUImage framework](https://github.com/BradLarson/GPUImage2), [a
 <img src="./screen/capture1.gif" width="360px" height="640px"/>
 <img src="./screen/capture2.gif" width="360px" height="640px"/>
 
-### FBO CASE
+### How do I use NGP?
+> 将渲染结果显示在ImageView中.
+
+```
+ NGP.with(this)
+                .applyBitmapByUrls("http://www.zhangchuany.com/photo5.jpg")
+                .applyFilter(new GPUImageSaturationFilter(2.0f)) //设置默认Filter
+                .applyMultipleFilter(...)                        //如果设置MultipleFilter则按照一张图像渲染一个滤镜进行渲染
+                .applyWidth(1000)                                //指定宽度渲染，不指定宽度则按原图宽度渲染
+                .applyHeight(1000)                               //指定高度渲染，不指定高度则按原图高度渲染
+                .applyRotation(Rotation.ROTATION_90)             //旋转90度进行渲染
+                .applyScaleType(ScaleType.CENTER_CROP)           //默认 ScaleType.CENTER_INSIDE
+                .autoFile(false)                                 //是否将渲染结果保存至磁盘，默认true，设置false将大幅提升NGP响应效率
+                .build()
+                .into(mImageView)
+```
+
+> 如何进行批量FBO渲染
 ```
  List<Result> results = NGP.with(FBOActivity.this)
                        .applyBitmapByUrls(
-                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo1.jpg",
-                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo2.jpg",
-                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo3.jpg",
-                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo4.jpg",
-                               "https://raw.githubusercontent.com/ben622/NativeGPUImage/master/photos/photo5.jpg"
+                               "http://www.zhangchuany.com/photo1.jpg",
+                               "http://www.zhangchuany.com/photo2.jpg",
+                               "http://www.zhangchuany.com/photo3.jpg",
+                               "http://www.zhangchuany.com/photo4.jpg",
+                               "http://www.zhangchuany.com/photo5.jpg"
                        )
                        .applyBitmaps(
                                R.drawable.photo1,
@@ -25,7 +42,6 @@ Idea from: [iOS GPUImage framework](https://github.com/BradLarson/GPUImage2), [a
                                R.drawable.photo5
                        )
                        .applyFilter(new GPUImageSaturationFilter(2.0f)) //设置默认Filter
-                       .applyMultipleFilter(...)                        //如果设置MultipleFilter则按照一张图像渲染一个滤镜进行渲染
                        .applyWidth(1000)                                //指定宽度渲染，不指定宽度则按原图宽度渲染
                        .applyHeight(1000)                               //指定高度渲染，不指定高度则按原图高度渲染
                        .applyRotation(Rotation.ROTATION_90)             //旋转90度进行渲染
@@ -39,7 +55,32 @@ Idea from: [iOS GPUImage framework](https://github.com/BradLarson/GPUImage2), [a
                            }
                        })
                        .build()
-                       .get();
+                       .get();                                          //同步处理
+```
+
+
+> 根据特定场景自定义渲染流程
+NGP的渲染是在Native中进行的，与Native的交互都被封装在NGPNativeBridge中，只需要遵循NGPNative生命周期就可以自定义渲染.
+```
+FBO离屏渲染:
+1、NGPNativeBridge.init();                                           //只需执行一次,目的是需要在Native中注册相关Class
+2、NGPNativeBridge.nativeCreateGL();                                 //同一个渲染流程只需要创建一次GL
+3、NGPNativeBridge.nativeSurfaceChanged(int width, int height);      //当Bitmap宽高发生变化时调用，可以被重复调用
+4、NGPNativeBridge.nativeApplyFilter(NativeFilter f);                //设置一个Filter，可以被重复调用
+5、NGPNativeBridge.nativeApplyBitmap(Bitmap bitmap);                 //设置一个Bitmap，还未进行渲染
+   NGPNativeBridge.nativeApplyYUV420(byte[] yuv);               
+6、NGPNativeBridge.nativeCapture(Bitmap bitmap);                     //获取渲染后的Bitmap，渲染.
+7、NGPNativeBridge.nativeDestroyed();                                //渲染结束后调用释放资源
+
+Surface渲染:
+1、NGPNativeBridge.init(); 
+2、NGPNativeBridge.nativeSurfaceCreated(Surface surface);
+3、NGPNativeBridge.nativeSurfaceChanged(int width, int height);
+4、NGPNativeBridge.nativeApplyFilter(NativeFilter f);
+5、NGPNativeBridge.nativeApplyBitmap(Bitmap bitmap);
+   NGPNativeBridge.nativeApplyYUV420(byte[] yuv);
+6、NGPNativeBridge.nativeRequestRender();
+7、NGPNativeBridge.nativeDestorySurfaceGL();
 ```
 
 ### Support status of [GPUImage for iOS](https://github.com/BradLarson/GPUImage2) shaders

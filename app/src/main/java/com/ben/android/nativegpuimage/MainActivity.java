@@ -20,4 +20,8 @@ public class MainActivity extends AppCompatActivity {
     public void fboTest(View view) {
         startActivity(new Intent(this, ImageActivity.class));
     }
+
+    public void showRenderBitmap(View view) {
+        startActivity(new Intent(this, ShowBitmapActivity.class));
+    }
 }
