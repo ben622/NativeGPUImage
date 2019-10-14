@@ -7,8 +7,11 @@ Idea from: [iOS GPUImage framework](https://github.com/BradLarson/GPUImage2), [a
 <img src="./screen/capture1.gif" width="360px" height="640px"/>
 <img src="./screen/capture2.gif" width="360px" height="640px"/>
 
+
 ### How do I use NGP?
 > 将渲染结果显示在ImageView中.
+
+<img src="./screen/capture3.jpg" width="360px" height="640px"/>
 
 ```
  NGP.with(this)
