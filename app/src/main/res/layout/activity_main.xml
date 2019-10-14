@@ -19,5 +19,11 @@
         android:text="Show Render Bitmap"
         android:onClick="showRenderBitmap"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Camera Render"
+        android:onClick="cameraRender"/>
+
 
 </LinearLayout>

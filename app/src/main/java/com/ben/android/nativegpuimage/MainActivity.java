@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.ben.android.library.NGP;
+import com.ben.android.library.NGPExecutors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,6 +16,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         NGP.initialize(this);
 
+        NGPExecutors.execute(new Runnable() {
+            @Override
+            public void run() {
+                NGP.get().clearCache();
+            }
+        });
     }
 
     public void fboTest(View view) {
@@ -23,5 +30,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void showRenderBitmap(View view) {
         startActivity(new Intent(this, ShowBitmapActivity.class));
+    }
+
+    public void cameraRender(View view) {
+        startActivity(new Intent(this, CameraActivity.class));
     }
 }

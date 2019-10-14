@@ -48,6 +48,9 @@ void ben::ngp::NGPNativeBridge::initialize(JNIEnv *env) {
     addNativeMethod("nativeApplyScaleType", (void *) nativeApplyScaleType, kTypeVoid, kTypeInt,
                     NULL);
 
+    addNativeMethod("nativeApplyYUV420", (void *) nativeApplyYUV420, kTypeVoid,
+                    kTypeArray(kTypeByte),kTypeInt, kTypeInt, NULL);
+
     registerNativeMethods(env);
 }
 
@@ -167,6 +170,63 @@ void ben::ngp::NGPNativeBridge::nativeApplyRotation(JNIEnv *env, jclass javaThis
 void ben::ngp::NGPNativeBridge::nativeApplyScaleType(JNIEnv *env, jclass javaThis, jint scaleType) {
     getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS)->setScaleType(
             fromScaleValue(scaleType));
+}
+
+void ben::ngp::NGPNativeBridge::nativeApplyYUV420(JNIEnv *env, jclass javaThis, jbyteArray jdata, jint width, jint height) {
+    GPUImageRender *render = getNativeClassPtr<GPUImageRender>(GPU_IMAGE_RENDER_CLASS);
+    int *rgb = new int[width * height];
+    int sz;
+    int i;
+    int j;
+    int Y;
+    int Cr = 0;
+    int Cb = 0;
+    int pixPtr = 0;
+    int jDiv2 = 0;
+    int R = 0;
+    int G = 0;
+    int B = 0;
+    int cOff;
+    int w = width;
+    int h = height;
+    sz = w * h;
+
+    jbyte *yuv = static_cast<jbyte *>(env->GetPrimitiveArrayCritical(jdata, 0));
+
+    for (j = 0; j < h; j++) {
+        pixPtr = j * w;
+        jDiv2 = j >> 1;
+        for (i = 0; i < w; i++) {
+            Y = yuv[pixPtr];
+            if (Y < 0) Y += 255;
+            if ((i & 0x1) != 1) {
+                cOff = sz + jDiv2 * w + (i >> 1) * 2;
+                Cb = yuv[cOff];
+                if (Cb < 0) Cb += 127; else Cb -= 128;
+                Cr = yuv[cOff + 1];
+                if (Cr < 0) Cr += 127; else Cr -= 128;
+            }
+
+            //ITU-R BT.601 conversion
+            //
+            //R = 1.164*(Y-16) + 2.018*(Cr-128);
+            //G = 1.164*(Y-16) - 0.813*(Cb-128) - 0.391*(Cr-128);
+            //B = 1.164*(Y-16) + 1.596*(Cb-128);
+            //
+            Y = Y + (Y >> 3) + (Y >> 5) + (Y >> 7);
+            R = Y + (Cr << 1) + (Cr >> 6);
+            if (R < 0) R = 0; else if (R > 255) R = 255;
+            G = Y - Cb + (Cb >> 3) + (Cb >> 4) - (Cr >> 1) + (Cr >> 3);
+            if (G < 0) G = 0; else if (G > 255) G = 255;
+            B = Y + Cb + (Cb >> 1) + (Cb >> 4) + (Cb >> 5);
+            if (B < 0) B = 0; else if (B > 255) B = 255;
+            rgb[pixPtr++] = 0xff000000 + (R << 16) + (G << 8) + B;
+        }
+    }
+
+    env->ReleasePrimitiveArrayCritical(jdata, yuv, 0);
+    render->renderYUV420(env, rgb, width, height);
+    delete (rgb);
 }
 
 void ben::ngp::NGPNativeBridge::nativeApplyFilter(JNIEnv *env, jclass javaThis, jobject object) {

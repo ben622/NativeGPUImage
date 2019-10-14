@@ -53,7 +53,7 @@ public class NGPNativeBridge {
      * 渲染的YUV数据
      * @param yuv
      */
-    public native static void nativeApplyYUV420(byte[] yuv);
+    public native static void nativeApplyYUV420(byte[] yuv,int width,int height);
 
     /**
      * 从Native GL中截取渲染结果，FBO离屏渲染或Surface渲染都可以调用该函数，注意调用该函数时会在Native中再次请求渲染,所以在Camera非FBO实时渲染过程中不建议频繁调用该函数。

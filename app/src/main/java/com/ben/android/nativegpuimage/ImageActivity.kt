@@ -119,12 +119,10 @@ class ImageActivity : AppCompatActivity() {
             runOnUiThread {
                 adapter.setNewData(result)
                 mProgressBar.visibility = View.GONE
-                mSurfaceView.initialize()
-                mSurfaceView.setEGPEnvironmentListener {
+                mSurfaceView.initialize({
                     NGPNativeBridge.nativeApplyFilter(filters.get(0))
                     NGPNativeBridge.nativeApplyBitmap(BitmapFactory.decodeResource(resources, R.drawable.photo4))
-                }
-
+                })
             }
         }).start()
 

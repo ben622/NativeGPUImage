@@ -13,6 +13,15 @@ add_subdirectory(${ROOT}/include/jni)
 add_subdirectory(${ROOT}/filter)
 add_subdirectory(${ROOT}/api)
 
+ADD_LIBRARY(yuv
+        SHARED
+        IMPORTED)
+SET_TARGET_PROPERTIES(yuv
+        PROPERTIES
+        IMPORTED_LOCATION
+        ${PRELIB_ROOT}/libyuv.so)
+
+
 ADD_LIBRARY(gpuimage
         SHARED
         ${ROOT}/include/queue.c
@@ -75,6 +84,7 @@ TARGET_LINK_LIBRARIES(gpuimage
         libjni
         libfilter
         libapi
+        yuv
         ${log-lib})
 
 

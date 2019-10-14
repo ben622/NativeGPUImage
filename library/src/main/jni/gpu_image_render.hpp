@@ -60,6 +60,8 @@ namespace ben {
 
             void nativeDestorySurfaceGL(JNIEnv *env, jclass javaThis);
 
+            void renderYUV420(JNIEnv *env, void* rgb, jint width, jint height);
+
         public:
             GPUImageRender();
 

@@ -89,6 +89,8 @@ namespace ben {
 
             static void nativeApplyScaleType(JNIEnv *env, jclass javaThis, jint scaleType);
 
+            static void nativeApplyYUV420(JNIEnv *env, jclass javaThis, jbyteArray jbyte, jint width, jint height);
+
 
         private:
             static void readBitmapPixel(JNIEnv *env, GPUImageTwoInputFilter *filter);

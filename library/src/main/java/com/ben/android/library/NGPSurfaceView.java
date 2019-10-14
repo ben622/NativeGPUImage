@@ -30,6 +30,10 @@ public class NGPSurfaceView extends FrameLayout implements SurfaceHolder.Callbac
     }
 
     public void initialize(){
+      initialize(null);
+    }
+    public void initialize(EGPEnvironmentListener EGPEnvironmentListener){
+        this.EGPEnvironmentListener = EGPEnvironmentListener;
         mSurfaceView = new SurfaceView(getContext());
         this.addView(mSurfaceView);
         mSurfaceView.getHolder().addCallback(this);

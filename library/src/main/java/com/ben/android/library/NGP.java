@@ -82,6 +82,26 @@ public final class NGP {
         }
     }
 
+    public boolean clearCache() {
+        boolean delFile = delFile(new File(getConfigure().getCacheDir()));
+        checkCacheConfigure();
+        return delFile;
+    }
+
+    private boolean delFile(File file) {
+        if (!file.exists()) {
+            return false;
+        }
+
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            for (File f : files) {
+                delFile(f);
+            }
+        }
+        return file.delete();
+    }
+
     public NGPConfigure getConfigure() {
         return configure;
     }

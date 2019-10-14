@@ -7,6 +7,7 @@
 #include "util/jni_util.hpp"
 #include "util/open_gl_util.hpp"
 #include <math.h>
+
 #define MAX_FBO_SURFACE_WIDTH 5000
 #define MAX_FBO_SURFACE_HEIGHT 5000
 
@@ -165,73 +166,63 @@ void ben::ngp::GPUImageRender::nativeCreateGL(JNIEnv *env, jclass javaThis) {
     };
     // surface attributes
     const EGLint surfaceAttr[] = {
-            EGL_WIDTH,MAX_FBO_SURFACE_WIDTH,
-            EGL_HEIGHT,MAX_FBO_SURFACE_HEIGHT,
+            EGL_WIDTH, MAX_FBO_SURFACE_WIDTH,
+            EGL_HEIGHT, MAX_FBO_SURFACE_HEIGHT,
             EGL_NONE
     };
     EGLint numConfigs;
 
     eglDisp = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    if(eglDisp == EGL_NO_DISPLAY)
-    {
+    if (eglDisp == EGL_NO_DISPLAY) {
         //Unable to open connection to local windowing system
-        LOGI("%s","Unable to open connection to local windowing system");
+        LOGI("%s", "Unable to open connection to local windowing system");
     }
-    if(!eglInitialize(eglDisp,NULL, NULL))
-    {
+    if (!eglInitialize(eglDisp, NULL, NULL)) {
         // Unable to initialize EGL. Handle and recover
-        LOGI("%s","Unable to initialize EGL");
+        LOGI("%s", "Unable to initialize EGL");
     }
     // choose the first config, i.e. best config
-    if(!eglChooseConfig(eglDisp, confAttr, &eglConf, 1, &numConfigs))
-    {
-        LOGI("%s","some config is wrong");
-    }
-    else
-    {
-        LOGI("%s","all configs is OK");
+    if (!eglChooseConfig(eglDisp, confAttr, &eglConf, 1, &numConfigs)) {
+        LOGI("%s", "some config is wrong");
+    } else {
+        LOGI("%s", "all configs is OK");
     }
     // create a pixelbuffer surface
     eglSurface = eglCreatePbufferSurface(eglDisp, eglConf, surfaceAttr);
-    if(eglSurface == EGL_NO_SURFACE)
-    {
-        switch(eglGetError())
-        {
+    if (eglSurface == EGL_NO_SURFACE) {
+        switch (eglGetError()) {
             case EGL_BAD_ALLOC:
                 // Not enough resources available. Handle and recover
-                LOGI("%s","Not enough resources available");
+                LOGI("%s", "Not enough resources available");
                 break;
             case EGL_BAD_CONFIG:
                 // Verify that provided EGLConfig is valid
-                LOGI("%s","provided EGLConfig is invalid");
+                LOGI("%s", "provided EGLConfig is invalid");
                 break;
             case EGL_BAD_PARAMETER:
                 // Verify that the EGL_WIDTH and EGL_HEIGHT are
                 // non-negative values
-                LOGI("%s","provided EGL_WIDTH and EGL_HEIGHT is invalid");
+                LOGI("%s", "provided EGL_WIDTH and EGL_HEIGHT is invalid");
                 break;
             case EGL_BAD_MATCH:
                 // Check window and EGLConfig attributes to determine
                 // compatibility and pbuffer-texture parameters
-                LOGI("%s","Check window and EGLConfig attributes");
+                LOGI("%s", "Check window and EGLConfig attributes");
                 break;
         }
     }
     eglCtx = eglCreateContext(eglDisp, eglConf, EGL_NO_CONTEXT, ctxAttr);
-    if(eglCtx == EGL_NO_CONTEXT)
-    {
+    if (eglCtx == EGL_NO_CONTEXT) {
         EGLint error = eglGetError();
-        if(error == EGL_BAD_CONFIG)
-        {
+        if (error == EGL_BAD_CONFIG) {
             // Handle error and recover
-            LOGI("%s","EGL_BAD_CONFIG");
+            LOGI("%s", "EGL_BAD_CONFIG");
         }
     }
-    if(!eglMakeCurrent(eglDisp, eglSurface, eglSurface, eglCtx))
-    {
-        LOGI("%s","MakeCurrent failed");
+    if (!eglMakeCurrent(eglDisp, eglSurface, eglSurface, eglCtx)) {
+        LOGI("%s", "MakeCurrent failed");
     }
-    LOGI("%s","initialize success!");
+    LOGI("%s", "initialize success!");
 
     //2.初始化GPUImageRender
     ben::ngp::GPUImageRender *render = getNativeClassPtr<ben::ngp::GPUImageRender>(
@@ -395,7 +386,7 @@ ScaleType ben::ngp::GPUImageRender::getScaleType() const {
 }
 
 void ben::ngp::GPUImageRender::setScaleType(ScaleType scaleType) {
-    if(this->scaleType == scaleType)
+    if (this->scaleType == scaleType)
         return;
     GPUImageRender::scaleType = scaleType;
 }
@@ -535,14 +526,23 @@ void ben::ngp::GPUImageRender::renderBitmap(JNIEnv *env, jobject jbitmap) {
 
 }
 
+void ben::ngp::GPUImageRender::renderYUV420(JNIEnv *env, void* rgb, jint width, jint height) {
+    this->setGlTextureId(
+            loadTextureByPixel(rgb, width, height, this->getGlTextureId()));
+    this->setImageWidth(width);
+    this->setImageHeight(height);
+    adjustImageScaling();
+    reqeustRender();
+}
+
 void ben::ngp::GPUImageRender::surfaceChange(int width, int height) {
     //reset width height。
     int windowWidth = width;
     int windowHeight = height;
-   /* if (windowWidth > windowHeight) {
-        windowHeight = width;
-        windowWidth = height;
-    }*/
+    /* if (windowWidth > windowHeight) {
+         windowHeight = width;
+         windowWidth = height;
+     }*/
     this->setOutputWidth(windowWidth);
     this->setOutputHeight(windowHeight);
     glViewport(0, 0, windowWidth, windowHeight);

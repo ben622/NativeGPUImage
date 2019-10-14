@@ -6,6 +6,7 @@ Idea from: [iOS GPUImage framework](https://github.com/BradLarson/GPUImage2), [a
 
 <img src="./screen/capture1.gif" width="360px" height="640px"/>
 <img src="./screen/capture2.gif" width="360px" height="640px"/>
+<img src="./screen/capture4.gif" width="360px" height="640px"/>
 
 
 ### How do I use NGP?
@@ -17,7 +18,6 @@ Idea from: [iOS GPUImage framework](https://github.com/BradLarson/GPUImage2), [a
  NGP.with(this)
                 .applyBitmapByUrls("http://www.zhangchuany.com/photo5.jpg")
                 .applyFilter(new GPUImageSaturationFilter(2.0f)) //设置默认Filter
-                .applyMultipleFilter(...)                        //如果设置MultipleFilter则按照一张图像渲染一个滤镜进行渲染
                 .applyWidth(1000)                                //指定宽度渲染，不指定宽度则按原图宽度渲染
                 .applyHeight(1000)                               //指定高度渲染，不指定高度则按原图高度渲染
                 .applyRotation(Rotation.ROTATION_90)             //旋转90度进行渲染
@@ -29,7 +29,7 @@ Idea from: [iOS GPUImage framework](https://github.com/BradLarson/GPUImage2), [a
 
 > 如何进行批量FBO渲染
 ```
- List<Result> results = NGP.with(FBOActivity.this)
+ List<Result> results = NGP.with(this)
                        .applyBitmapByUrls(
                                "http://www.zhangchuany.com/photo1.jpg",
                                "http://www.zhangchuany.com/photo2.jpg",
@@ -60,6 +60,28 @@ Idea from: [iOS GPUImage framework](https://github.com/BradLarson/GPUImage2), [a
                        .build()
                        .get();                                          //同步处理
 ```
+> Camera实时预览
+使用NGPNativeBridge.nativeApplyYUV420(data, width, height)将YUV数据发送至Native进行实时渲染，使用该函数后不需要手动调用NGPNativeBridge.nativeRequestRender()函数。详情见 [CameraDemo](https://github.com/ben622/NativeGPUImage/blob/master/app/src/main/java/com/ben/android/nativegpuimage/CameraActivity.kt)
+```
+ <com.ben.android.library.NGPSurfaceView
+        android:id="@+id/mSurfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+        
+```
+```
+mSurfaceView.initialize({
+                    //初始化滤镜
+                    NGPNativeBridge.nativeApplyFilter(GPUImageGrayscaleFilter())
+                    //设置旋转角度
+                    NGPNativeBridge.nativeApplyRotation(Rotation.getValue(getRotation(cameraLoader.getCameraOrientation())), false, false)
+                })
+```
+```
+//通过NGPNativeBridge将预览数据发送至Native
+NGPNativeBridge.nativeApplyYUV420(data, width, height)
+```
+
 
 
 > 根据特定场景自定义渲染流程

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:orientation="vertical"
+    tools:context=".ImageActivity">
+    <com.ben.android.library.NGPSurfaceView
+        android:id="@+id/mSurfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/mRecyclerView"/>
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_above="@+id/mRecyclerView"
+        android:layout_gravity="bottom"
+        android:visibility="gone"
+        android:layout_marginStart="15dp"
+        android:layout_toLeftOf="@+id/mCapture"
+        android:layout_marginEnd="15dp"
+        android:progressBackgroundTint="#9C27B0"
+        android:layout_marginBottom="20dp"
+        android:max="100" />
+
+    <ImageView
+        android:id="@+id/mCapture"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_above="@+id/mRecyclerView"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="15dp"
+        android:visibility="gone"
+        android:layout_marginBottom="15dp"
+        android:src="@drawable/ic_camera_enhance_black_24dp"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/mRecyclerView"
+        android:background="@android:color/transparent"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp"
+        android:layout_height="100dp"/>
+    <ProgressBar
+        android:id="@+id/mProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+
+</RelativeLayout>

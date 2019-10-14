@@ -8,7 +8,6 @@
 #include "../include/jni/JniHelpers.h"
 #include "../include/queue.h"
 #include "../util/filter_tools.hpp"
-#include "../util/yuv-decoder.hpp"
 #include "../util/rotation.hpp"
 #include "../util/open_gl_util.hpp"
 #include "../util/textur_rotation_util.hpp"
